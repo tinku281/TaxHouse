@@ -1,0 +1,86 @@
+//created on: 21 Oct, 2012
+package com.taxhouse
+
+import com.taxhouse.*;
+
+rule "Rule:1"
+salience 15
+    when
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    then
+        double salary = item.getIncome();
+        double taxCal = 0;
+        int taxPer = 15;
+        
+        if(item.getIncome()<=50000)
+        {
+        	taxPer = 5;
+         taxCal = Utils.calculateTax(salary,taxPer);
+          System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
+        }
+        else if(item.getIncome()>50000 && item.getIncome()<100000 )
+        {
+	         taxCal = Utils.calculateTax(salary, taxPer);
+	         System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
+        }
+        else
+        {
+	         taxCal = Utils.calculateTax(salary,taxPer);
+	         System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
+        }
+        
+        item.setTax(taxCal);
+end
+
+rule "for Profit_private"
+    //include attributes such as "salience" here...
+    salience 14
+    when
+         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
+    then
+        double tax = item.getTax();
+       	double PPCaltax=0;
+        int taxPer = 10;
+        PPCaltax = Utils.calculateTax(tax,taxPer);
+        System.out.println("Private Organization Tax @ " + taxPer + "% : " +PPCaltax);
+        item.setTax(PPCaltax + tax);
+end
+
+
+rule"Women Welfare"
+salience 9
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
+	then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Women Welfare Deduction @ " + taxPer + "% : -" + Remtax);
+		item.setTax(Tax - Remtax);	
+end	
+
+rule"Residency status"
+salience 12
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
+	then
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		item.setTax(Tax - Remtax);
+		System.out.println("Non-Resident Tax @ " + taxPer + "% : " +Remtax);	
+end	
+
+rule"Alien status"
+salience 11
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
+	then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		item.setTax(Tax + Remtax);
+		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);	
+end	

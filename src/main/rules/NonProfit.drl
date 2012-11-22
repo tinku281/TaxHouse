@@ -1,0 +1,112 @@
+//created on: 21 Oct, 2012
+package com.taxhouse
+
+import com.taxhouse.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+
+rule "Non Profit Base"
+salience 15 
+    when
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income>20000)
+    then
+        double salary = item.getIncome();
+        int taxPer = 15;
+        double taxCal = Utils.calculateTax(salary,taxPer);
+        System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
+        item.setTax(taxCal);
+end
+
+rule "Non Profit Base rule2"
+salience 15
+    when
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income<=12000)
+    then
+        double salary = item.getIncome();
+        int taxPer = 2;
+        double taxCal = Utils.calculateTax(salary,taxPer);
+        System.out.println("Base Tax @ " + taxPer + "% : " + taxCal);
+		item.setTax(taxCal);
+end
+
+rule "Non Profit Base rule3"
+salience 15
+    when
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income>12000,income<=20000)
+    then
+    	int taxPer = 10;
+        double salary = item.getIncome();
+        double taxCal = Utils.calculateTax(salary,taxPer);
+        System.out.println("Base Tax @ " + taxPer + "% : " + taxCal);
+		item.setTax(taxCal);
+end
+
+rule"Women Welfare"
+salience 10
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)    , gender == Employee.Gender.FEMALE)
+	then
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Women Welfare Deduction @ " + taxPer + "% : -" +Remtax);
+		item.setTax(Tax - Remtax);	
+end	
+
+rule"Resident rule"
+salience 14
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
+	then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Non-Permanent Resident Tax @ " + taxPer + "% : " +Remtax);
+		item.setTax(Tax + Remtax);	
+end	
+
+rule"Alien stat"
+salience 11
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
+	then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);
+		item.setTax(Tax + Remtax);	
+end	
+
+rule"History 3 years Rule"
+salience 9
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), mUtin : utin)
+	then
+	
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		int lastYear = cal.get(Calendar.YEAR) - 1;
+		boolean latePayment = false;
+		for (int year = lastYear; year > lastYear - 3; year--) {
+			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
+			if (tHistory != null){
+				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
+				if(latePayment) 
+					break;
+			}
+		}
+			
+		if(!latePayment){
+			double Tax= item.getTax();
+			int taxPer = 2;
+			double Remtax = Utils.calculateTax(Tax , taxPer);
+			System.out.println("On-time Payment Deduction @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
+			item.setTax(Tax - Remtax);
+		}
+end	
+

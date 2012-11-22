@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+
+    <!-- Specify a JDBC datasource -->
+
+    <Resource
+        name="jdbc/tax_house"
+        auth="Container"
+        driverClassName="com.mysql.jdbc.Driver"
+        maxActive="20"
+        maxIdle="10"
+        password="root"
+        type="javax.sql.DataSource"
+        url="jdbc:mysql://localhost:3306/tax_house"
+        username="root" />
+
+</Context>

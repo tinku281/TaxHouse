@@ -1,0 +1,19 @@
+//created on: Nov 15, 2012
+package com.taxhouse
+
+//list any import classes here.
+import com.taxhouse.*;
+
+
+
+//declare any global variables here
+
+
+rule "Base"
+
+    when
+        sen : SeniorCitizen()
+    then
+        System.out.println("Senior citizen");
+
+end
