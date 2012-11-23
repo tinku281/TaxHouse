@@ -24,7 +24,7 @@ function focusOnUtin()
 
 function validate() {
 	if (document.loginForm.utin.value == "") {
-		alert("Please enter username");
+		alert("Please enter UTIN/AdminID");
 		document.loginForm.utin.focus();
 		return false;
 	}

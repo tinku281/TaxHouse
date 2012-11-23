@@ -42,6 +42,10 @@ public class DBHandler {
 	public static final String MySQL_USERNAME = "root";
 	public static final String MySQL_PASSWORD = "root";
 
+	// table Admin
+	public static final String ADMIN_ID = "Admin_Id";
+	public static final String ADMIN_PASSWORD = "Admin_Password";
+
 	// table Tax_payer
 	public static final String UTIN = "UTIN";
 	public static final String TP_PASSWORD = "TP_Password";
@@ -138,6 +142,30 @@ public class DBHandler {
 		// MySQL_PASSWORD);
 
 		return dataSource.getConnection();
+	}
+
+	public boolean validateAdmin(String adminId, String password) {
+		String sql = "select * from administrator where " + ADMIN_ID + " = " + adminId + " and " + ADMIN_PASSWORD
+				+ " = '" + password + "'";
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			if (rs.next())
+				return true;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return false;
 	}
 
 	public boolean validateTaxPayer(String utin, String password) {
@@ -244,7 +272,10 @@ public class DBHandler {
 				if (emp instanceof Student) // for putting fee waiver details
 					putStudentDetails((Student) emp); // from Student table
 
+				putExemptionDetails(emp); // for putting exemption details
+				putInvestmentDetails(emp); // for putting investment details
 				putStockDetails(emp); // for putting stock details
+
 			}
 
 		} catch (Exception e) {
@@ -422,6 +453,62 @@ public class DBHandler {
 
 	}
 
+	private void putExemptionDetails(Employee emp) throws SQLException {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		List<Exemption> exemptions = null;
+
+		String sql = "select * from exemption natural join has_exmp where utin = " + emp.getUtin();
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+				if (exemptions == null)
+					exemptions = new ArrayList<Exemption>();
+
+				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
+						.getDouble(EXEMP_PER)));
+			}
+
+			emp.setExemptions(exemptions);
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+	}
+
+	private void putInvestmentDetails(Employee emp) throws SQLException {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		List<Investment> investments = null;
+
+		String sql = "select * from investment natural join has_inv where utin = " + emp.getUtin();
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			while (rs.next()) {
+				if (investments == null)
+					investments = new ArrayList<Investment>();
+
+				investments.add(new Investment(rs.getInt(INV_ID), rs.getString(INV_NAME), rs.getDouble(INV_AMT), rs
+						.getDouble(INV_APPL_PER)));
+			}
+
+			emp.setInvestments(investments);
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+	}
+
 	public Organization getOrganization(int utin) {
 
 		Connection con = null;
@@ -570,66 +657,6 @@ public class DBHandler {
 		}
 
 		return idMap;
-	}
-
-	public List<Exemption> getEmployeeExemptions(int utin) {
-		Connection con = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		List<Exemption> exemptions = null;
-
-		String sql = "select * from exemption natural join has_exmp where utin = " + utin;
-
-		try {
-			con = getConnection();
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql);
-
-			while (rs.next()) {
-				if (exemptions == null)
-					exemptions = new ArrayList<Exemption>();
-
-				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
-						.getDouble(EXEMP_PER)));
-			}
-
-		} catch (Exception e) {
-
-		} finally {
-			closeConnectionObjects(rs, stmt, con);
-		}
-
-		return exemptions;
-	}
-
-	public List<Investment> getEmployeeInvestments(int utin) {
-		Connection con = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		List<Investment> investments = null;
-
-		String sql = "select * from investment natural join has_inv where utin = " + utin;
-
-		try {
-			con = getConnection();
-			stmt = con.createStatement();
-			rs = stmt.executeQuery(sql);
-
-			while (rs.next()) {
-				if (investments == null)
-					investments = new ArrayList<Investment>();
-
-				investments.add(new Investment(rs.getInt(INV_ID), rs.getString(INV_NAME), rs.getDouble(INV_AMT), rs
-						.getDouble(INV_APPL_PER)));
-			}
-
-		} catch (Exception e) {
-
-		} finally {
-			closeConnectionObjects(rs, stmt, con);
-		}
-
-		return investments;
 	}
 
 	private void closeConnectionObjects(ResultSet rs, Statement stmt, Connection con) {

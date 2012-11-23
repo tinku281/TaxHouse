@@ -3,8 +3,6 @@ package com.taxhouse.model;
 import java.util.Date;
 import java.util.List;
 
-import com.taxhouse.db.DBHandler;
-
 public class Employee extends TaxPayer {
 
 	public enum Gender {
@@ -35,6 +33,8 @@ public class Employee extends TaxPayer {
 	private Date jobStartDate;
 
 	private List<Stock> stocks;
+	private List<Exemption> exemptions;
+	private List<Investment> investments;
 
 	public Date getDateOfBirth() {
 		return dateOfBirth;
@@ -108,10 +108,32 @@ public class Employee extends TaxPayer {
 		this.spouseUtin = spouseUtin;
 	}
 
+	public List<Exemption> getExemptions() {
+		return exemptions;
+	}
+
+	public void setExemptions(List<Exemption> exemptions) {
+		this.exemptions = exemptions;
+	}
+
+	public boolean hasExemptions() {
+		return (exemptions != null && !exemptions.isEmpty());
+	}
+
+	public List<Investment> getInvestments() {
+		return investments;
+	}
+
+	public void setInvestments(List<Investment> investments) {
+		this.investments = investments;
+	}
+
+	public boolean hasInvestments() {
+		return (investments != null && !investments.isEmpty());
+	}
+
 	public double getDeductibleExemption() {
 		double exmpAmt = 0;
-
-		List<Exemption> exemptions = DBHandler.getInstance().getEmployeeExemptions(getUtin());
 
 		if (exemptions != null && exemptions.size() > 0) {
 			for (Exemption exemption : exemptions) {
@@ -128,8 +150,6 @@ public class Employee extends TaxPayer {
 
 	public double getDeductibleInvestment() {
 		double invAmt = 0;
-
-		List<Investment> investments = DBHandler.getInstance().getEmployeeInvestments(getUtin());
 
 		if (investments != null && investments.size() > 0) {
 			for (Investment investment : investments) {

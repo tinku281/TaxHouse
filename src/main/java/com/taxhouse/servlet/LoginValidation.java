@@ -44,7 +44,13 @@ public class LoginValidation extends HttpServlet {
 			}
 
 		} else {
+			if (DBHandler.getInstance().validateAdmin(sUtin, passwd)) {
+				output.println("Validated");
 
+			} else {
+				String errorMsg = "Invalid AdminstratorID or password";
+				response.sendRedirect("login.jsp?error=" + errorMsg);
+			}
 		}
 	}
 
