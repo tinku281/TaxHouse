@@ -21,87 +21,112 @@ import com.taxhouse.model.SeniorCitizen;
 import com.taxhouse.model.Student;
 import com.taxhouse.model.TaxPayer;
 
-public class TaxRulesLogic {
+public class TaxRulesLogic
+{
 
-	public static void main(String args[]) {
+	public static void main( String args[] )
+	{
 
-		try {
+		try
+		{
 
-			System.out.println("WELCOME TO TAX HOUSE !!!");
-			System.out.print("\nPlease enter the UTIN: ");
-			BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println( "WELCOME TO TAX HOUSE !!!" );
+			System.out.print( "\nPlease enter the UTIN: " );
+			BufferedReader bufferRead = new BufferedReader( new InputStreamReader( System.in ) );
 			String sUtin = bufferRead.readLine();
 
 			int utin = 0;
-			try {
-				utin = Integer.parseInt(sUtin);
-			} catch (NumberFormatException e) {
-				System.out.println("Please provide a valid input.");
+			try
+			{
+				utin = Integer.parseInt( sUtin );
+			}
+			catch ( NumberFormatException e )
+			{
+				System.out.println( "Please provide a valid input." );
 			}
 
 			KnowledgeBase kbase = null;
-			TaxPayer taxPayer = DBHandler.getInstance().getTaxPayer(utin);
+			TaxPayer taxPayer = DBHandler.getInstance().getTaxPayer( utin );
 
-			if (taxPayer == null) {
-				System.out.println("Tax Payer not found.");
+			if ( taxPayer == null )
+			{
+				System.out.println( "Tax Payer not found." );
 				return;
 			}
 
-			System.out.println("\nName: " + taxPayer.getFirstName() + " " + taxPayer.getLastName() + ",");
-			System.out.println("\nGross Income: " + taxPayer.getIncome());
+			System.out.println( "\nName: " + taxPayer.getFirstName() + " " + taxPayer.getLastName() + "," );
+			System.out.println( "\nGross Income: " + taxPayer.getIncome() );
 
 			// put applicable rule files in KnowledgeBase
-			if (taxPayer instanceof Employee) {
+			if ( taxPayer instanceof Employee )
+			{
 
-				if (taxPayer instanceof SeniorCitizen) {
-					kbase = readKnowledgeBase("SeniorCitizen.drl");
+				if ( taxPayer instanceof SeniorCitizen )
+				{
+					kbase = readKnowledgeBase( "SeniorCitizen.drl" );
 
-				} else if (taxPayer instanceof ArmedForcePersonnel) {
+				}
+				else if ( taxPayer instanceof ArmedForcePersonnel )
+				{
 					kbase = readKnowledgeBase(/* add files here */);
 
-				} else if (taxPayer instanceof Student) {
+				}
+				else if ( taxPayer instanceof Student )
+				{
 					kbase = readKnowledgeBase(/* add files here */);
 
-				} else {
-					kbase = readKnowledgeBase("employeePay.drl", "NonProfit.drl");
+				}
+				else
+				{
+					kbase = readKnowledgeBase( "employeePay.drl", "NonProfit.drl" );
 				}
 
-			} else if (taxPayer instanceof Organization) {
+			}
+			else if ( taxPayer instanceof Organization )
+			{
 				kbase = readKnowledgeBase(/* add files here */);
 			}
 
-			if (kbase != null) {
+			if ( kbase != null )
+			{
 				StatefulKnowledgeSession ksession = kbase.newStatefulKnowledgeSession();
-				ksession.insert(taxPayer);
+				ksession.insert( taxPayer );
 				ksession.fireAllRules();
 
-				System.out.println("Total Tax: " + taxPayer.getTax());
+				System.out.println( "Total Tax: " + taxPayer.getTax() );
 
-			} else
-				System.out.println("Tax cannot be calculated with present information");
+			}
+			else
+				System.out.println( "Tax cannot be calculated with present information" );
 
-		} catch (Exception e) {
-			System.err.println(e);
+		}
+		catch ( Exception e )
+		{
+			System.err.println( e );
 		}
 	}
 
-	private static KnowledgeBase readKnowledgeBase(String... resources) throws Exception {
+	private static KnowledgeBase readKnowledgeBase( String... resources ) throws Exception
+	{
 
 		KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		for (String resource : resources) {
-			kbuilder.add(ResourceFactory.newClassPathResource(resource), ResourceType.DRL);
+		for ( String resource : resources )
+		{
+			kbuilder.add( ResourceFactory.newClassPathResource( resource ), ResourceType.DRL );
 		}
 
 		KnowledgeBuilderErrors errors = kbuilder.getErrors();
-		if (errors.size() > 0) {
-			for (KnowledgeBuilderError error : errors) {
-				System.err.println(error);
+		if ( errors.size() > 0 )
+		{
+			for ( KnowledgeBuilderError error : errors )
+			{
+				System.err.println( error );
 			}
-			throw new IllegalArgumentException("Could not parse knowledge.");
+			throw new IllegalArgumentException( "Could not parse knowledge." );
 		}
 
 		KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
-		kbase.addKnowledgePackages(kbuilder.getKnowledgePackages());
+		kbase.addKnowledgePackages( kbuilder.getKnowledgePackages() );
 
 		return kbase;
 	}

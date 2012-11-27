@@ -2,8 +2,9 @@
 package com.taxhouse
 
 //list any import classes here.
-import com.taxhouse.*;
-
+import com.taxhouse.model.*;
+import com.taxhouse.app.*;
+import com.taxhouse.db.*;
 
 
 //declare any global variables here

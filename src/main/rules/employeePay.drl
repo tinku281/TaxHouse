@@ -1,7 +1,9 @@
 //created on: 21 Oct, 2012
 package com.taxhouse
 
-import com.taxhouse.*;
+import com.taxhouse.model.*;
+import com.taxhouse.app.*;
+import com.taxhouse.db.*;
 
 rule "Rule:1"
 salience 15

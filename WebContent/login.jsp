@@ -15,11 +15,28 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>TaxHouse Login</title>
+<link rel="stylesheet" type="text/css" href="main.css" />
 <script>
 
 function focusOnUtin()
 {
      document.loginForm.utin.focus();
+}
+
+function clearText()
+{
+	if (document.loginForm.utin.value == "UTIN/AdminID") 
+	{
+	   document.loginForm.utin.value = "";
+	}
+}
+
+function setText()
+{
+	if (document.loginForm.utin.value == "") 
+	{
+	   document.loginForm.utin.value = "UTIN/AdminID";
+	}
 }
 
 function validate() {
@@ -39,7 +56,25 @@ function validate() {
 }
 </script>
 </head>
-<body onLoad="focusOnUtin()">
+<body>
+<%@ include file="header.jsp" %>
+
+<div class="subheader width300">
+	<div class="header">
+		<h2>LOGIN</h2>
+	</div>
+	<form name="loginForm" method="POST" action="login.do">
+		<input class="textbox1" type="text" name="utin" value="UTIN/AdminID" onfocus="clearText()" onblur ="setText()"/>
+		<input class="textbox1" type="password" name="passwd" />
+		<div class="center_div margin10">
+		<input type="radio" name="role" value="taxpayer" checked="yes"/>Tax Payer
+		<input type="radio" name="role" value="admin"/>Admin
+		</div>
+		<input class=" center_div button_blue display_block margin10"  type = "button" value="Login" onClick="validate()"/>
+	</form>
+</div>
+
+<!-- 
 	<form name="loginForm" method="POST" action="login.do">
 		UTIN/AdminID:<input type="text" name="utin" size="15" /><br />
 		Password:<input type="password" name="passwd" size="15" /><br />
@@ -52,7 +87,8 @@ function validate() {
 			</p>
 		</div>
 	</form>
+ -->	
 	<br />
-	<div style="color:#FF0000"><%=error%></div>
+	<div class="margin10" style="color:#FF0000"><%=error%></div>
 </body>
 </html>
