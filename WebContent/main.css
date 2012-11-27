@@ -1,14 +1,14 @@
 body
 {
 	font-size: 14px;
-	font-family:"Sans";
-	color: #AAA;
+	font-family:sans-serif;
 	padding:0;
 	margin:0;
 	background-color:#FFF;
 	text-align:justify;
 	min-width:900px;
 	line-height:18px;
+	
 }
 
 #header
@@ -18,13 +18,27 @@ body
 	background-color:#3e93c0;
 	color:#FFF;
 }
-
+#headers
+{
+	
+	padding:5px 0 5px 0;
+	height:40px;
+	background-color:#3e93c0;
+	color:#FFF;
+	margin:0px auto;
+	width:550px;
+}
 #header h1
 {
-	width:300px;
+	width:320px;
 	margin:0px auto;
 	top:50px;
 	position:relative;
+}
+#radio_input
+{
+	margin-top:20px;
+	margin-right:10px;
 }
 
 .labels p
@@ -46,10 +60,12 @@ body
 
 .subheader
 {
-	margin:0px auto;
+	margin:10px auto;
 	border:1px solid #8fdeff;
 	position:relative;
 	top:30px;
+	padding-bottom:10px;
+	
 }
 
 .subheader .header
@@ -60,17 +76,11 @@ body
 	top:0px;
 }
 
-.padding_bottom20
-{
-	padding-bottom:20px;
-}
-
 .subheader h2
 {
 	color:#FFF;
 	padding:15px;
 	margin-left:10px;
-	display:float;
 }
 .center_div
 {
@@ -103,13 +113,58 @@ body
 	clear:both;
 	color:#AAA;
 }
+.textbox2
+{
+	border:1px solid #8fdeff;
+	height:20px;
+	padding:5px;
+	width:200px;
+	margin:10px;
+	color:#AAA;
+	display:block;
+	clear:right;
+}
+.drop
+{
+	border:1px solid #8fdeff;
+	height:30px;
+	padding:5px;
+	width:210px;
+	margin:10px;
+	color:#AAA;
+	display:block;
+	clear:right;
+}
+.formrow
+{
+	display:block;
+	clear:both;
+	margin:5px;
+	height:50px;
+}
 
+.label1
+{
+	float:left;
+	margin-left:50px;
+	color:#555;
+	margin-top:20px;
+	font-size:18px;
+	display:block;
+	clear:left;
+}
 .button_blue
 {
 	background-color:#3e93c0;
 	padding:5px;
 	color:#FFF;
 	border:0px;
+}
+.buttons
+{
+	margin:0px auto;
+	width:450px;
+	padding:5px;
 }
 
 .display_block

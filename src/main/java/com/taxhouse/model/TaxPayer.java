@@ -80,5 +80,9 @@ public class TaxPayer {
 	public void setTax(double tax) {
 		this.tax = tax;
 	}
+	public void setPassword(String password)
+	{
+		
+	}
 
 }

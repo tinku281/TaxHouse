@@ -14,4 +14,24 @@
     <servlet-name>LoginValidation</servlet-name>
     <url-pattern>/login.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>InsertProcessing</display-name>
+    <servlet-name>InsertProcessing</servlet-name>
+    <servlet-class>com.taxhouse.servlet.InsertProcessing</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>InsertProcessing</servlet-name>
+    <url-pattern>/insert.do</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>EmployeeProcessing</display-name>
+    <servlet-name>EmployeeProcessing</servlet-name>
+    <servlet-class>com.taxhouse.servlet.EmployeeProcessing</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>EmployeeProcessing</servlet-name>
+    <url-pattern>/insert_employee.do</url-pattern>
+  </servlet-mapping>
 </web-app>

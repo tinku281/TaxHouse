@@ -1,8 +1,15 @@
-<%@page import="com.taxhouse.model.Investment"%>
-<%@page import="com.taxhouse.model.Employee"%>
 <%@page import="com.taxhouse.model.TaxPayer"%>
+<%@page import="com.taxhouse.model.Employee"%>
+<%@page import="com.taxhouse.model.Organization"%>
+<%@page import="com.taxhouse.model.Student"%>
+<%@page import="com.taxhouse.model.ArmedForcePersonnel"%>
+<%@page import="com.taxhouse.model.ArmedForcePersonnel.SpecialTask"%>
+<%@page import="com.taxhouse.model.SeniorCitizen"%>
+<%@page import="com.taxhouse.model.SeniorCitizen.Income"%>
+<%@page import="com.taxhouse.model.Investment"%>
 <%@page import="com.taxhouse.model.Exemption"%>
-<%@ page import="java.util.List" %>
+<%@page import="java.util.List" %>
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -69,6 +76,9 @@
 				<p class="leftfloat">Residency Status</p>
 				<p class="leftfloat values"><%= employee.getResidencyStatus().name() %></p>
 			</div>
+			<% if(!(employee instanceof SeniorCitizen))
+				{
+			%>
 			<div class="display_block">
 				<p class="leftfloat">Organization Name</p>
 				<p class="leftfloat values"><%= employee.getOrganization().getFirstName() %></p>
@@ -81,6 +91,9 @@
 				<p class="leftfloat">Income</p>
 				<p class="leftfloat values"><%= employee.getIncome(  ) %></p>
 			</div>
+			<%
+				}
+			%>
 			<div class="display_block">
 				<p class="leftfloat">Exemptions</p>
 				<% 	
@@ -112,7 +125,80 @@
 				%>
 			</div>
 			<%
+				if(employee instanceof Student)
+				{
+					Student student = (Student)employee;
+			%>		
+				<div class="display_block">
+					<p class="leftfloat">Fee Waiver Amount</p>
+					<p class="leftfloat values"><%=student.getFeeWaiverAmt() %></p>
+				</div>
+				
+			<%		
+				}
+				else if(employee instanceof SeniorCitizen)
+				{
+					SeniorCitizen seniorCitizen = (SeniorCitizen)employee;
+					List<Income> incomeList = seniorCitizen.getIncomes(  );
+					
+					if(incomeList != null)
+					{
+						for(int index=0; index < incomeList.size(); index++ )
+						{		
+				%>		
+							<div class="display_block">
+							<p class="leftfloat">Income Source <%=index+1%></p>
+							<p class="leftfloat values"><%= incomeList.get( index ).getSource() %></p>
+							</div>
+							
+							<div class="display_block">
+							<p class="leftfloat">Income Amount  <%=index+1 %></p>
+							<p class="leftfloat values"><%= incomeList.get( index ).getAmount() %></p>
+							</div>
+				<%
+						}
+					}	
+					//put else code here if want to display anything if no income is there
+				%>
+				
+				
+			<%
+				}
+				else if(employee instanceof ArmedForcePersonnel)
+				{
+					ArmedForcePersonnel armedForcePersonnel = (ArmedForcePersonnel)employee;
+					List<SpecialTask> spTaskList =  armedForcePersonnel.getSpecialTasks();
+					if(spTaskList != null)
+					{
+						for(int index=0; index < spTaskList.size(); index++ )
+						{	
+							
+			%>
+						<div class="display_block">
+							<p class="leftfloat">Special Task <%=index+1%></p>
+							<p class="leftfloat values"><%= spTaskList.get( index ).getName() %></p>
+							</div>
+							
+							<div class="display_block">
+							<p class="leftfloat">Start Date</p>
+							<p class="leftfloat values"><%= spTaskList.get( index ).getStartDate() %></p>
+							</div>
+							
+							<div class="display_block">
+							<p class="leftfloat">End Date</p>
+							<p class="leftfloat values"><%= spTaskList.get( index ).getEndDate() %></p>
+							</div>
+			<%				
+						}
+					}	
+					
+				}
+			
 			} 
+			else if(taxPayer instanceof Organization)
+			{
+				
+			}
 			%>
 			
 		</div>
