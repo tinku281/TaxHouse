@@ -1029,6 +1029,53 @@ public class DBHandler
 
 		return null;
 	}
+	
+	public String[] getExemptionNames()
+	{
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		String sqlTotal = "Select COUNT(DISTINCT "+EXEMP_NAME+") AS namecount FROM exemption";
+		String sql = "Select DISTINCT "+EXEMP_NAME+" FROM exemption";
+
+		try
+		{
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sqlTotal);
+			rs.next();
+			int count = rs.getInt( "namecount" );
+			
+			System.out.println("Count of exemep names: "+count);
+			if(count <= 0)
+				return null;
+			
+			String[] exempNames =  new String[count];
+			
+			rs =stmt.executeQuery(sql);
+			
+			int index =0;
+			while(rs.next())
+			{
+				exempNames[index++] = rs.getString( EXEMP_NAME );
+			}
+			
+			return exempNames;
+			
+			
+		}
+		catch ( Exception e )
+		{
+
+		}
+		finally
+		{
+			closeConnectionObjects( rs, stmt, con );
+		}
+
+		return null;
+	}
 
 	private String buildInClause( int batchSize )
 	{

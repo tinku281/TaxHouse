@@ -1,14 +1,12 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.taxhouse.model.Exemption;
 import com.taxhouse.model.TaxPayer;
 
 /**
@@ -27,24 +25,58 @@ public class EmployeeProcessing extends HttpServlet
 
 	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
 	{
-		System.out.println("Exmp Count: "+request.getParameter( "count" ).toString());
-		String exemptionAmount =  request.getParameter( "exemptionamount" ).toString();
-		String exemptionPer =  request.getParameter( "exemptionper" ).toString();
-		TaxPayer taxPayer = (TaxPayer)request.getAttribute( "taxpayer");
 		
-		if(!exemptionAmount.equals( "" ) && !exemptionPer.equals( "" ))
-		{	
-//			ArrayList<Exemption> exemptionsList = new ArrayList<Exemption>();
-//			Exemption exemption = new Exemption( id, name, amount, percentage )
-			
-			Double exemptionamount = Double.parseDouble( exemptionAmount);
-			int exemptionper = Integer.parseInt( request.getParameter( "exemptionper" ).toString() );
-			int count = Integer.parseInt( request.getParameter( "count" ).toString() );
-			
+		TaxPayer taxPayer = (TaxPayer)request.getAttribute( "employee");
+		if(taxPayer == null)
+			System.out.println("Taxpayer: NULL");
+		else
+			System.out.println("First Name: "+taxPayer.getFirstName());
+		
+		int exmpCount  = Integer.parseInt( request.getParameter( "count" ).toString() );
+//		int invCount  = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
+		
+		int empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
+		int empMaritalStatus = Integer.parseInt( request.getParameter( "emp_mar_status" ).toString() );
+		int spouseUtin=0;
+		if(empMaritalStatus == 1)
+		{
+			Integer.parseInt( request.getParameter( "spouse_utin" ).toString() );
 		}
 		
+		String[] exmpNames = null,exmpAmount = null;
+		int[] exmpType = null;
 		
+		if(exmpCount > 0)
+		{
+			exmpNames = new String[exmpCount];
+			exmpType = new int[exmpCount];
+			exmpAmount = new String[exmpCount];
+			
+			for(int index = 0; index < exmpCount; index++)
+			{
+				int i = index+1;
+				String str = request.getParameter( "exemptionname"+i);
+				System.out.println("\n String"+i+": "+str);
+				exmpNames[index] = request.getParameter( "exemptionname"+i ).toString();
+				exmpType[index] = Integer.parseInt(request.getParameter( "exemptiontype"+(index + 1) ).toString());
+				exmpAmount[index] = request.getParameter( "exemptionamount"+(index + 1) ).toString();
+			}
+		}
 		
+		System.out.println("\nEmployee Type: "+empType);
+		System.out.println("\nEmployee Marital Status: "+empMaritalStatus);
+		System.out.println("\nEmployee Spouse UTIN: "+ spouseUtin);
+		System.out.println("\nEmployee Exemption Count: "+exmpCount);
+		
+		if(exmpCount > 0)
+		{
+			for(int index= 0;index < exmpCount ; index++)
+			{	
+				System.out.println("\n Exemption Name: "+exmpNames[index]+", Exemption Type: "+exmpType[index]+", Exemption Amount/Per: "+exmpAmount[index]);
+			}
+		}
+		
+	
 	}
 
 }

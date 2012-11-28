@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.TaxPayer;
 import com.taxhouse.model.TaxPayer.Nationality;
 
@@ -52,8 +53,15 @@ public class InsertProcessing extends HttpServlet
 		if(iCategory == TaxPayer.SubType.EMPLOYEE.ordinal())
 		{
 			System.out.println("Employee Ordinal: "+TaxPayer.SubType.EMPLOYEE.ordinal());
+			
+			String[] exempNames = DBHandler.getInstance().getExemptionNames();
+			if(exempNames!= null)
+			System.out.println("Exemeption names length: "+exempNames.length);
+			else
+			System.out.println("Exemption names: NULL");	
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher( "insert_employee.jsp" );
 			request.setAttribute( "employee", taxPayer );
+			request.setAttribute( "exemption_names", exempNames );
 			requestDispatcher.forward( request, response );
 		}
 		else if(iCategory == TaxPayer.SubType.ORGANIZATION.ordinal())

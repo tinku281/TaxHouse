@@ -124,6 +124,17 @@ body
 	display:block;
 	clear:right;
 }
+
+.label3
+{
+	height:30px;
+	padding:5px;
+	width:200px;
+	margin:10px;
+	color:#AAA;
+	display:block;
+	clear:right;
+}
 .drop
 {
 	border:1px solid #8fdeff;
