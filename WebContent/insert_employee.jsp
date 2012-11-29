@@ -100,6 +100,16 @@
 			alert("Investement details should be in digits");	
 			return false;
 		}
+		if(invCount == 0)
+		{
+			document.insertEmployee.investmentamount.readOnly="readonly";
+			document.insertEmployee.investmentper.readOnly="readonly";
+		}
+		else
+		{
+			document.insertEmployee.elements["investmentamount"+invCount].readOnly = "readonly";
+			document.insertEmployee.elements["investmentper"+invCount].readOnly = "readonly";
+		}	
 		
 		document.insertEmployee.inv_count.value = 	++invCount;
 		

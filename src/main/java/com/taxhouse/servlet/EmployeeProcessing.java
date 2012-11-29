@@ -2,6 +2,7 @@ package com.taxhouse.servlet;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -17,6 +18,7 @@ import com.taxhouse.model.Employee.MaritalStatus;
 import com.taxhouse.model.Exemption;
 import com.taxhouse.model.SeniorCitizen;
 import com.taxhouse.model.Student;
+import com.taxhouse.model.TaxPayer.Nationality;
 
 /**
  * Servlet implementation class EmployeeProcessing
@@ -49,7 +51,7 @@ public class EmployeeProcessing extends HttpServlet
 		
 		
 		int exmpCount  = Integer.parseInt( request.getParameter( "count" ).toString() );
-//		int invCount  = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
+		int invCount  = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
 		
 		int empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
 		int empMaritalStatus = Integer.parseInt( request.getParameter( "emp_mar_status" ).toString() );
@@ -87,10 +89,10 @@ public class EmployeeProcessing extends HttpServlet
 			}
 		}
 		
-		System.out.println("\nEmployee Type: "+empType);
-		System.out.println("\nEmployee Marital Status: "+empMaritalStatus);
-		System.out.println("\nEmployee Spouse UTIN: "+ spouseUtin);
-		System.out.println("\nEmployee Exemption Count: "+exmpCount);
+		if(invCount > 0)
+		{
+			//investment code goes here
+		}
 		
 //		if(exmpCount > 0)
 //		{
@@ -120,10 +122,16 @@ public class EmployeeProcessing extends HttpServlet
 		}
 		
 		employee.setFirstName( httpSession.getAttribute( "firstname" ).toString() );
-		employee.setLastName( httpSession.getAttribute( "firstname" ).toString() );
+		employee.setLastName( httpSession.getAttribute( "lastname" ).toString() );
 		employee.setPassword( httpSession.getAttribute( "password" ).toString() );
 		employee.setCity( httpSession.getAttribute( "city" ).toString() );
 		employee.setState( httpSession.getAttribute( "state" ).toString() );
+		
+		int nationality = Integer.parseInt( httpSession.getAttribute( "nationality" ).toString() );
+		if(nationality == 1)
+			employee.setNationality( Nationality.USA );
+		else
+			employee.setNationality( Nationality.NON_USA );
 		
 		switch ( empMaritalStatus )
 		{
@@ -140,6 +148,27 @@ public class EmployeeProcessing extends HttpServlet
 		
 		if(exmpCount > 0)
 			employee.setExemptions( exemptionsList );
+		
+		System.out.println("\nEmployee FirstName: "+employee.getFirstName());
+		System.out.println("\nEmployee LastName: "+employee.getLastName());
+		System.out.println("\nEmployee City: "+employee.getCity());
+		System.out.println("\nEmployee State: "+employee.getState());
+		System.out.println("\nEmployee Nationality: "+employee.getNationality().name());
+		System.out.println("\nEmployee Marital Status: "+employee.getMaritalStatus().name());
+		if(empMaritalStatus == 1)
+		System.out.println("\nEmployee Spouse UTIN: "+ employee.getSpouseUtin());
+		System.out.println("\nEmployee Exemption Count: "+exmpCount);
+		if(exmpCount > 0)
+		{
+			List<Exemption> exmpList = employee.getExemptions();
+			for(Exemption e:exmpList)
+			{
+				System.out.println("Exemption Name: "+e.getName());
+				System.out.println("Exemption Id: "+e.getId());
+				System.out.println("Exemption Amount: "+e.getAmount());
+				System.out.println("Exemption Percentage: "+e.getPercentage());
+			}
+		}
 		
 	}
 	

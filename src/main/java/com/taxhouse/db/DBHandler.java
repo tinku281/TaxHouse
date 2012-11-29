@@ -1083,7 +1083,7 @@ public class DBHandler
 		Statement stmt = null;
 		ResultSet rs = null;
 		
-		String sql = "Select "+EXEMP_NAME+" FROM exemption WHERE "+EXEMP_NAME+" = '"+exempetionName+"'";
+		String sql = "Select "+EXEMP_ID+" FROM exemption WHERE "+EXEMP_NAME+" = '"+exempetionName+"'";
 		
 
 		try
@@ -1107,6 +1107,7 @@ public class DBHandler
 		return -1;
 
 	}
+	
 
 	private String buildInClause( int batchSize )
 	{
