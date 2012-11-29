@@ -9,6 +9,7 @@
 <script>
 	var count = 0;
 	var invCount = 0;
+	
 	function isNumeric(val)
 	{
 	        var validChars = '0123456789.';
@@ -30,17 +31,17 @@
 			alert("Please enter Exemption Amount as digits.");
 			return false;
 		}	
-		document.insertEmployee.count.value = 	++count;
+		document.insertEmployee.count.value = ++count;
 		var labelExmpAmount =document.createElement("label");
 		labelExmpAmount.setAttribute("class","label1");
 		labelExmpAmount.innerHTML="Exemption Name";
 		
 		var labelExmpNameValue = document.createElement("input");
-		labelExmpNameValue.setAttribute("type", "text");
+		labelExmpNameValue.type="text";
+		labelExmpNameValue.name="exemptionname"+count;
 		labelExmpNameValue.setAttribute("class", "textbox2 rightfloat");
-		labelExmpNameValue.setAttribute("name",  "exemptionname"+count);
 		labelExmpNameValue.setAttribute("value", document.insertEmployee.emp_exemp_name.value);
-		labelExmpNameValue.setAttribute("disabled","true");
+		labelExmpNameValue.readOnly = "readonly";
 
 		
 		var divExmpAmount = document.createElement("div");
@@ -53,11 +54,11 @@
 		labelExmpPer.innerHTML="Exemption Per";
 		
 		var labelExmpPerValue = document.createElement("input");
-		labelExmpPerValue.setAttribute("type", "text");
+		labelExmpPerValue.type="text";
+		labelExmpPerValue.name="exemptionamount"+count;
 		labelExmpPerValue.setAttribute("class", "textbox2 rightfloat");
-		labelExmpPerValue.setAttribute("name", "exemptionamount"+count);
 		labelExmpPerValue.setAttribute("value", exempAmount);
-		labelExmpPerValue.setAttribute("disabled","true");
+		labelExmpPerValue.readOnly = "readonly";
 
 		
 		var divExmpPer = document.createElement("div");
@@ -66,9 +67,9 @@
 		divExmpPer.appendChild(labelExmpPerValue);
 		
 		var divExmpType = document.createElement("input");
-		divExmpType.setAttribute("type", "hidden");
-		divExmpType.setAttribute("name","exemptiontype"+count);
-		divExmpType.setAttribute("value", document.insertEmployee.exmp_type.value);
+		divExmpType.type="hidden";
+		divExmpType.name="exemptiontype"+count;
+		divExmpType.value=document.insertEmployee.exmp_type.value;
 		
 		document.getElementById('exemp_details').appendChild(divExmpAmount).appendChild(divExmpPer).appendChild(divExmpType);
 		
@@ -190,11 +191,6 @@
 </head>
 <body>
 
-<% 
-	TaxPayer taxPayer = (TaxPayer)request.getAttribute( "employee" ) ;
-	request.setAttribute( "employee",taxPayer); 
-	System.out.println("FNAME: "+taxPayer.getFirstName());
-	%>
 <%@ include file="header.jsp" %>
 <%@ include file="admin_panel.html" %>
 
@@ -249,9 +245,12 @@
 			</select>
 			</div>
 			<div class="formrow"><label class="label1 ">Exemption Amount/Percentage</label><input class="textbox2 rightfloat" type="text" name="exemptionamt" /></div>
-			<div id="radio_input" class="formrow rightfloat"><input type ="radio" name="exmp_type" value="1" checked="checked"/>Amount<input type ="radio" name="exmp_type" value="2"/>Percentage</div>
-	<div id="exemp_details">
-	</div>	
+			<div class="formrow rightfloat">
+				<select name="exmp_type" class="drop rightfloat">
+					<option value="1">Amount</option>
+					<option value="2">Percentage</option>
+				</select></div>
+	<div id="exemp_details"></div>	
 			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>
 	
 	<div class="header">

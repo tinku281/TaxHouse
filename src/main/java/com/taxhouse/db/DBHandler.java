@@ -1076,6 +1076,37 @@ public class DBHandler
 
 		return null;
 	}
+	
+	public int getExemptionId(String exempetionName)
+	{
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		String sql = "Select "+EXEMP_NAME+" FROM exemption WHERE "+EXEMP_NAME+" = '"+exempetionName+"'";
+		
+
+		try
+		{
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+			rs.next();
+			int id = rs.getInt( EXEMP_ID );
+			return id;
+		}	
+		catch ( Exception e )
+		{
+
+		}
+		finally
+		{
+			closeConnectionObjects( rs, stmt, con );
+		}
+		
+		return -1;
+
+	}
 
 	private String buildInClause( int batchSize )
 	{

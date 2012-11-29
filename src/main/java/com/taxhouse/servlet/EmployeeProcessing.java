@@ -1,13 +1,22 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import com.taxhouse.model.TaxPayer;
+import com.taxhouse.db.DBHandler;
+import com.taxhouse.model.ArmedForcePersonnel;
+import com.taxhouse.model.Employee;
+import com.taxhouse.model.Employee.MaritalStatus;
+import com.taxhouse.model.Exemption;
+import com.taxhouse.model.SeniorCitizen;
+import com.taxhouse.model.Student;
 
 /**
  * Servlet implementation class EmployeeProcessing
@@ -26,11 +35,18 @@ public class EmployeeProcessing extends HttpServlet
 	protected void doPost( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
 	{
 		
-		TaxPayer taxPayer = (TaxPayer)request.getAttribute( "employee");
-		if(taxPayer == null)
-			System.out.println("Taxpayer: NULL");
-		else
-			System.out.println("First Name: "+taxPayer.getFirstName());
+		HttpSession httpSession = request.getSession();
+		RequestDispatcher requestDispatcher;
+		
+		if(httpSession.isNew())
+		{
+			httpSession.invalidate();
+			requestDispatcher  = request.getRequestDispatcher( "login.jsp" );
+			requestDispatcher.forward( request, response );
+			return;
+		}
+		
+		
 		
 		int exmpCount  = Integer.parseInt( request.getParameter( "count" ).toString() );
 //		int invCount  = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
@@ -40,26 +56,34 @@ public class EmployeeProcessing extends HttpServlet
 		int spouseUtin=0;
 		if(empMaritalStatus == 1)
 		{
-			Integer.parseInt( request.getParameter( "spouse_utin" ).toString() );
+			spouseUtin = Integer.parseInt( request.getParameter( "spouse_utin" ).toString() );
 		}
 		
-		String[] exmpNames = null,exmpAmount = null;
-		int[] exmpType = null;
+		ArrayList<Exemption> exemptionsList = new ArrayList<Exemption>();
 		
 		if(exmpCount > 0)
 		{
-			exmpNames = new String[exmpCount];
-			exmpType = new int[exmpCount];
-			exmpAmount = new String[exmpCount];
+			DBHandler dbHandler = new DBHandler();
 			
 			for(int index = 0; index < exmpCount; index++)
 			{
 				int i = index+1;
-				String str = request.getParameter( "exemptionname"+i);
-				System.out.println("\n String"+i+": "+str);
-				exmpNames[index] = request.getParameter( "exemptionname"+i ).toString();
-				exmpType[index] = Integer.parseInt(request.getParameter( "exemptiontype"+(index + 1) ).toString());
-				exmpAmount[index] = request.getParameter( "exemptionamount"+(index + 1) ).toString();
+				String exempName = request.getParameter( "exemptionname"+i );
+				int exempType = Integer.parseInt(request.getParameter( "exemptiontype"+i ));
+				Double exempAmount = Double.parseDouble( request.getParameter( "exemptionamount"+i ));
+				int exempId = dbHandler.getExemptionId( exempName.trim() );
+				
+				Exemption exemption;
+				if(exempType == 1)
+				{
+					exemption = new Exemption( exempId, exempName, exempAmount, 0 );
+				}
+				else
+				{
+					exemption = new Exemption( exempId, exempName, 0, exempAmount );
+				}
+				
+				exemptionsList.add( exemption );
 			}
 		}
 		
@@ -68,15 +92,56 @@ public class EmployeeProcessing extends HttpServlet
 		System.out.println("\nEmployee Spouse UTIN: "+ spouseUtin);
 		System.out.println("\nEmployee Exemption Count: "+exmpCount);
 		
-		if(exmpCount > 0)
+//		if(exmpCount > 0)
+//		{
+//			for(int index= 0;index < exmpCount ; index++)
+//			{	
+//				System.out.println("\n Exemption Name: "+exmpNames[index]+", Exemption Type: "+exmpType[index]+", Exemption Amount/Per: "+exmpAmount[index]);
+//			}
+//		}
+		
+		Employee employee;
+		
+		if(empType == Employee.SubType.STUDENT.ordinal())
 		{
-			for(int index= 0;index < exmpCount ; index++)
-			{	
-				System.out.println("\n Exemption Name: "+exmpNames[index]+", Exemption Type: "+exmpType[index]+", Exemption Amount/Per: "+exmpAmount[index]);
-			}
+			employee = new Student();
+		}
+		else if(empType == Employee.SubType.SENIOR_CITIZEN.ordinal())
+		{
+			employee = new SeniorCitizen();
+		}
+		else if(empType == Employee.SubType.ARMY.ordinal())
+		{
+			employee = new ArmedForcePersonnel();
+		}
+		else
+		{
+			employee =new Employee();
 		}
 		
-	
+		employee.setFirstName( httpSession.getAttribute( "firstname" ).toString() );
+		employee.setLastName( httpSession.getAttribute( "firstname" ).toString() );
+		employee.setPassword( httpSession.getAttribute( "password" ).toString() );
+		employee.setCity( httpSession.getAttribute( "city" ).toString() );
+		employee.setState( httpSession.getAttribute( "state" ).toString() );
+		
+		switch ( empMaritalStatus )
+		{
+			case 0: employee.setMaritalStatus( MaritalStatus.SINGLE);
+					break;
+			case 1: employee.setMaritalStatus( MaritalStatus.MARRIED);
+					employee.setSpouseUtin( spouseUtin );
+					break;
+			case 2: employee.setMaritalStatus( MaritalStatus.DIVORCED);
+					break;
+			case 3: employee.setMaritalStatus( MaritalStatus.WIDOW);
+					break;
+		}
+		
+		if(exmpCount > 0)
+			employee.setExemptions( exemptionsList );
+		
 	}
+	
 
 }
