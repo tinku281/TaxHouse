@@ -206,9 +206,9 @@
 
 <form name="insertEmployee" method="POST" action="insert_employee.do">
 <div class="subheader width600">
-	<div class="header">
-		<h2>Employee Details</h2>
-	</div>
+		<div class="header">
+			<h2>Employee Details</h2>
+		</div>
 	
 			<div class="formrow">
 				<label class="label1">Employee Type</label>

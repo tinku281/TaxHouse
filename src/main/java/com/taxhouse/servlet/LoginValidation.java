@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.TaxPayer;
@@ -32,6 +33,8 @@ public class LoginValidation extends HttpServlet
 
 		PrintWriter output = response.getWriter();
 		response.setContentType( "text/html" );
+		HttpSession httpSession = request.getSession();
+		httpSession.setMaxInactiveInterval( 15*60 );
 
 		if ( role.equals( "taxpayer" ) )
 		{
@@ -46,6 +49,7 @@ public class LoginValidation extends HttpServlet
 					RequestDispatcher requestDispatcher = request.getRequestDispatcher( "details.jsp" );
 					request.setAttribute( "taxpayer", taxPayer );
 					requestDispatcher.forward( request, response );
+					httpSession.setAttribute( "role", "taxpayer" );
 
 					// output.println("<br/>" + taxPayer.getFirstName() +
 					// "<br/>"
@@ -66,6 +70,8 @@ public class LoginValidation extends HttpServlet
 			if ( DBHandler.getInstance().validateAdmin( sUtin, passwd ) )
 			{
 				output.println( "Validated" );
+				httpSession.setAttribute( "role", "admin" );
+				httpSession.setAttribute( "functionType", "1" );
 
 			}
 			else
