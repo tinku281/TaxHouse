@@ -54,4 +54,14 @@
     <servlet-name>HandleUTIN</servlet-name>
     <url-pattern>/HandleUTIN.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>EmployeeSubtypeProcessing</display-name>
+    <servlet-name>EmployeeSubtypeProcessing</servlet-name>
+    <servlet-class>com.taxhouse.servlet.EmployeeSubtypeProcessing</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>EmployeeSubtypeProcessing</servlet-name>
+    <url-pattern>/EmployeeSubtypeProcessing.do</url-pattern>
+  </servlet-mapping>
 </web-app>

@@ -1108,6 +1108,11 @@ public class DBHandler
 
 	}
 	
+	public boolean insertTaxPayer(TaxPayer taxPayer)
+	{
+		return true;
+	}
+	
 
 	private String buildInClause( int batchSize )
 	{

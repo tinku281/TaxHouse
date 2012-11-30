@@ -170,6 +170,29 @@ public class EmployeeProcessing extends HttpServlet
 			}
 		}
 		
+		httpSession.setAttribute( "employee", employee );
+		httpSession.setAttribute( "empType", empType );
+		
+		if(empType == Employee.SubType.STUDENT.ordinal())
+		{
+			requestDispatcher = request.getRequestDispatcher( "insert_student.jsp" );
+			requestDispatcher.forward( request, response );
+		}
+		else if(empType == Employee.SubType.SENIOR_CITIZEN.ordinal())
+		{
+			requestDispatcher = request.getRequestDispatcher( "insert_senior_citizen.jsp" );
+			requestDispatcher.forward( request, response );
+		}
+		else if(empType == Employee.SubType.ARMY.ordinal())
+		{
+			requestDispatcher = request.getRequestDispatcher( "insert_armed.jsp" );
+			requestDispatcher.forward( request, response );
+		}
+		else
+		{
+			// insert code for employee goes here with type none
+			DBHandler.getInstance().insertTaxPayer( employee );
+		}
 	}
 	
 

@@ -4,9 +4,72 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Insert title here</title>
+<title>Insert Student</title>
+<script>
+
+function isNumeric(val)
+{
+        var validChars = '0123456789.';
+
+
+        for(var i = 0; i < val.length; i++) 
+        {
+            if(validChars.indexOf(val.charAt(i)) == -1)
+                return false;
+        }
+
+        return true;
+}
+function clearText()
+{
+	if (document.insertStudentForm.waiver_amount.value == "Enter Amount") 
+	{
+		document.insertStudentForm.waiver_amount.value = "";
+	}
+}
+
+function setText()
+{
+	if (document.insertStudentForm.waiver_amount.value == "") 
+	{
+		document.insertStudentForm.waiver_amount.value = "Enter Amount";
+	}
+}
+
+function validate() 
+{
+	if (document.insertStudentForm.waiver_amount.value == "") 
+	{
+		alert("Please enter Free Waiver Amount");
+		document.insertStudentForm.waiver_amount.focus();
+		return false;
+	}
+	if(!isNumeric(document.insertStudentForm.waiver_amount.value))
+	{
+		alert("Amount should be in digits");
+		document.insertStudentForm.waiver_amount.focus();
+		return false;
+	}
+
+	document.insertStudentForm.submit();
+	return true;
+}
+</script>
 </head>
 <body>
+<%@ include file = "header.jsp"%>
+<%@ include file = "admin_panel.html" %>
+
+<div class="subheader width500" >
+	<div class="header">
+		<h2>Enter Student Details</h2>
+	</div>
+	<form name="insertStudentForm" method="POST" action="EmployeeSubtypeProcessing.do" >
+			<div class="formrow"><label class="label1 ">Free Waiver Amount</label><input class="textbox2 rightfloat" type="text" name="waiver_amount" value="Enter Amount" onFocus="clearText()" onBlur="setText()"/></div>
+			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
+	</form>
+</div>	
+
 
 </body>
 </html>
