@@ -48,9 +48,9 @@ public class LoginValidation extends HttpServlet
 				{
 					RequestDispatcher requestDispatcher = request.getRequestDispatcher( "details.jsp" );
 					request.setAttribute( "taxpayer", taxPayer );
-					requestDispatcher.forward( request, response );
 					httpSession.setAttribute( "role", "taxpayer" );
-
+					requestDispatcher.forward( request, response );
+					
 					// output.println("<br/>" + taxPayer.getFirstName() +
 					// "<br/>"
 					// + taxPayer.getLastName() + "<br/>"
@@ -72,6 +72,8 @@ public class LoginValidation extends HttpServlet
 				output.println( "Validated" );
 				httpSession.setAttribute( "role", "admin" );
 				httpSession.setAttribute( "functionType", "1" );
+				RequestDispatcher requestDispatcher = request.getRequestDispatcher( "enter_utin.jsp" );
+				requestDispatcher.forward( request, response );
 
 			}
 			else

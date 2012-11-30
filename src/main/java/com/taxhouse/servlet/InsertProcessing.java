@@ -37,7 +37,10 @@ public class InsertProcessing extends HttpServlet
 		
 		if(httpSession.isNew())
 		{
-			httpSession.setMaxInactiveInterval( 900 );
+			httpSession.invalidate();
+			RequestDispatcher requestDispatcher  = request.getRequestDispatcher( "login.jsp" );
+			requestDispatcher.forward( request, response );
+			return;
 		}
 		
 		httpSession.setAttribute( "firstname", request.getParameter( "firstname" ));

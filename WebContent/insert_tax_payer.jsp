@@ -1,3 +1,4 @@
+<%@page import="com.taxhouse.model.TaxPayer"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -49,28 +50,82 @@ function validate()
 <body>
 <%@ include file = "header.jsp"%>
 <%@ include file = "admin_panel.html" %>
+<%
+		String firstName,lastName,password,city,state,buttonLabel;
+		int nationality;
+		boolean typeDisabled;
+		
+		TaxPayer taxPayer = (TaxPayer)session.getAttribute( "taxpayee" );
+		
+		if(taxPayer != null)
+		{
+			firstName = taxPayer.getFirstName(  );
+			lastName = taxPayer.getLastName(  );
+			password = taxPayer.getPassowrd(  );
+			city = taxPayer.getCity(  );
+			state =taxPayer.getState(  );
+			nationality = taxPayer.getNationality(  ).ordinal(  );
+			typeDisabled = true;
+			buttonLabel = "Update";
+		}
+		else
+		{
+			firstName="";
+			lastName = "";
+			password="";
+			city = "";
+			state = "";
+			nationality = TaxPayer.Nationality.USA.ordinal(  );
+			typeDisabled = false;
+			buttonLabel = "Submit";
+		}
+
+%>
 
 <div class="subheader width500" >
 	<div class="header">
 		<h2>Enter Details</h2>
 	</div>
 	<form name="insertform" method="POST" action="insert.do" >
-			<div class="formrow"><label class="label1 ">First Name</label><input class="textbox2 rightfloat" type="text" name="firstname"/></div>
-			<div class="formrow"><label class="label1 ">Last Name</label><input class="textbox2 rightfloat" type="text" name="lastname"/></div>
-			<div class="formrow"><label class="label1 ">TP Password</label><input class="textbox2 rightfloat" type="password" name="tp_password"/></div>
-			<div class="formrow"><label class="label1 ">City</label><input class="textbox2 rightfloat" type="text" name="city"  /></div>
-			<div class="formrow"><label class="label1 ">State</label><input class="textbox2 rightfloat" type="text" name="state"/></div>
+			<div class="formrow"><label class="label1 ">First Name</label><input class="textbox2 rightfloat" type="text" name="firstname" value="<%=firstName%>" /></div>
+			<div class="formrow"><label class="label1 ">Last Name</label><input class="textbox2 rightfloat" type="text" name="lastname" value="<%=lastName %>"/></div>
+			<div class="formrow"><label class="label1 ">TP Password</label><input class="textbox2 rightfloat" type="password" name="tp_password" value="<%=password %>"/></div>
+			<div class="formrow"><label class="label1 ">City</label><input class="textbox2 rightfloat" type="text" name="city" value="<%=city %>" /></div>
+			<div class="formrow"><label class="label1 ">State</label><input class="textbox2 rightfloat" type="text" name="state" value="<%=state %>"/></div>
 			<div class="formrow"><label class="label1 ">Nationality</label><select name="nationality" class="drop rightfloat">
-				<option value="1">USA</option>
-				<option value="2">NON_USA</option>
+				<%
+					if(nationality == TaxPayer.Nationality.USA.ordinal(  ) )
+					{
+				%>
+						<option value="1" selected="selected">USA</option>
+						<option value="2">NON_USA</option>
+				<%	}
+					else
+					{	
+				%>
+						<option value="1">USA</option>
+						<option value="2" selected="selected">NON_USA</option>
+				<%	}
+				%>	
 			</select>
 			</div>
 			<div class="formrow">
-				<label class="label1">TP Category</label><select name="tp_category" class="drop rightfloat">
-				<option value="1">Employee</option>
-				<option value="2">Organization</option>
+				<label class="label1">TP Category</label>
+				<%
+					if(typeDisabled)
+					{	
+				%>
+						<select name="tp_category" class="drop rightfloat" disabled="disabled" >
+				<%	}
+					else
+					{	
+				%>		<select name="tp_category" class="drop rightfloat" >
+				<%	}
+				%>
+					<option value="1">Employee</option>
+					<option value="2">Organization</option>
 			</select></div>
-			<input class=" center_div button_blue display_block margin10"  type = "submit" value="Submit" onClick="validate()"/>
+			<input class=" center_div button_blue display_block margin10"  type = "button" value="<%=buttonLabel %>" onClick="validate()"/>
 	</form>
 </div>
 

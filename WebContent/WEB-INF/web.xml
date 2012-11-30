@@ -34,4 +34,24 @@
     <servlet-name>EmployeeProcessing</servlet-name>
     <url-pattern>/insert_employee.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>AdminPanelListener</display-name>
+    <servlet-name>AdminPanelListener</servlet-name>
+    <servlet-class>com.taxhouse.servlet.AdminPanelListener</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>AdminPanelListener</servlet-name>
+    <url-pattern>/AdminPanelListener.do</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>HandleUTIN</display-name>
+    <servlet-name>HandleUTIN</servlet-name>
+    <servlet-class>com.taxhouse.servlet.HandleUTIN</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HandleUTIN</servlet-name>
+    <url-pattern>/HandleUTIN.do</url-pattern>
+  </servlet-mapping>
 </web-app>

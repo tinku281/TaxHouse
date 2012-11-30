@@ -84,5 +84,9 @@ public class TaxPayer {
 	{
 		
 	}
+	public String getPassowrd()
+	{
+		return "password";
+	}
 
 }

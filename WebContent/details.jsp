@@ -21,9 +21,16 @@
 </head>
 <body>
 <%@include file="header.jsp" %>
-<%
+
+		<%
 			TaxPayer taxPayer = (TaxPayer)request.getAttribute( "taxpayer" );
-			%>
+			if(session.getAttribute( "role" ).toString(  ).equals( "admin" ))
+			{
+		%>
+				<%@include file="admin_panel.html" %>
+		<%		
+			}
+		%>
 <div class="subheader width500 padding_bottom20">
 		<div class="header">
 			<h2>Employee Details</h2>

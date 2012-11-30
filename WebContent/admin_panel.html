@@ -8,11 +8,11 @@
 </head>
 <body>
 <div class="buttons">
-		<form>
-				<input class="button_blue margin10"  type = "submit" value="Calculate Tax"/>
-				<input class="button_blue margin10"  type = "submit" value="Insert Tax Payer"/>
-				<input class="button_blue margin10"  type = "submit" value="Delete Tax Payer"/>
-				<input class="button_blue margin10"  type = "submit" value="Update Tax Payer"/>
+		<form name="adminMenuform" method="GET" action="AdminPanelListener.do">
+				<input class="button_blue margin10" name="panel_button" type = "submit" value="Calculate Tax"/>
+				<input class="button_blue margin10" name="panel_button" type = "submit" value="Insert Tax Payer"/>
+				<input class="button_blue margin10" name="panel_button" type = "submit" value="Delete Tax Payer"/>
+				<input class="button_blue margin10" name="panel_button" type = "submit" value="Update Tax Payer"/>
 		</form>
 </div>
 </body>

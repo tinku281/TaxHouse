@@ -189,6 +189,11 @@ body
 	margin-top:100px;
 }
 
+.error_msg
+{
+	color:#A22;
+	margin-left:10px;
+}
 
 .width100
 {
