@@ -1,0 +1,484 @@
+package com.taxhouse;
+
+import java.util.Date;
+import java.util.Calendar;
+import java.util.List;
+
+import com.taxhouse.model.*;
+import com.taxhouse.db.*;
+import com.taxhouse.app.*;
+import com.taxhouse.servlet.TaxCalculator;
+
+rule "Currently working in A1 Combat Zone"
+salience 18
+when 
+ item:ArmedForcePersonnel()
+ specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A1") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+     
+     	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        
+        if((cyear-syear)==0)
+        {
+	   		System.out.println("No Tax for you brave soldier :-)");
+			item.setTax(0);
+			drools.halt();
+ 		}
+ end
+ 
+ 
+rule "Currently working in A2 Combat Zone"
+salience 17
+when 
+ item:ArmedForcePersonnel()
+      specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A2") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+     	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)==0)
+        {
+	   		double Per=1;
+			double taxCal=0;
+			taxCal=Utils.calculateTax(item.getIncome(),Per);
+			System.out.println("Only one percent tax for you brave soldier :-)"+Per+ " % : "+taxCal);
+			item.setTax(taxCal);
+			drools.halt();
+ 		}
+ end
+ rule "Currently working in A3 Combat Zone"
+salience 16
+when 
+ item:ArmedForcePersonnel()
+      specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A3") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+     	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)==0)
+        {
+   		double Per=2;
+		double taxCal=0;
+		taxCal=Utils.calculateTax(item.getIncome(),Per);
+		System.out.println("Only two percent tax for you brave soldier :-)"+Per+ " % : "+taxCal);
+		item.setTax(taxCal);
+		drools.halt();
+ 		}
+ end
+ 
+ rule "Currently working in A4 Combat Zone"
+salience 15
+when 
+ item:ArmedForcePersonnel()
+      specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A4") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+     	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)==0)
+        {
+   		double Per=3;
+		double taxCal=0;
+		taxCal=Utils.calculateTax(item.getIncome(),Per);
+		System.out.println("Only three tax for you brave soldier :-)"+Per+ " % : "+taxCal);
+		item.setTax(taxCal);
+		drools.halt();
+ 		}
+ end
+ 
+ rule "Base Federal rule for Armed forces with designation 3 "
+salience 14
+when
+item:ArmedForcePersonnel(designation=="Seaman"||designation == "Private" || designation =="Aircraftman" )
+taxRecord:TaxRecord(  )
+then
+double Per=7;
+double taxCal=0;
+taxCal=Utils.calculateTax(item.getIncome(),Per);
+System.out.println("Base Federal Tax for Rank3 Armed force Personnel @ "+Per+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+rule "Base State rule for Armed forces with designation 3"
+salience 13
+when
+item:ArmedForcePersonnel(designation=="Seaman"||designation == "Private" || designation =="Aircraftman" )
+taxRecord:TaxRecord(  )
+then
+double taxCal=0;
+double taxPer=0;
+ if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
+        {
+         taxPer = 7.4;
+        }
+       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
+         taxPer = 7.6;
+         }
+         else{
+         taxPer=7.9;
+         }
+
+taxCal=Utils.calculateTax(item.getIncome(),taxPer);
+System.out.println("Base State Tax for Rank3 Armed force Personnel @ "+taxPer+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+rule "Base Federal rule for Armed forces with designation 2 "
+salience 14
+when
+item:ArmedForcePersonnel(designation=="Lieutenant"||designation == "Captain" || designation =="FlightLieutenant" )
+taxRecord:TaxRecord(  )
+then
+double Per=7.8;
+double taxCal=0;
+taxCal=Utils.calculateTax(item.getIncome(),Per);
+System.out.println("Base Federal Tax for Rank2 Armed force Personnel @ "+Per+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+rule "Base State rule for Armed forces with designation 2"
+salience 13
+when
+item:ArmedForcePersonnel(designation=="Lieutenant"||designation == "Captain" || designation =="FlightLieutenant" )
+taxRecord:TaxRecord(  )
+then
+double taxPer=0;
+double taxCal=0;
+if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
+        {
+         taxPer = 5.4;
+        }
+       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
+         taxPer = 5.5;
+         }
+         else{
+         taxPer=6;
+         }
+taxCal=Utils.calculateTax(item.getIncome(),taxPer);
+System.out.println("Base State Tax for Rank2 Armed force Personnel @ "+taxPer+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+
+rule "Base Federal rule for Armed forces with designation 1 "
+salience 14
+when
+item:ArmedForcePersonnel(designation=="Commodore"||designation == "Brigadier" || designation =="AirCommodore" )
+taxRecord:TaxRecord(  )
+then
+double Per=8.8;
+double taxCal=0;
+taxCal=Utils.calculateTax(item.getIncome(),Per);
+System.out.println("Base Federal Tax for Rank2 Armed force Personnel @ "+Per+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+rule "Base State rule for Armed forces with designation 1"
+salience 13
+when
+item:ArmedForcePersonnel(designation=="Commodore"||designation == "Brigadier" || designation =="AirCommodore" )
+taxRecord:TaxRecord(  )
+then
+double taxPer=0;
+double taxCal=0;
+if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
+        {
+         taxPer = 7.2;
+        }
+       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
+         taxPer = 6.6;
+         }
+         else{
+         taxPer=4.6;
+         }
+taxCal=Utils.calculateTax(item.getIncome(),taxPer);
+System.out.println("Base State Tax for Rank3 Armed force Personnel @ "+taxPer+ " % : "+taxCal);
+item.setTax(taxCal);
+end
+
+rule "Worked at combat A1 Zone"
+salience 12
+    when
+        item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A1") from item.getSpecialTasks()
+    taxRecord:TaxRecord(  )
+then
+    	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)>0)
+        {
+        double taxCal=0;
+		double exmpPer=10;
+		taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+		System.out.println("Exemption for previous work in A1 Combat Zone: % "+exmpPer+" : "+taxCal);
+		item.setTax(item.getTax()-taxCal);
+		}
+		
+end
+rule "Worked at combat A2 Zone"
+salience 11
+    when
+        item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A2") from item.getSpecialTasks()
+    taxRecord:TaxRecord(  )
+then
+    	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)>0)
+        {
+        double taxCal=0;
+		double exmpPer=6;
+		taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+		System.out.println("Exemption for previous work in A2 Combat Zone: % "+exmpPer+" : "+taxCal);
+		item.setTax(item.getTax()-taxCal);
+		}
+		
+end
+
+rule "Worked at combat A3 Zone"
+salience 10
+    when
+        item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A3") from item.getSpecialTasks()
+    taxRecord:TaxRecord(  )
+then
+    	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)>0)
+        {
+        double taxCal=0;
+		double exmpPer=4;
+		taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+		System.out.println("Exemption for previous work in A3 Combat Zone: % "+exmpPer+" : "+taxCal);
+		item.setTax(item.getTax()-taxCal);
+		}
+		
+end
+
+
+rule "Worked at combat A4 Zone"
+salience 9
+    when
+        item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(combatZone=="A4") from item.getSpecialTasks()
+    taxRecord:TaxRecord(  )
+then
+    	Date enddate =specialtask.getEndDate();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(enddate);
+        int syear=cal.get(Calendar.YEAR);
+        if((cyear-syear)>0)
+        {
+        double taxCal=0;
+		double exmpPer=10;
+		taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+		System.out.println("Exemption for previous work in A4 Combat Zone: % "+exmpPer+" : "+taxCal);
+		item.setTax(item.getTax()-taxCal);
+		}
+		end
+		
+rule "Special task in Redcross"		
+salience 8
+when 
+ item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(name == "Red Cross") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+ double taxCal=0;
+ double Per=4;
+ taxCal=Utils.calculateTax(item.getTax(),Per);
+ System.out.println("Tax for special tax Redcross : @" +Per+" % :" +taxCal);
+ item.setTax(item.getTax()-taxCal);
+ end 
+ 
+ rule "Special task in Marine"		
+salience 7
+when 
+ item:ArmedForcePersonnel()
+        specialtask:ArmedForcePersonnel.SpecialTask(name == "US Marine") from item.getSpecialTasks()
+ taxRecord:TaxRecord(  )
+then
+ double taxCal=0;
+ double Per=4;
+ taxCal=Utils.calculateTax(item.getTax(),Per);
+ System.out.println("Tax for special tax Marine: @" +Per+" % :" +taxCal);
+ item.setTax(item.getTax()-taxCal);
+ end 
+ 
+rule "Hospitalization Exemption"
+salience 10
+when item:ArmedForcePersonnel()
+exemption:Exemption(id==14) from item.getExemptions() 
+taxRecord:TaxRecord(  )
+then
+double amt=exemption.getAmount();
+double taxCal;
+System.out.println("Physical Disability Exemption :-"+amt);
+item.setTax(item.getTax()-amt);
+end
+
+rule "Housing investment Exception"
+salience 10
+when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
+exemption:Exemption(id==2) from item.getExemptions() 
+taxRecord:TaxRecord(  )
+then
+double exmpPer=80;
+double amt=exemption.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Exemption on Housing investment @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+
+rule "With Dependants"
+salience 4
+when item:ArmedForcePersonnel(noOfDependants > 0)
+taxRecord:TaxRecord(  )
+then
+double amount=item.getDependantincome();
+double exmpPer=60;
+double Remtax=0;
+Remtax=Utils.calculateTax(amount,exmpPer);
+System.out.println("Exemption on Dependants @ :" +exmpPer+ " % :" + "-"+Remtax);
+item.setTax(item.getTax()-Remtax);
+end
+
+rule "Armed personnel with Stocks"
+salience 3
+ when
+     item:ArmedForcePersonnel(item.hasStocks())
+    taxRecord:TaxRecord(  )
+then
+        int per = 0;
+        double tax = item.getTax();
+        List<Stock> s=item.getStocks();
+        StockProvider st= new StockProvider();
+        double samt=0;
+        double camt=0;
+        int quantity=0;
+        String pdate,symbol;
+        for(Stock stock:s)
+        {
+	        pdate=stock.getPurchaseDate().toString();
+	        symbol=stock.getSymbol();
+	        quantity=stock.getQuantity();
+	      	camt+=st.GetCurrentRate(symbol)*quantity;
+	        samt+=HistoryProvider.GetHistoricRate(symbol,pdate)*quantity;
+        }
+        
+       if((samt-camt)>0)
+        {
+        	per = 4;
+        }
+        else
+        {
+        	per=5;
+        }
+        samt = Utils.calculateTax(samt,per);
+        System.out.println("Stock investment Exemption for Armed Force Personnel @  % " +per+ ": -"  +samt);
+        if(tax-samt>0)
+        {
+        	item.setTax(tax-samt);
+        }
+        else
+        {
+        	item.setTax(0);
+        }
+end
+
+rule"History 3 years Rule for seniors"
+salience 2
+	when 
+		 item:ArmedForcePersonnel(mUtin : utin)
+	taxRecord:TaxRecord(  )
+then
+	
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		int lastYear = cal.get(Calendar.YEAR) - 1;
+		boolean latePayment = false;
+		for (int year = lastYear; year > lastYear - 3; year--) {
+			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
+			if (tHistory != null){
+				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
+				if(latePayment) 
+					break;
+			}
+		}
+			
+		if(!latePayment){
+			double Tax= item.getTax();
+			int taxPer = 50;
+			double Remtax = Utils.calculateTax(Tax , taxPer);
+			System.out.println("On-time Payment Deduction @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
+			item.setTax(Tax - Remtax);
+		}
+	
+end
+
+
+rule " For Married Armed Force People"
+salience 1
+when 
+	item:ArmedForcePersonnel(item.getMaritalStatus().toString() == "MARRIED" && maritalFlag==0)
+taxRecord:TaxRecord(  )
+then
+	Student.maritalFlag++;
+	System.out.println("Your spouse Tax details:");
+	double taxCal=0;
+	double totalTax=0,stax=0;
+	double per;
+	int sutin=item.getSpouseUtin();
+	TaxPayer spouse = DBHandler.getInstance().getTaxPayer(sutin);
+	TaxCalculator.triggerRules(spouse);
+	totalTax= (item.getTax()+spouse.getTax());
+	
+	if(spouse instanceof ArmedForcePersonnel)
+	{ 
+		per=50;
+	}
+	else
+	{
+		per=20;
+	}
+	
+	System.out.println("Your Spouse total Tax is :"+spouse.getTax());
+	taxCal=Utils.calculateTax(totalTax,per);
+	System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
+	System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
+end

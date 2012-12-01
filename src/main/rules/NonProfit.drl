@@ -1,20 +1,20 @@
 //created on: 21 Oct, 2012
-/*
 package com.taxhouse
 
-import com.taxhouse.model.*;
-import com.taxhouse.app.*;
-import com.taxhouse.db.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.taxhouse.model.*;
+import com.taxhouse.db.*;
+import com.taxhouse.app.*;
 
 rule "Non Profit Base"
 salience 15 
     when
         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income>20000)
-    then
+    taxRecord:TaxRecord(  )
+then
         double salary = item.getIncome();
         int taxPer = 15;
         double taxCal = Utils.calculateTax(salary,taxPer);
@@ -26,7 +26,8 @@ rule "Non Profit Base rule2"
 salience 15
     when
         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income<=12000)
-    then
+    taxRecord:TaxRecord(  )
+then
         double salary = item.getIncome();
         int taxPer = 2;
         double taxCal = Utils.calculateTax(salary,taxPer);
@@ -38,7 +39,8 @@ rule "Non Profit Base rule3"
 salience 15
     when
         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), income>12000,income<=20000)
-    then
+    taxRecord:TaxRecord(  )
+then
     	int taxPer = 10;
         double salary = item.getIncome();
         double taxCal = Utils.calculateTax(salary,taxPer);
@@ -50,7 +52,8 @@ rule"Women Welfare"
 salience 10
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)    , gender == Employee.Gender.FEMALE)
-	then
+	taxRecord:TaxRecord(  )
+then
 		double Tax= item.getTax();
 		int taxPer = 5;
 		double Remtax = Utils.calculateTax(Tax , taxPer);
@@ -62,7 +65,8 @@ rule"Resident rule"
 salience 14
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
-	then
+	taxRecord:TaxRecord(  )
+then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
 		int taxPer = 5;
@@ -75,7 +79,8 @@ rule"Alien stat"
 salience 11
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
-	then
+	taxRecord:TaxRecord(  )
+then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
 		int taxPer = 5;
@@ -88,7 +93,8 @@ rule"History 3 years Rule"
 salience 9
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), mUtin : utin)
-	then
+	taxRecord:TaxRecord(  )
+then
 	
 		Date now = new Date();
 		Calendar cal = Calendar.getInstance();
@@ -112,4 +118,4 @@ salience 9
 			item.setTax(Tax - Remtax);
 		}
 end	
-*/
+

@@ -54,7 +54,12 @@ public class HistoryProvider {
 		if (cursorDoc.hasNext()) {
 			DBObject dbObj = cursorDoc.next();
 
-			rate = Double.parseDouble((String) dbObj.get("HSTOCKRATE"));
+			try {
+				rate = Double.parseDouble((String) dbObj.get("HSTOCKRATE"));
+				
+			} catch (NumberFormatException e) {
+
+			}
 		}
 
 		return rate;

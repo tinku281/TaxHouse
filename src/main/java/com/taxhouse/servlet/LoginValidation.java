@@ -43,6 +43,7 @@ public class LoginValidation extends HttpServlet {
 				if (taxPayer != null) {
 					RequestDispatcher requestDispatcher = request.getRequestDispatcher("details.jsp");
 					request.setAttribute("taxpayer", taxPayer);
+					httpSession.setAttribute("taxpay", taxPayer);
 					httpSession.setAttribute("role", "taxpayer");
 					requestDispatcher.forward(request, response);
 

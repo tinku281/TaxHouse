@@ -33,8 +33,6 @@ public class Employee extends TaxPayer {
 	private Date jobStartDate;
 
 	private List<Stock> stocks;
-	private List<Exemption> exemptions;
-	private List<Investment> investments;
 
 	private String exMilatary;
 	private double dependantincome;
@@ -138,59 +136,7 @@ public class Employee extends TaxPayer {
 	public void setSpouseUtin(int spouseUtin) {
 		this.spouseUtin = spouseUtin;
 	}
-
-	public List<Exemption> getExemptions() {
-		return exemptions;
-	}
-
-	public void setExemptions(List<Exemption> exemptions) {
-		this.exemptions = exemptions;
-	}
-
-	public boolean hasExemptions() {
-		return (exemptions != null && !exemptions.isEmpty());
-	}
-
-	public List<Investment> getInvestments() {
-		return investments;
-	}
-
-	public void setInvestments(List<Investment> investments) {
-		this.investments = investments;
-	}
-
-	public boolean hasInvestments() {
-		return (investments != null && !investments.isEmpty());
-	}
-
-	public double getDeductibleExemption() {
-		double exmpAmt = 0;
-
-		if (exemptions != null && exemptions.size() > 0) {
-			for (Exemption exemption : exemptions) {
-				if (exemption.getAmount() != 0)
-					exmpAmt += exemption.getAmount();
-
-				if (exemption.getPercentage() != 0)
-					exmpAmt += (exemption.getPercentage() * getIncome()) / 100;
-			}
-		}
-
-		return exmpAmt;
-	}
-
-	public double getDeductibleInvestment() {
-		double invAmt = 0;
-
-		if (investments != null && investments.size() > 0) {
-			for (Investment investment : investments) {
-				invAmt += investment.getApplicablePercent() * investment.getAmount() / 100;
-			}
-		}
-
-		return invAmt;
-	}
-
+	
 	public List<Stock> getStocks() {
 		return stocks;
 	}

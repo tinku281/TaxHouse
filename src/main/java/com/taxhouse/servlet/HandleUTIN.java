@@ -48,6 +48,7 @@ public class HandleUTIN extends HttpServlet
 			{
 				requestDispatcher = request.getRequestDispatcher( "details.jsp" );
 				request.setAttribute( "taxpayer", taxPayer );
+				httpSession.setAttribute("taxpay", taxPayer);
 				requestDispatcher.forward( request, response );
 
 			}

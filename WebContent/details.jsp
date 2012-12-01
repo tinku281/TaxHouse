@@ -18,6 +18,15 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Details</title>
+<script type="text/javascript">
+
+function calculateTax() {
+    
+	document.location.href='${pageContext.request.contextPath}/calculateTax.do';
+
+}
+
+</script>
 <link rel="stylesheet" type="text/css" href="main.css" />
 </head>
 <body>
@@ -95,7 +104,7 @@
 			</div>
 			<div class="display_block">
 				<p class="leftfloat">Income</p>
-				<p class="leftfloat values">$ <%=employee.getIncome()%></p>
+				<p class="leftfloat values"><%="$ " +employee.getIncome()%></p>
 			</div>
 			<%
 				}
@@ -136,7 +145,7 @@
 			%>
 			<div class="display_block">
 				<p class="leftfloat">Fee Waiver Amount</p>
-				<p class="leftfloat values">$ <%=student.getFeeWaiverAmt()%></p>
+				<p class="leftfloat values"><%="$ " +student.getFeeWaiverAmt()%></p>
 			</div>
 
 			<%
@@ -158,7 +167,7 @@
 				<p class="leftfloat">
 					Income Amount
 					<%=index + 1%></p>
-				<p class="leftfloat values">$ <%=incomeList.get(index).getAmount()%></p>
+				<p class="leftfloat values"><%="$ " +incomeList.get(index).getAmount()%></p>
 			</div>
 			<%
 				}
@@ -202,8 +211,10 @@
 			%>
 
 		</div>
-		<input class=" center_div button_blue display_block" type="button"
-			value="Calculate Tax" />
+		<form method="POST" action="calculateTax.do"/>
+		<input class=" center_div button_blue display_block" type="submit"
+			value="Calculate Tax"  />
+		</form>	
 	</div>
 </body>
 </html>

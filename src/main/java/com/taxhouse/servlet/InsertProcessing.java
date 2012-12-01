@@ -42,7 +42,7 @@ public class InsertProcessing extends HttpServlet
 			requestDispatcher.forward( request, response );
 			return;
 		}
-		
+				
 		httpSession.setAttribute( "firstname", request.getParameter( "firstname" ));
 		httpSession.setAttribute( "lastname", request.getParameter( "lastname" ));
 		httpSession.setAttribute( "password", request.getParameter( "tp_password" ));

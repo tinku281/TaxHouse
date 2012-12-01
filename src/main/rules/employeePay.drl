@@ -1,15 +1,16 @@
 //created on: 21 Oct, 2012
-/*package com.taxhouse
+package com.taxhouse
 
 import com.taxhouse.model.*;
-import com.taxhouse.app.*;
 import com.taxhouse.db.*;
+import com.taxhouse.app.*;
 
 rule "Rule:1"
 salience 15
     when
         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
-    then
+    taxRecord:TaxRecord(  )
+then
         double salary = item.getIncome();
         double taxCal = 0;
         int taxPer = 15;
@@ -39,7 +40,8 @@ rule "for Profit_private"
     salience 14
     when
          item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
-    then
+    taxRecord:TaxRecord(  )
+then
         double tax = item.getTax();
        	double PPCaltax=0;
         int taxPer = 10;
@@ -53,7 +55,8 @@ rule"Women Welfare"
 salience 9
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
-	then
+	taxRecord:TaxRecord(  )
+then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
 		int taxPer = 5;
@@ -66,7 +69,8 @@ rule"Residency status"
 salience 12
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
-	then
+	taxRecord:TaxRecord(  )
+then
 		double Tax= item.getTax();
 		int taxPer = 5;
 		double Remtax = Utils.calculateTax(Tax , taxPer);
@@ -78,7 +82,8 @@ rule"Alien status"
 salience 11
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
-	then
+	taxRecord:TaxRecord(  )
+then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
 		int taxPer = 5;
@@ -86,4 +91,7 @@ salience 11
 		item.setTax(Tax + Remtax);
 		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);	
 end	
-*/
+
+
+
+

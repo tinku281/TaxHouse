@@ -16,39 +16,43 @@ import org.w3c.dom.NodeList;
 public class StockProvider {
 
 	public static double GetCurrentRate(String symbol) throws Exception {
+		String dayshigh = null, dayslow = null;
 		String request = "http://query.yahooapis.com/v1/public/yql?q=select%20DaysHigh%2CDaysLow%20from%20yahoo.finance.quoteslist%20where%20symbol%3D"
 				+ "'" + symbol + "'" + "&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
 
-		String dayshigh = null, dayslow = null;
 		HttpClient client = new HttpClient();
 		GetMethod method = new GetMethod(request);
+
 		int statusCode = client.executeMethod(method);
+
 		if (statusCode != HttpStatus.SC_OK) {
 			System.err.println("Method failed: " + method.getStatusLine());
+
 		} else {
-			InputStream rstream = null;
-			rstream = method.getResponseBodyAsStream();
+			InputStream rstream = method.getResponseBodyAsStream();
 			// Process response
 			Document response = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(rstream);
 
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xPath = factory.newXPath();
+
 			// Get all search Result nodes
 			NodeList nodes = (NodeList) xPath.evaluate("query/results/quote", response, XPathConstants.NODESET);
-			int nodeCount = nodes.getLength();
-			// iterate over search Result nodes
 
-			for (int i = 0; i < nodeCount; i++) {
+			// iterate over search Result nodes
+			for (int i = 0; i < nodes.getLength(); i++) {
 				// Get each xpath expression as a string
 				dayshigh = (String) xPath.evaluate("DaysHigh", nodes.item(i), XPathConstants.STRING);
 				dayslow = (String) xPath.evaluate("DaysLow", nodes.item(i), XPathConstants.STRING);
-
-				// System.out.println("Rate: " + rate);
-				System.out.println("-----------");
 			}
-
 		}
-		return (Double.parseDouble(dayshigh) + Double.parseDouble(dayslow)) / 2;
+
+		try {
+			return (Double.parseDouble(dayshigh) + Double.parseDouble(dayslow)) / 2;
+
+		} catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 
 	public static double GetHistoricRate(String symbol, String date) throws Exception {
@@ -60,24 +64,28 @@ public class StockProvider {
 				+ date
 				+ "%22&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
 		String rate = null;
+		
 		HttpClient client = new HttpClient();
 		GetMethod method = new GetMethod(request);
+		
 		int statusCode = client.executeMethod(method);
 		if (statusCode != HttpStatus.SC_OK) {
 			System.err.println("Method failed: " + method.getStatusLine());
+			
 		} else {
 			InputStream rstream = null;
 			rstream = method.getResponseBodyAsStream();
+			
 			// Process response
 			Document response = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(rstream);
-
 			XPathFactory factory = XPathFactory.newInstance();
 			XPath xPath = factory.newXPath();
+			
 			// Get all search Result nodes
 			NodeList nodes = (NodeList) xPath.evaluate("query/results/quote", response, XPathConstants.NODESET);
 			int nodeCount = nodes.getLength();
+			
 			// iterate over search Result nodes
-
 			for (int i = 0; i < nodeCount; i++) {
 				// Get each xpath expression as a string
 				rate = (String) xPath.evaluate("Close", nodes.item(i), XPathConstants.STRING);
@@ -85,7 +93,13 @@ public class StockProvider {
 			}
 
 		}
-		return Double.parseDouble(rate);
+
+		try {
+			return Double.parseDouble(rate);
+
+		} catch (NumberFormatException e) {
+			return 0;
+		}
 	}
 
 }

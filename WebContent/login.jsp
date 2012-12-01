@@ -72,23 +72,9 @@ function validate() {
 		</div>
 		<input class=" center_div button_blue display_block margin10"  type = "button" value="Login" onClick="validate()"/>
 	</form>
-</div>
-
-<!-- 
-	<form name="loginForm" method="POST" action="login.do">
-		UTIN/AdminID:<input type="text" name="utin" size="15" /><br />
-		Password:<input type="password" name="passwd" size="15" /><br />
-		Role: <input type="radio" checked name="role" value="taxpayer">Taxpayer
-		<input type="radio" name="role" value="admin">Admin
-
-		<div align="center">
-			<p>
-				<input type="button" value="Login" onClick="validate()" />
-			</p>
-		</div>
-	</form>
- -->	
 	<br />
-	<div class="margin10" style="color:#FF0000"><%=error%></div>
+	<div align="center" style="color:#FF0000"><%=error%></div>
+</div>
+	
 </body>
 </html>

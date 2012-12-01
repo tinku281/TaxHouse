@@ -1,0 +1,363 @@
+//created on: Nov 9, 2012
+package com.taxhouse;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import com.taxhouse.model.*;
+import com.taxhouse.db.*;
+import com.taxhouse.app.*;
+import com.taxhouse.servlet.TaxCalculator;
+
+rule "Base Federal tax rule"
+salience 15 
+    when
+        item:SeniorCitizen(item.getIncome()>9350)
+        
+    taxRecord:TaxRecord(  )
+then
+        double taxCal=0;
+        double taxPer;
+        double amt = item.getIncome();
+        Date dob= item.getDateOfBirth();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(item.getDateOfBirth());
+        int syear=cal.get(Calendar.YEAR);
+        
+        if((cyear-syear)>=70)
+        {
+        taxPer=3.5;
+        }
+        else
+        {
+        taxPer=4.5;
+        }
+        taxCal=Utils.calculateTax(amt,taxPer);
+        System.out.println("Base Federal tax for senior citizens @  % "+taxPer+" :"+taxCal);
+        item.setTax(taxCal);
+end
+
+rule "Base State tax rule"
+salience 14
+    when
+        item:SeniorCitizen(item.getIncome()>8000)
+        
+    taxRecord:TaxRecord(  )
+then
+        double taxCal=0;
+        double taxPer;
+        double amt = item.getIncome();
+        Date dob= item.getDateOfBirth();
+        Date now = new Date();
+        Calendar cal = Calendar.getInstance();
+        int cyear=cal.get(Calendar.YEAR);
+        cal.setTime(item.getDateOfBirth());
+        int syear=cal.get(Calendar.YEAR);
+        
+        if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
+        {
+        
+        	if((cyear-syear)>=70)
+        	{
+        		taxPer=3.5;
+        	}
+               
+        	else
+        	{
+        		taxPer=4.5;
+        	}
+        }	 
+        else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") 
+        {
+          if((cyear-syear)>=70)
+        	{
+        		taxPer=3.7;
+ 			}    
+          else
+        	{
+        		taxPer=4.2;
+        	}
+         }
+         else
+         {
+          if((cyear-syear)>=70)
+        	{
+        		taxPer=3.9;
+        	}
+         else
+        	{
+        		taxPer=4.9;
+        	}
+         }
+     
+        taxCal=Utils.calculateTax(amt,taxPer);
+        System.out.println("Base State tax for senior citizens @  % "+taxPer+" :"+taxCal);
+        item.setTax(item.getTax()+taxCal);
+end
+
+rule "ExMilatary Exemption"
+salience 13
+when
+item:SeniorCitizen()
+taxRecord:TaxRecord(  )
+then
+double exmpPer=0;
+double taxCal=0;
+if(item.getExMilatary() == "Y")
+{
+exmpPer= 20;
+taxCal= Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Ex- Milatary Exemption : @ "+exmpPer+ " % -"+taxCal);
+item.setTax(item.getTax()-taxCal);
+}
+end
+
+
+rule "Income Source is PF"
+salience 12
+when
+    item:SeniorCitizen()
+    income:SeniorCitizen.Income(source== "PF") from item.getIncomes()
+taxRecord:TaxRecord(  )
+then
+double taxCal=0;
+double exmpPer=10;
+taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Exemption from Pension: % "+exmpPer+" : "+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+
+rule "Income Source is annuity"
+salience 13
+when
+    item:SeniorCitizen()
+    income:SeniorCitizen.Income(source== "annuity") from item.getIncomes()
+taxRecord:TaxRecord(  )
+then
+double taxCal=0;
+double exmpPer=10;
+taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Exemption from annuity: % "+exmpPer+" : "+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+rule "Income Source is from otherstate"
+salience 12
+when
+    item:SeniorCitizen()
+    income:SeniorCitizen.Income(source== "otherstate") from item.getIncomes()
+taxRecord:TaxRecord(  )
+then
+double taxCal=0;
+double exmpPer=10;
+taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Exemption from otherstate: % "+exmpPer+" : "+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+
+rule "Based on Number of dependants"
+salience 11
+when item:SeniorCitizen(noOfDependants > 3)
+taxRecord:TaxRecord(  )
+then
+double exmpPer=item.getNoOfDependants()/2;
+double taxCal=0;
+taxCal= Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Exemption for Dependants : %"+exmpPer+ " : -"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+rule "Widow"
+salience 10
+when item:SeniorCitizen(maritalStatus.toString() == "WIDOW")
+taxRecord:TaxRecord(  )
+then
+double per=0.5;
+double taxCal=0;
+taxCal= Utils.calculateTax(item.getTax(),per);
+System.out.println("Widow Senior Citizen Exemption : % " +per+ ": - "+taxCal);
+item.setTax(item.getTax()-taxCal); 
+end
+
+rule "Having invested in Health Insurance"
+salience 9
+when 
+item:SeniorCitizen()
+investment:Investment(id==22) from item.getInvestments() 
+taxRecord:TaxRecord(  )
+then
+double exmpPer=investment.getApplicablePercent();
+double amt=investment.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Investment Exemption for Health insurance @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+rule "For Senior Citizens with physical disability"
+salience 8
+when
+item:SeniorCitizen()
+exemption:Exemption(id==4) from item.getExemptions() 
+taxRecord:TaxRecord(  )
+then
+double exmpPer=exemption.getPercentage();
+double amt=exemption.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Physical Disability Exemption @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+
+rule"History 3 years Rule for seniors"
+salience 7
+	when 
+		 item:SeniorCitizen(mUtin : utin)
+	taxRecord:TaxRecord(  )
+then
+	
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		int lastYear = cal.get(Calendar.YEAR) - 1;
+		boolean latePayment = false;
+		for (int year = lastYear; year > lastYear - 3; year--) {
+			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
+			if (tHistory != null){
+				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
+				if(latePayment) 
+					break;
+			}
+		}
+			
+		if(!latePayment){
+			double Tax= item.getTax();
+			int taxPer = 20;
+			double Remtax = Utils.calculateTax(Tax , taxPer);
+			System.out.println("On-time Payment Deduction @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
+			item.setTax(Tax - Remtax);
+		}
+	
+end
+
+
+rule "For NonResidents"
+salience 6 
+when item:SeniorCitizen(item.getResidencyStatus().toString() == "PART_TIME")
+taxRecord:TaxRecord(  )
+then
+double extra,taxCal;
+double per;
+if(item.maritalFlag!=0)
+{
+extra=250;
+per=0.6;
+}
+else
+{
+extra=300;
+per=0.8;
+}
+taxCal=Utils.calculateTax(item.getTax(),per);
+
+System.out.println("Non Resident Tax for Senior Citizens:" +(extra+taxCal));
+item.setTax(item.getTax()+extra+taxCal);
+
+end
+
+rule"Alien stat"
+salience 5
+	when 
+		 item:SeniorCitizen(nationality != Employee.Nationality.USA)
+	taxRecord:TaxRecord(  )
+then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);
+		item.setTax(Tax + Remtax);
+end	
+
+
+rule "Seniors with Stocks"
+salience 4
+ when
+         item:SeniorCitizen(item.hasStocks())
+    taxRecord:TaxRecord(  )
+then
+        int per = 0;
+        double tax = item.getTax();
+        List<Stock> s=item.getStocks();
+        StockProvider st= new StockProvider();
+        double samt=0;
+        double camt=0;
+        int quantity=0;
+        String pdate,symbol;
+        for(Stock stock:s)
+        {
+        pdate=stock.getPurchaseDate().toString();
+        symbol=stock.getSymbol();
+        quantity=stock.getQuantity();
+        camt+=st.GetCurrentRate(symbol)*quantity;
+        samt+=HistoryProvider.GetHistoricRate(symbol,pdate)*quantity;
+        }
+        
+       if((samt-camt)>0)
+        {
+        per = 4;
+        }
+        else
+        {
+        per=5;
+        }
+        samt = Utils.calculateTax(samt,per);
+        System.out.println("Stock investment Exemption for Senior citizens @  % " +per+ ": -"  +samt);
+        if(tax-samt>0)
+        {
+        item.setTax(tax-samt);
+        }
+        else
+        {
+        item.setTax(0);
+        }
+end
+
+
+rule "For Married Senior citizens"
+salience 3
+when item:SeniorCitizen(item.getMaritalStatus().toString() == "MARRIED" && maritalFlag==0)
+taxRecord:TaxRecord(  )
+then
+SeniorCitizen.maritalFlag++;
+System.out.println("Your spouse Tax details:");
+double taxCal=0;
+double totalTax=0,stax=0;
+double per;
+int sutin=item.getSpouseUtin();
+TaxPayer spouse = DBHandler.getInstance().getTaxPayer(sutin);
+TaxCalculator.triggerRules(spouse);
+totalTax= (item.getTax()+spouse.getTax());
+if(spouse instanceof ArmedForcePersonnel)
+{
+per=50;
+}
+else if(spouse instanceof SeniorCitizen){
+per=30;
+}
+else{
+per=10;
+}
+System.out.println("Your Spouse total Tax is :"+spouse.getTax());
+taxCal=Utils.calculateTax(totalTax,per);
+System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
+System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
+end
+

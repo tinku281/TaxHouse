@@ -64,4 +64,14 @@
     <servlet-name>EmployeeSubtypeProcessing</servlet-name>
     <url-pattern>/EmployeeSubtypeProcessing.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>TaxCalculator</display-name>
+    <servlet-name>TaxCalculator</servlet-name>
+    <servlet-class>com.taxhouse.servlet.TaxCalculator</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>TaxCalculator</servlet-name>
+    <url-pattern>/calculateTax.do</url-pattern>
+  </servlet-mapping>
 </web-app>

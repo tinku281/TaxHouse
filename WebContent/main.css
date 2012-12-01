@@ -46,15 +46,23 @@ body
 	display:inline;
 	clear:none;
 	color:#555;
-	font-size:16px;
+	font-size:14px;
 	font-weight: bold;
 	margin-left:30px;
+	position:relative;
 }
 
 .labels .values
 {
 	position:absolute;
-	left:200px;
+	left:250px;
+	color:#999;
+}
+
+.labels .values2
+{
+	position:absolute;
+	right:20px;
 	color:#999;
 }
 
@@ -64,7 +72,7 @@ body
 	border:1px solid #8fdeff;
 	position:relative;
 	top:30px;
-	padding-bottom:10px;
+	padding-bottom:50px;
 	
 }
 
@@ -97,6 +105,11 @@ body
 {
 	float:right;
 }
+
+.fullwidth
+{
+	width:100%;
+}
 .margin10
 {
 	margin:10px auto; 
@@ -119,6 +132,17 @@ body
 	height:20px;
 	padding:5px;
 	width:200px;
+	margin:10px;
+	color:#AAA;
+	display:block;
+	clear:right;
+}
+
+.label4
+{
+	height:50px;
+	padding:5px;
+	width:100px;
 	margin:10px;
 	color:#AAA;
 	display:block;
