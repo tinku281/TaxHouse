@@ -36,6 +36,37 @@ public class Employee extends TaxPayer {
 	private List<Exemption> exemptions;
 	private List<Investment> investments;
 
+	private String exMilatary;
+	private double dependantincome;
+	
+	public static int maritalFlag;
+
+	public String getExMilatary() {
+		return exMilatary;
+	}
+
+	public void setExMilatary(String exMilatary) {
+		this.exMilatary = exMilatary;
+	}
+
+	public double getDependantincome() {
+		return dependantincome;
+	}
+
+	public void setDependantincome(double dependantincome) {
+		this.dependantincome = dependantincome;
+	}
+
+	public static int getMaritalFlag() {
+		return maritalFlag;
+	}
+
+	public static void setMaritalFlag(int maritalFlag) {
+		Employee.maritalFlag = maritalFlag;
+
+	}
+
+	
 	public Date getDateOfBirth() {
 		return dateOfBirth;
 	}

@@ -20,13 +20,25 @@ public class ArmedForcePersonnel extends Employee {
 		private int id;
 		private String name;
 		private Date startDate, endDate;
+		private String combatZone;
 
-		public SpecialTask(int id, String name, Date startDate, Date endDate) {
+		public SpecialTask(int id, String name, Date startDate, Date endDate,
+				String combatZone) {
 			super();
 			this.id = id;
 			this.name = name;
 			this.startDate = startDate;
 			this.endDate = endDate;
+			this.combatZone = combatZone;
+
+		}
+
+		public String getCombatZone() {
+			return combatZone;
+		}
+
+		public void setCombatZone(String combatZone) {
+			this.combatZone = combatZone;
 		}
 
 		public int getId() {

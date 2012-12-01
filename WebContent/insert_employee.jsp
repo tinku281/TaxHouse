@@ -51,7 +51,7 @@
 		
 		var labelExmpPer =document.createElement("label");
 		labelExmpPer.setAttribute("class","label1");
-		labelExmpPer.innerHTML="Exemption Per";
+		
 		
 		var labelExmpPerValue = document.createElement("input");
 		labelExmpPerValue.type="text";
@@ -72,6 +72,10 @@
 		divExmpType.value=document.insertEmployee.exmp_type.value;
 		
 		document.getElementById('exemp_details').appendChild(divExmpAmount).appendChild(divExmpPer).appendChild(divExmpType);
+		if(document.insertEmployee.exmp_type.value == "1")
+			labelExmpPer.innerHTML="Exemption Amount";
+		else
+			labelExmpPer.innerHTML="Exemption Percentage";
 		
 		return true;
 		
