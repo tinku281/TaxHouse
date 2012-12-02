@@ -12,8 +12,25 @@ public class Organization extends TaxPayer {
 	private double turnover, taxPer, sharedTax;
 
 	private HashMap<Integer, Double> shares;
-	public static int hasShareFlag = 0;
-	public static int isSharedFlag = 0;
+	private boolean SharedExecuted=false;
+	private boolean hasSharesExecuted=false;
+
+	public boolean isSharedExecuted() {
+		return SharedExecuted;
+	}
+
+	public void setSharedExecuted(boolean isShared) {
+		this.SharedExecuted = isShared;
+	}
+
+	public boolean isHasSharesExecuted() {
+		return hasSharesExecuted;
+	}
+
+	public void setHasSharesExecuted(boolean hasShares) {
+		this.hasSharesExecuted = hasShares;
+	}
+
 
 	public double getSharedTax() {
 		return sharedTax;
