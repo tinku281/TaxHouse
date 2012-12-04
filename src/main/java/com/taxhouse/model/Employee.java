@@ -37,6 +37,8 @@ public class Employee extends TaxPayer {
 	private String exMilatary;
 	private double dependantincome;
 	private boolean marriedExecuted = false;
+	
+	private int slabId;
 
 	public boolean isMarriedExecuted() {
 		return marriedExecuted;
@@ -144,6 +146,14 @@ public class Employee extends TaxPayer {
 
 	public boolean hasStocks() {
 		return (stocks != null && !stocks.isEmpty());
+	}
+
+	public int getSlabId() {
+		return slabId;
+	}
+
+	public void setSlabId(int slabId) {
+		this.slabId = slabId;
 	}
 
 }

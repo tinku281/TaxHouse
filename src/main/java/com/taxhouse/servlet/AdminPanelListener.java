@@ -12,57 +12,47 @@ import javax.servlet.http.HttpSession;
 /**
  * Servlet implementation class AdminPanelListener
  */
-public class AdminPanelListener extends HttpServlet
-{
+public class AdminPanelListener extends HttpServlet {
 
-	private static final long	serialVersionUID	= 1L;
+	private static final long serialVersionUID = 1L;
 
-	public AdminPanelListener()
-	{
-
+	public AdminPanelListener() {
 		super();
 	}
 
-	protected void doGet( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException
-	{
+	protected void doGet(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
 		HttpSession httpSession = request.getSession();
 		RequestDispatcher requestDispatcher;
-		
-		if(httpSession.isNew())
-		{
+
+		if (httpSession.isNew()) {
 			httpSession.invalidate();
-			requestDispatcher  = request.getRequestDispatcher( "login.jsp" );
-			requestDispatcher.forward( request, response );
+			requestDispatcher = request.getRequestDispatcher("login.jsp");
+			requestDispatcher.forward(request, response);
 			return;
 		}
-		
-		String buttonLabel = request.getParameter( "panel_button" );
-		
-		if(buttonLabel.equals( "Calculate Tax" ))
-		{
-			httpSession.setAttribute( "functionType", "1" );
-			requestDispatcher = request.getRequestDispatcher( "enter_utin.jsp" );
-			requestDispatcher.forward( request, response );
+
+		String buttonLabel = request.getParameter("panel_button");
+
+		if (buttonLabel.equals("Calculate Tax")) {
+			httpSession.setAttribute("functionType", "1");
+			requestDispatcher = request.getRequestDispatcher("enter_utin.jsp");
+			requestDispatcher.forward(request, response);
+		} else if (buttonLabel.equals("Insert Tax Payer")) {
+			httpSession.setAttribute("taxpayee", null);
+			requestDispatcher = request
+					.getRequestDispatcher("insert_tax_payer.jsp");
+			requestDispatcher.forward(request, response);
+		} else if (buttonLabel.equals("Delete Tax Payer")) {
+			httpSession.setAttribute("functionType", "2");
+			requestDispatcher = request.getRequestDispatcher("enter_utin.jsp");
+			requestDispatcher.forward(request, response);
+		} else {
+			httpSession.setAttribute("functionType", "3");
+			requestDispatcher = request.getRequestDispatcher("enter_utin.jsp");
+			requestDispatcher.forward(request, response);
 		}
-		else if (buttonLabel.equals( "Insert Tax Payer" ))
-		{
-			httpSession.setAttribute( "taxpayee", null );
-			requestDispatcher = request.getRequestDispatcher( "insert_tax_payer.jsp" );
-			requestDispatcher.forward( request, response );
-		}
-		else if(buttonLabel.equals( "Delete Tax Payer" ))
-		{
-			httpSession.setAttribute( "functionType", "2" );
-			requestDispatcher = request.getRequestDispatcher( "enter_utin.jsp" );
-			requestDispatcher.forward( request, response );
-		}
-		else
-		{
-			httpSession.setAttribute( "functionType", "3" );
-			requestDispatcher = request.getRequestDispatcher( "enter_utin.jsp" );
-			requestDispatcher.forward( request, response );
-		}
-		
+
 	}
 
 }
