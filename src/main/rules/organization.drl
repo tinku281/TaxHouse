@@ -1966,11 +1966,11 @@ item:Organization(item.isSharedFlag!=-1)
 taxRecord:TaxRecord(  )
 then
 double percentage=DBHandler.getInstance().getSharePercents(item.getUtin());
-double actualtax= item.getTax()-item.getTax()*percentage/100;
+double actualtax= item.getTax()*percentage/100;
 System.out.println("-------------------------------------");
 System.out.println("Total tax for "+item.getUtin()+" organization is "+item.getTax());
 System.out.println("Your actual tax according to your "+percentage+" % share in" +item.getUtin()+" is :" +actualtax);
-item.setTax(actualtax+item.getSharedTax());
+item.setTax(actualtax);
 end
 
 
@@ -1999,7 +1999,7 @@ for(Map.Entry<Integer,Double> entry : shares.entrySet())
 	ctax = Utils.calculateTax(company.getTax(),sharePer);
 	System.out.println("Tax percentage for share with "+cutin+ " : " +ctax);
 	System.out.println("----------------------------------");
-	item.setSharedTax(ctax);
+	item.setSharedTax(item.getSharedTax()+ctax);
 	//item.setTax(item.getTax()+ctax);
 	}
 }

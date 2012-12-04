@@ -109,7 +109,7 @@ when
 		taxCal=Utils.calculateTax(item.getIncome(),Per);
 		System.out.println("Only three tax for you brave soldier :-)"+Per+ " % : "+taxCal);
 		item.setTax(taxCal);
-		drools.halt();
+		drools.halt(); 
  		}
  end
  
@@ -507,4 +507,7 @@ taxCal=Utils.calculateTax(totalTax,per);
 System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
 System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
 end 
+<<<<<<< HEAD
 >>>>>>> ef25382accc7878ae739b2642934dad4ccb447bc
+=======
+>>>>>>> 1085e1e1a38e91b9e0ec32824b607a0113bccf1e
