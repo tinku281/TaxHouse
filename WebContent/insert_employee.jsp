@@ -265,9 +265,11 @@
 				<select name="exmp_type" class="drop rightfloat">
 					<option value="1">Amount</option>
 					<option value="2">Percentage</option>
-				</select></div>
+				</select>
+			</div>
+			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
 	<div id="exemp_details"></div>	
-			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>
+			
 	
 	<div class="header">
 		<h2>Investment Details</h2>

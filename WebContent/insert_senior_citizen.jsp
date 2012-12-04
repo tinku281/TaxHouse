@@ -103,7 +103,7 @@ function validate()
 
 <div class="subheader width500" >
 	<div class="header">
-		<h2>Enter Student Details</h2>
+		<h2>Enter Senior Citizen Details</h2>
 	</div>
 	<form name="insertScForm" method="POST" action="EmployeeSubtypeProcessing.do" >
 			<div class="formrow">
@@ -137,10 +137,11 @@ function validate()
 				<label class="label1 ">Income Amount</label>
 				<input class="textbox2 rightfloat" type="text" vlaue="Enter Amount" name="income_amount" onFocus="clearText()" onBlur="setText()"/>
 			</div>
-			<div id="income_details"></div>	
 			<div class="formrow ">
 				<input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Income" onClick="addIncomeDetails()"/>
 			</div>
+			<div id="income_details"></div>	
+			
 			<input type="hidden" name="count" value="0" />
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 	</form>

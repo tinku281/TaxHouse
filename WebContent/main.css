@@ -170,6 +170,16 @@ body
 	display:block;
 	clear:right;
 }
+
+.drop1
+{
+	border:1px solid #8fdeff;
+	height:30px;
+	padding:5px;
+	margin:10px;
+	color:#AAA;
+	display:block;
+}
 .formrow
 {
 	display:block;
