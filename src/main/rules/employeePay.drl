@@ -1,97 +1,390 @@
-//created on: 21 Oct, 2012
-package com.taxhouse
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
+import java.util.List;
 
 import com.taxhouse.model.*;
 import com.taxhouse.db.*;
 import com.taxhouse.app.*;
+import com.taxhouse.model.TaxRecord.Entry;
+import com.taxhouse.servlet.TaxCalculator;
 
-rule "Rule:1"
-salience 15
+
+//tested
+rule "Base Federal rule for Profit private/public Employees"
+salience 20
     when
         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
-    taxRecord:TaxRecord(  )
-then
+    then
         double salary = item.getIncome();
         double taxCal = 0;
-        int taxPer = 15;
-        
-        if(item.getIncome()<=50000)
+        double taxPer = 0;
+        int slab= DBHandler.getInstance().getSlabId(item.getIncome());
+        if(slab==1)
         {
-        	taxPer = 5;
+        	taxPer = 20;
          taxCal = Utils.calculateTax(salary,taxPer);
-          System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
-        }
-        else if(item.getIncome()>50000 && item.getIncome()<100000 )
+                  }
+        else if(slab == 2)
         {
+	         taxPer=22;
 	         taxCal = Utils.calculateTax(salary, taxPer);
-	         System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
-        }
-        else
+	    }
+        else if(slab ==3)
         {
+	         taxPer=24;
 	         taxCal = Utils.calculateTax(salary,taxPer);
-	         System.out.println("Base Tax @ " + taxPer + "% : " +taxCal);
+	
         }
-        
+        else{
+        	taxPer=35;
+            taxCal = Utils.calculateTax(salary,taxPer);
+
+            }
+        System.out.println("Base Federal Tax for Profit Employees @ " + taxPer + "% : " +taxCal);
         item.setTax(taxCal);
 end
 
-rule "for Profit_private"
-    //include attributes such as "salience" here...
-    salience 14
+//tested
+rule "Base State rule for Profit private/public Employees"
+salience 19
     when
-         item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
-    taxRecord:TaxRecord(  )
-then
-        double tax = item.getTax();
-       	double PPCaltax=0;
-        int taxPer = 10;
-        PPCaltax = Utils.calculateTax(tax,taxPer);
-        System.out.println("Private Organization Tax @ " + taxPer + "% : " +PPCaltax);
-        item.setTax(PPCaltax + tax);
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    then
+        double salary = item.getIncome();
+        double taxCal = 0;
+        double taxPer = 0;
+        int slab= DBHandler.getInstance().getSlabId(item.getIncome());
+
+ if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
+        if(slab==1){
+         taxPer = 15.9;
+         }
+         else{
+         taxPer=16.9;
+         }
+    }
+   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
+         if(slab==1){
+         taxPer = 17.5;
+    	}
+    	else{
+    	taxPer=18.5;
+    	}
+     }
+    
+    else{
+        if(slab==1){
+         taxPer=19.0;
+         }
+         else{
+         taxPer=20;
+         	}
+        }
+double taxcal = Utils.calculateTax(salary,taxPer);
+System.out.println("Base State Tax for profit organization employees: @ " + taxPer + "% : " +taxcal);
+item.setTax(item.getTax()+taxcal);
+ end   
+
+//tested
+rule "SSN & Medicare"
+salience 18
+    when
+        item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    then
+    double income=item.getIncome();
+	int taxPer = 13;
+    double taxCal = Utils.calculateTax(income,taxPer);
+    System.out.println("SSN and Medicare Tax for profit Employees @ " + taxPer + "% : " +taxCal);
+    item.setTax(item.getTax()+taxCal);
 end
 
 
-rule"Women Welfare"
-salience 9
+//tested
+rule "MARRIED STATUS SINGLE"
+salience 17
 	when 
-		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
-	taxRecord:TaxRecord(  )
-then
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+		 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), 
+		 maritalStatus == Employee.MaritalStatus.SINGLE)
+	then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
-		int taxPer = 5;
+		int taxPer = 2;
 		double Remtax = Utils.calculateTax(Tax , taxPer);
-		System.out.println("Women Welfare Deduction @ " + taxPer + "% : -" + Remtax);
-		item.setTax(Tax - Remtax);	
-end	
+		item.setTax(Tax + Remtax);
+		System.out.println("SINGLE EMPLOYEE TAX FOR PROFIT EMPLOYEES " + taxPer + "% : " +Remtax);	
+end
 
-rule"Residency status"
-salience 12
-	when 
-		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
-	taxRecord:TaxRecord(  )
-then
-		double Tax= item.getTax();
-		int taxPer = 5;
-		double Remtax = Utils.calculateTax(Tax , taxPer);
-		item.setTax(Tax - Remtax);
-		System.out.println("Non-Resident Tax @ " + taxPer + "% : " +Remtax);	
-end	
-
-rule"Alien status"
-salience 11
+//tested
+rule "Alien status"
+salience 16
 	when 
 		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
-	taxRecord:TaxRecord(  )
-then
+	then
 		double salary = item.getIncome();
 		double Tax= item.getTax();
 		int taxPer = 5;
 		double Remtax = Utils.calculateTax(Tax , taxPer);
 		item.setTax(Tax + Remtax);
-		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);	
+		System.out.println("Alien Tax for profit employees@ " + taxPer + "% : " +Remtax);	
+end
+
+//tested
+rule "Women Welfare"
+salience 15
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)    || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
+	then
+		double salary = item.getIncome();
+		double Tax= item.getTax();
+		int taxPer = 6;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		System.out.println("Women Welfare Deduction for profit employees @ " + taxPer + "% : -" + Remtax);
+		item.setTax(Tax - Remtax);	
 end	
 
+//tested
+rule "Residency status"
+salience 14
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
+	then
+		double Tax= item.getTax();
+		int taxPer = 5;
+		double Remtax = Utils.calculateTax(Tax , taxPer);
+		item.setTax(Tax + Remtax);
+		System.out.println("Non-Resident Tax for profit employees @ " + taxPer + "% : " +Remtax);	
+end	
+//tested	
+rule "WIDOW ALLOWANCE MALE"
+salience 13
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+		 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), 
+		 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.MALE)
+	then
+        double Tax = item.getTax();
+        int taxPer = 5;
+        double Remtax = Utils.calculateTax(Tax,taxPer);
+        System.out.println("Martial Status Tax allowance for Male Widow profit employees @ " + taxPer + "% : -" +Remtax);
+        item.setTax(Tax - Remtax);
+end
 
+//tested
+rule "WIDOW ALLOWANCE FEMALE"
+salience 13
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) 
+		 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), 
+		 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.FEMALE)
+	then
+        double Tax = item.getTax();
+        int taxPer = 8;
+        double Remtax = Utils.calculateTax(Tax,taxPer);
+        System.out.println("Martial Status Tax allowance for Female Widow profit employees @ " + taxPer + "% : -" +Remtax);
+        item.setTax(Tax - Remtax);
+end
+
+//tested
+rule "Dependents Exemption"
+salience 12
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+		 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC)
+		 &&(noOfDependants>3),income<40000)
+	then	
+		double Tax = item.getTax();
+        int taxPer = 10;
+        double Remtax = Utils.calculateTax(Tax,taxPer);
+        System.out.println("Dependents Allowance for profit employees  @ " + taxPer + "% : -" +Remtax);
+        item.setTax(Tax - Remtax);
+end
+
+rule "ExMilatary Exemption"
+salience 11
+when 
+item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+|| organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+then
+double exmpPer=0;
+double taxCal=0;
+if(item.getExMilatary() == "Y")
+{
+exmpPer= 10;
+taxCal= Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Ex- Milatary Exemption for profit employees : @ "+exmpPer+ " % -"+taxCal);
+item.setTax(item.getTax()-taxCal);
+}
+end
+
+//tested
+rule "Having invested in Health Insurance"
+salience 10
+when 
+item:Employee()
+investment:Investment(id==22) from item.getInvestments() 
+then
+double exmpPer=investment.getApplicablePercent();
+double amt=investment.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Investment Exemption for Health insurance @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+
+
+rule "For Employees Citizens with physical disability"
+salience 9
+when
+item:Employee()
+exemption:Exemption(id==4) from item.getExemptions() 
+then
+double exmpPer=exemption.getPercentage();
+double amt=exemption.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Physical Disability Exemption @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+rule "for Employees invested in Charity"
+salience 8
+when item:Employee()
+investment:Investment(id==2) from item.getInvestments() 
+then
+double exmpPer=investment.getApplicablePercent();
+double amt=investment.getAmount();
+double taxCal;
+taxCal=amt*exmpPer/100;
+System.out.println("Investment Exemption for Students @ "+exmpPer+"% :-"+taxCal);
+item.setTax(item.getTax()-taxCal);
+end
+
+rule "Having worked in the same org for 15 years"
+salience 7
+when 
+item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+ || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+ then
+Calendar cal = Calendar.getInstance();
+int cyear=cal.get(Calendar.YEAR);
+cal.setTime(item.getJobStartDate());
+int syear=cal.get(Calendar.YEAR);
+double exmpPer=0;
+double taxCal=0;
+if((cyear-syear)>=15){
+exmpPer = 5;
+taxCal=Utils.calculateTax(item.getTax(),exmpPer);
+System.out.println("Working more than 15 years exemption: @ "+exmpPer+" :%"+taxCal);
+}
+end
+
+rule "History 3 years Rule"
+salience 6
+	when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+		  || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC),mUtin:Utin)
+    then
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		int lastYear = cal.get(Calendar.YEAR) - 1;
+		boolean latePayment = false;
+		for (int year = lastYear; year > lastYear - 3; year--) {
+			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
+			if (tHistory != null){
+				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
+				if(latePayment) 
+					break;
+			}
+		}
+			
+		if(!latePayment){
+			double Tax= item.getTax();
+			int taxPer = 5;
+			double Remtax = Utils.calculateTax(Tax , taxPer);
+			System.out.println("On-time Payment Deduction @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
+			item.setTax(Tax - Remtax);
+		}
+end	
+
+rule "Employees with Stocks"
+salience 5
+when 
+		 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+		  || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) && item.hasStocks())
+    then
+        int per = 0;
+        double tax = item.getTax();
+        List<Stock> s=item.getStocks();
+        double samt=0;
+        double camt=0;
+        int quantity=0;
+        String pdate,symbol;
+        for(Stock stock:s)
+        {
+        pdate=DBHandler.dateFormat.format(stock.getPurchaseDate()).toString();
+        symbol=stock.getSymbol();
+        quantity=stock.getQuantity();
+        camt+=StockProvider.GetCurrentRate(symbol)*quantity;
+        samt+=HistoryProvider.GetHistoricRate(symbol,pdate)*quantity;
+        }
+        
+       if((samt-camt)>0)
+        {
+        per = 6;
+        }
+        else
+        {
+        per=7;
+        }
+        samt = Utils.calculateTax(samt,per);
+        System.out.println("Stock investment Exemption for Profit employees @  % " +per+ ": -"  +samt);
+        if(tax-samt>0)
+        {
+        item.setTax(tax-samt);
+        }
+        else
+        {
+        item.setTax(0);
+        }
+end
+
+//tested
+rule "For Married Employees"
+salience 1
+when
+item: Employee(marriedExecuted == false)
+then
+int sutin=item.getSpouseUtin();
+TaxPayer spouse =(Employee) DBHandler.getInstance().getTaxPayer(sutin);
+((Employee)spouse).setMarriedExecuted(true);
+System.out.println("Your spouse Tax details:");
+double taxCal=0;
+double totalTax=0,stax=0;
+double per;
+TaxRulesLogic.triggerRules(spouse);
+totalTax= (item.getTax()+spouse.getTax());
+if(spouse instanceof ArmedForcePersonnel)
+{
+per=50;
+}
+else if(spouse instanceof SeniorCitizen)
+{
+per=20;
+}
+else
+{
+per=10;
+}
+System.out.println("Your Spouse total Tax is :"+spouse.getTax());
+taxCal=Utils.calculateTax(totalTax,per);
+System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
+System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
+end 
 
 

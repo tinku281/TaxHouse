@@ -11,6 +11,14 @@ public class TaxHistory {
 	private double investments;
 	private double taxPaid;
 	private double penaltyPaid;
+	private double exemptions;
+	public double getExemptions() {
+		return exemptions;
+	}
+
+	public void setExemptions(double exemptions) {
+		this.exemptions = exemptions;
+	}
 
 	public int getUtin() {
 		return utin;

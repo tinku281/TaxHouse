@@ -64,6 +64,7 @@ public class DBHandler {
 	public static final String RESIDENCY_STATUS = "Residency_Status";
 	public static final String EMP_CATEGORY = "emp_category";
 	public static final String DEP_AMOUNT = "income";
+	public static final String EMP_SLAB = "Slab_Id";
 
 	// table Organization, Organization Income
 	public static final String ESTBL_DATE = "Estbl_Date";
@@ -131,7 +132,8 @@ public class DBHandler {
 	public static final String SHARE_UTIN = "Share_UTIN";
 	public static final String SHARE_PERCENT = "Share_Percent";
 
-	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	public static final SimpleDateFormat dateFormat = new SimpleDateFormat(
+			"yyyy-MM-dd");
 
 	public DBHandler() {
 
@@ -147,6 +149,7 @@ public class DBHandler {
 	}
 
 	public static DBHandler getInstance() {
+
 		if (mInstance == null) {
 			mInstance = new DBHandler();
 		}
@@ -164,8 +167,8 @@ public class DBHandler {
 
 	public boolean validateAdmin(String adminId, String password) {
 
-		String sql = "select * from administrator where " + ADMIN_ID + " = " + adminId + " and " + ADMIN_PASSWORD
-				+ " = '" + password + "'";
+		String sql = "select * from administrator where " + ADMIN_ID + " = "
+				+ adminId + " and " + ADMIN_PASSWORD + " = '" + password + "'";
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -189,8 +192,8 @@ public class DBHandler {
 
 	public boolean validateTaxPayer(String utin, String password) {
 
-		String sql = "select * from tax_payer where " + UTIN + " = " + utin + " and " + TP_PASSWORD + " = '" + password
-				+ "'";
+		String sql = "select * from tax_payer where " + UTIN + " = " + utin
+				+ " and " + TP_PASSWORD + " = '" + password + "'";
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -214,7 +217,8 @@ public class DBHandler {
 
 	public TaxPayer getTaxPayer(int utin) {
 
-		String sql = "select " + TP_CATEGORY + " from tax_payer where UTIN = " + utin;
+		String sql = "select " + TP_CATEGORY + " from tax_payer where UTIN = "
+				+ utin;
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -250,7 +254,8 @@ public class DBHandler {
 		return null;
 	}
 
-	public Employee getEmployee(int utin) throws SQLException, ClassNotFoundException, ParseException {
+	public Employee getEmployee(int utin) throws SQLException,
+			ClassNotFoundException, ParseException {
 
 		Connection con = null;
 		Statement stmt = null;
@@ -267,8 +272,10 @@ public class DBHandler {
 			stmt1 = con.createStatement();
 			stmt2 = con.createStatement();
 
-			String sql = "select * from tax_payer T natural join employee E where UTIN = " + utin;
-			String query = "select income from dependant_income where UTIN=" + utin;
+			String sql = "select * from tax_payer T natural join employee E where UTIN = "
+					+ utin;
+			String query = "select income from dependant_income where UTIN="
+					+ utin;
 			String query1 = "select * from exmilitary where UTIN=" + utin;
 			rs = stmt.executeQuery(sql);
 
@@ -335,8 +342,8 @@ public class DBHandler {
 		return emp;
 	}
 
-	private void putEmployeeDetails(Employee emp, ResultSet rs, ResultSet rs1, ResultSet rs2) throws SQLException,
-			ParseException {
+	private void putEmployeeDetails(Employee emp, ResultSet rs, ResultSet rs1,
+			ResultSet rs2) throws SQLException, ParseException {
 
 		emp.setUtin(rs.getInt(UTIN));
 		emp.setFirstName(rs.getString(FIRST_NAME));
@@ -348,7 +355,8 @@ public class DBHandler {
 		emp.setGender(Gender.valueOf(rs.getString(GENDER)));
 		emp.setNoOfDependants(rs.getInt(NO_OF_DEPENDENTS));
 		emp.setMaritalStatus(MaritalStatus.valueOf(rs.getString(MARITAL_STATUS)));
-		emp.setResidencyStatus(ResidencyStatus.valueOf(rs.getString(RESIDENCY_STATUS)));
+		emp.setResidencyStatus(ResidencyStatus.valueOf(rs
+				.getString(RESIDENCY_STATUS)));
 		emp.setInvestments(this.getEmployeeInvestments(emp.getUtin()));
 		emp.setExemptions(this.getEmployeeExemptions(emp.getUtin()));
 
@@ -362,14 +370,17 @@ public class DBHandler {
 		}
 	}
 
-	private void putMarriageDetails(Employee emp) throws SQLException, ClassNotFoundException {
+	private void putMarriageDetails(Employee emp) throws SQLException,
+			ClassNotFoundException {
 
 		String sql = null;
 
 		if (emp.getGender() == Gender.MALE)
-			sql = "select utinf as spouse_utin from marriedto where utinm = " + emp.getUtin();
+			sql = "select utinf as spouse_utin from marriedto where utinm = "
+					+ emp.getUtin();
 		else
-			sql = "select utinm as spouse_utin from marriedto where utinf = " + emp.getUtin();
+			sql = "select utinm as spouse_utin from marriedto where utinf = "
+					+ emp.getUtin();
 
 		Connection con = null;
 		Statement stmt = null;
@@ -389,9 +400,11 @@ public class DBHandler {
 		}
 	}
 
-	private void putIncomeDetails(Employee emp) throws SQLException, ClassNotFoundException, ParseException {
+	private void putIncomeDetails(Employee emp) throws SQLException,
+			ClassNotFoundException, ParseException {
 
-		String sql = "select * from works_at where emp_utin = " + emp.getUtin() + " and end_date = ''";
+		String sql = "select * from works_at where emp_utin = " + emp.getUtin()
+				+ " and end_date = ''";
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -413,7 +426,8 @@ public class DBHandler {
 		}
 	}
 
-	private void putIncomeDetails(SeniorCitizen sc) throws SQLException, ClassNotFoundException {
+	private void putIncomeDetails(SeniorCitizen sc) throws SQLException,
+			ClassNotFoundException {
 
 		String sql = "select * from sc_income where utin = " + sc.getUtin();
 		Connection con = null;
@@ -426,7 +440,8 @@ public class DBHandler {
 			rs = stmt.executeQuery(sql);
 			List<Income> incomes = new ArrayList<Income>();
 			while (rs.next()) {
-				incomes.add(new Income(rs.getString(INCOME_SOURCE), rs.getInt(INCOME_AMOUNT)));
+				incomes.add(new Income(rs.getString(INCOME_SOURCE), rs
+						.getInt(INCOME_AMOUNT)));
 			}
 
 			sc.setIncomes(incomes);
@@ -436,11 +451,13 @@ public class DBHandler {
 		}
 	}
 
-	private void putSpecialTaskDetails(ArmedForcePersonnel afPerson) throws SQLException, ClassNotFoundException,
-			ParseException {
+	private void putSpecialTaskDetails(ArmedForcePersonnel afPerson)
+			throws SQLException, ClassNotFoundException, ParseException {
 
-		String sql = "select * from af_specl natural join specl_task where utin = " + afPerson.getUtin();
-		String query1 = "select combat_zone from combat_zones where utin=" + afPerson.getUtin();
+		String sql = "select * from af_specl natural join specl_task where utin = "
+				+ afPerson.getUtin();
+		String query1 = "select combat_zone from combat_zones where utin="
+				+ afPerson.getUtin();
 
 		Connection con = null;
 		Statement stmt = null;
@@ -457,13 +474,16 @@ public class DBHandler {
 			List<SpecialTask> tasks = new ArrayList<SpecialTask>();
 			while (rs.next()) {
 				if (rs1.next()) {
-					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs.getString(TASK_NAME), dateFormat.parse(rs
-							.getString(START_DATE)), dateFormat.parse(rs.getString(END_DATE)), rs1
-							.getString(COMBAT_ZONE)));
+					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs
+							.getString(TASK_NAME), dateFormat.parse(rs
+							.getString(START_DATE)), dateFormat.parse(rs
+							.getString(END_DATE)), rs1.getString(COMBAT_ZONE)));
 
 				} else {
-					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs.getString(TASK_NAME), dateFormat.parse(rs
-							.getString(START_DATE)), dateFormat.parse(rs.getString(END_DATE)), " "));
+					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs
+							.getString(TASK_NAME), dateFormat.parse(rs
+							.getString(START_DATE)), dateFormat.parse(rs
+							.getString(END_DATE)), " "));
 				}
 			}
 
@@ -474,7 +494,8 @@ public class DBHandler {
 		}
 	}
 
-	private void putStudentDetails(Student student) throws SQLException, ClassNotFoundException {
+	private void putStudentDetails(Student student) throws SQLException,
+			ClassNotFoundException {
 
 		String sql = "select * from student where utin = " + student.getUtin();
 		Connection con = null;
@@ -496,7 +517,8 @@ public class DBHandler {
 
 	}
 
-	private void putStockDetails(Employee emp) throws SQLException, ClassNotFoundException, ParseException {
+	private void putStockDetails(Employee emp) throws SQLException,
+			ClassNotFoundException, ParseException {
 
 		String sql = "select * from stockholders where UTIN = " + emp.getUtin();
 		Connection con = null;
@@ -511,8 +533,8 @@ public class DBHandler {
 			List<Stock> stocks = new ArrayList<Stock>();
 
 			while (rs.next()) {
-				stocks.add(new Stock(rs.getString(SYMBOL), rs.getInt(QUANTITY), dateFormat.parse(rs
-						.getString(PURCHASE_DATE))));
+				stocks.add(new Stock(rs.getString(SYMBOL), rs.getInt(QUANTITY),
+						dateFormat.parse(rs.getString(PURCHASE_DATE))));
 			}
 
 			emp.setStocks(stocks);
@@ -530,7 +552,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		List<Exemption> exemptions = null;
 
-		String sql = "select * from exemption natural join has_exmp where utin = " + emp.getUtin();
+		String sql = "select * from exemption natural join has_exmp where utin = "
+				+ emp.getUtin();
 
 		try {
 			con = getConnection();
@@ -541,7 +564,8 @@ public class DBHandler {
 				if (exemptions == null)
 					exemptions = new ArrayList<Exemption>();
 
-				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
+				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs
+						.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
 						.getDouble(EXEMP_PER)));
 			}
 
@@ -559,7 +583,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		List<Investment> investments = null;
 
-		String sql = "select * from investment natural join has_inv where utin = " + emp.getUtin();
+		String sql = "select * from investment natural join has_inv where utin = "
+				+ emp.getUtin();
 
 		try {
 			con = getConnection();
@@ -570,7 +595,8 @@ public class DBHandler {
 				if (investments == null)
 					investments = new ArrayList<Investment>();
 
-				investments.add(new Investment(rs.getInt(INV_ID), rs.getString(INV_NAME), rs.getDouble(INV_AMT), rs
+				investments.add(new Investment(rs.getInt(INV_ID), rs
+						.getString(INV_NAME), rs.getDouble(INV_AMT), rs
 						.getDouble(INV_APPL_PER)));
 			}
 
@@ -581,7 +607,8 @@ public class DBHandler {
 		}
 	}
 
-	public HashMap<Integer, Double> getOrganizationShares(int utin) throws SQLException {
+	public HashMap<Integer, Double> getOrganizationShares(int utin)
+			throws SQLException {
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -599,12 +626,14 @@ public class DBHandler {
 		return shares;
 	}
 
-	public Organization getOrganization(int utin) throws SQLException, ParseException {
+	public Organization getOrganization(int utin) {
 		Connection con = null;
 		Statement stmt = null;
 		Statement stmt1 = null;
+		Statement stmt2 = null;
 		ResultSet rs = null;
 		ResultSet rs1 = null;
+		ResultSet rs2 = null;
 		Organization org = null;
 
 		String sql = "select * from Combination natural join (select * from Tax_Payer T natural join Organization O) as TPO  where UTIN = "
@@ -621,16 +650,27 @@ public class DBHandler {
 				org.setLastName(rs.getString(LAST_NAME));
 				org.setCity(rs.getString(CITY));
 				org.setState(rs.getString(STATE));
-				org.setNationality(Nationality.valueOf(rs.getString(NATIONALITY)));
+				org.setNationality(Nationality.valueOf(rs
+						.getString(NATIONALITY)));
 				org.setEstblDate((dateFormat.parse(rs.getString(ESTBL_DATE))));
-
 				org.setCombinationId(rs.getInt(COMBINATION_ID));
-				String query = "select * from org_tax where combination_id=" + rs.getInt(COMBINATION_ID);
-				stmt1 = con.createStatement();
-				rs1 = stmt1.executeQuery(query);
-				if (rs1.next()) {
-					org.setSlabId(rs1.getInt(ORG_SLAB));
-					org.setTaxPer(rs1.getDouble(ORG_TAX_PER));
+				String query1 = "select slab_id from org_slab where slab_min_amt<= "
+						+ rs.getDouble(GROSS_PROFIT)
+						+ " and slab_max_amt > "
+						+ rs.getDouble(GROSS_PROFIT);
+				stmt2 = con.createStatement();
+				rs2 = stmt2.executeQuery(query1);
+				if (rs2.next()) {
+					org.setSlabId(rs2.getInt(ORG_SLAB));
+					String query = "select * from org_tax where combination_id="
+							+ rs.getInt(COMBINATION_ID)
+							+ " and slab_id="
+							+ rs2.getInt(ORG_SLAB);
+					stmt1 = con.createStatement();
+					rs1 = stmt1.executeQuery(query);
+					if (rs1.next()) {
+						org.setTaxPer(rs1.getDouble(ORG_TAX_PER));
+					}
 				}
 				org.setScaleId(rs.getInt(SCALE_ID));
 				org.setTypeId(rs.getInt(TYPE_ID));
@@ -640,6 +680,9 @@ public class DBHandler {
 				org.setShares(this.getOrganizationShares(utin));
 			}
 
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
@@ -776,7 +819,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		List<Exemption> exemptions = null;
 
-		String sql = "select * from exemption natural join has_exmp where utin = " + utin;
+		String sql = "select * from exemption natural join has_exmp where utin = "
+				+ utin;
 
 		try {
 			con = getConnection();
@@ -787,7 +831,8 @@ public class DBHandler {
 				if (exemptions == null)
 					exemptions = new ArrayList<Exemption>();
 
-				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
+				exemptions.add(new Exemption(rs.getInt(EXEMP_ID), rs
+						.getString(EXEMP_NAME), rs.getDouble(EXEMP_AMT), rs
 						.getDouble(EXEMP_PER)));
 			}
 
@@ -806,7 +851,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		List<Investment> investments = null;
 
-		String sql = "select * from investment natural join has_inv where utin = " + utin;
+		String sql = "select * from investment natural join has_inv where utin = "
+				+ utin;
 
 		try {
 			con = getConnection();
@@ -817,7 +863,8 @@ public class DBHandler {
 				if (investments == null)
 					investments = new ArrayList<Investment>();
 
-				investments.add(new Investment(rs.getInt(INV_ID), rs.getString(INV_NAME), rs.getDouble(INV_AMT), rs
+				investments.add(new Investment(rs.getInt(INV_ID), rs
+						.getString(INV_NAME), rs.getDouble(INV_AMT), rs
 						.getDouble(INV_APPL_PER)));
 			}
 
@@ -835,15 +882,16 @@ public class DBHandler {
 		Statement stmt = null;
 		ResultSet rs = null;
 		con = getConnection();
-		String query = "select Share_Percent from has_partnership where Share_UTIN=" + utin;
+		String query = "select Share_Percent from has_partnership where Share_UTIN="
+				+ utin;
 		double percents = 0;
 		stmt = con.createStatement();
 		rs = stmt.executeQuery(query);
 		while (rs.next()) {
 			percents += rs.getInt(SHARE_PERCENT);
 		}
-		Organization.isSharedFlag = -1;
-		return percents;
+
+		return (100 - percents);
 	}
 
 	public String getScaleName(int id) {
@@ -931,7 +979,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		String[] names = new String[ids.length];
 
-		String sql = "select * from exemption where exemption_id in (" + buildInClause(ids.length) + ");";
+		String sql = "select * from exemption where exemption_id in ("
+				+ buildInClause(ids.length) + ");";
 
 		try {
 			con = getConnection();
@@ -967,7 +1016,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		String[] names = new String[ids.length];
 
-		String sql = "select * from investment where investment_id in (" + buildInClause(ids.length) + ");";
+		String sql = "select * from investment where investment_id in ("
+				+ buildInClause(ids.length) + ");";
 
 		try {
 			con = getConnection();
@@ -1003,7 +1053,8 @@ public class DBHandler {
 		ResultSet rs = null;
 		String[] names = new String[ids.length];
 
-		String sql = "select * from specl_task where task_id in (" + buildInClause(ids.length) + ");";
+		String sql = "select * from specl_task where task_id in ("
+				+ buildInClause(ids.length) + ");";
 
 		try {
 			con = getConnection();
@@ -1037,7 +1088,8 @@ public class DBHandler {
 		Statement stmt = null;
 		ResultSet rs = null;
 
-		String sqlTotal = "Select COUNT(DISTINCT " + EXEMP_NAME + ") AS namecount FROM exemption";
+		String sqlTotal = "Select COUNT(DISTINCT " + EXEMP_NAME
+				+ ") AS namecount FROM exemption";
 		String sql = "Select DISTINCT " + EXEMP_NAME + " FROM exemption";
 
 		try {
@@ -1076,7 +1128,8 @@ public class DBHandler {
 		Statement stmt = null;
 		ResultSet rs = null;
 
-		String sql = "Select " + EXEMP_ID + " FROM exemption WHERE " + EXEMP_NAME + " = '" + exempetionName + "'";
+		String sql = "Select " + EXEMP_ID + " FROM exemption WHERE "
+				+ EXEMP_NAME + " = '" + exempetionName + "'";
 
 		try {
 			con = getConnection();
@@ -1093,6 +1146,29 @@ public class DBHandler {
 
 		return -1;
 
+	}
+
+	public int getSlabId(double income) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		int slabId = 0;
+		String query = "select slab_id from org_slab where slab_min_amt<= "
+				+ income + " and slab_max_amt > " + income;
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+			if (rs.next()) {
+				slabId = rs.getInt(EMP_SLAB);
+			}
+			return slabId;
+		} catch (Exception e) {
+			System.out.println(e);
+			return 0;
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
 	}
 
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
@@ -1119,7 +1195,8 @@ public class DBHandler {
 		return inClause.toString();
 	}
 
-	private void closeConnectionObjects(ResultSet rs, Statement stmt, Connection con) {
+	private void closeConnectionObjects(ResultSet rs, Statement stmt,
+			Connection con) {
 		if (rs != null)
 			try {
 				rs.close();
