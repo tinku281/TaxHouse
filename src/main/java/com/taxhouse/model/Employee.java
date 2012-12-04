@@ -36,8 +36,17 @@ public class Employee extends TaxPayer {
 
 	private String exMilatary;
 	private double dependantincome;
+	private boolean marriedExecuted = false;
 	
-	public static int maritalFlag;
+	private int slabId;
+
+	public boolean isMarriedExecuted() {
+		return marriedExecuted;
+	}
+
+	public void setMarriedExecuted(boolean marriedExecuted) {
+		this.marriedExecuted = marriedExecuted;
+	}
 
 	public String getExMilatary() {
 		return exMilatary;
@@ -55,16 +64,6 @@ public class Employee extends TaxPayer {
 		this.dependantincome = dependantincome;
 	}
 
-	public static int getMaritalFlag() {
-		return maritalFlag;
-	}
-
-	public static void setMaritalFlag(int maritalFlag) {
-		Employee.maritalFlag = maritalFlag;
-
-	}
-
-	
 	public Date getDateOfBirth() {
 		return dateOfBirth;
 	}
@@ -136,7 +135,7 @@ public class Employee extends TaxPayer {
 	public void setSpouseUtin(int spouseUtin) {
 		this.spouseUtin = spouseUtin;
 	}
-	
+
 	public List<Stock> getStocks() {
 		return stocks;
 	}
@@ -147,6 +146,14 @@ public class Employee extends TaxPayer {
 
 	public boolean hasStocks() {
 		return (stocks != null && !stocks.isEmpty());
+	}
+
+	public int getSlabId() {
+		return slabId;
+	}
+
+	public void setSlabId(int slabId) {
+		this.slabId = slabId;
 	}
 
 }

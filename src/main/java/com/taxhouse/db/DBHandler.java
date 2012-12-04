@@ -64,6 +64,7 @@ public class DBHandler {
 	public static final String RESIDENCY_STATUS = "Residency_Status";
 	public static final String EMP_CATEGORY = "emp_category";
 	public static final String DEP_AMOUNT = "income";
+	public static final String EMP_SLAB = "Slab_Id";
 
 	// table Organization, Organization Income
 	public static final String ESTBL_DATE = "Estbl_Date";
@@ -147,6 +148,7 @@ public class DBHandler {
 	}
 
 	public static DBHandler getInstance() {
+
 		if (mInstance == null) {
 			mInstance = new DBHandler();
 		}
@@ -599,12 +601,14 @@ public class DBHandler {
 		return shares;
 	}
 
-	public Organization getOrganization(int utin) throws SQLException, ParseException {
+	public Organization getOrganization(int utin) {
 		Connection con = null;
 		Statement stmt = null;
 		Statement stmt1 = null;
+		Statement stmt2 = null;
 		ResultSet rs = null;
 		ResultSet rs1 = null;
+		ResultSet rs2 = null;
 		Organization org = null;
 
 		String sql = "select * from Combination natural join (select * from Tax_Payer T natural join Organization O) as TPO  where UTIN = "
@@ -623,14 +627,20 @@ public class DBHandler {
 				org.setState(rs.getString(STATE));
 				org.setNationality(Nationality.valueOf(rs.getString(NATIONALITY)));
 				org.setEstblDate((dateFormat.parse(rs.getString(ESTBL_DATE))));
-
 				org.setCombinationId(rs.getInt(COMBINATION_ID));
-				String query = "select * from org_tax where combination_id=" + rs.getInt(COMBINATION_ID);
-				stmt1 = con.createStatement();
-				rs1 = stmt1.executeQuery(query);
-				if (rs1.next()) {
-					org.setSlabId(rs1.getInt(ORG_SLAB));
-					org.setTaxPer(rs1.getDouble(ORG_TAX_PER));
+				String query1 = "select slab_id from org_slab where slab_min_amt<= " + rs.getDouble(GROSS_PROFIT)
+						+ " and slab_max_amt > " + rs.getDouble(GROSS_PROFIT);
+				stmt2 = con.createStatement();
+				rs2 = stmt2.executeQuery(query1);
+				if (rs2.next()) {
+					org.setSlabId(rs2.getInt(ORG_SLAB));
+					String query = "select * from org_tax where combination_id=" + rs.getInt(COMBINATION_ID)
+							+ " and slab_id=" + rs2.getInt(ORG_SLAB);
+					stmt1 = con.createStatement();
+					rs1 = stmt1.executeQuery(query);
+					if (rs1.next()) {
+						org.setTaxPer(rs1.getDouble(ORG_TAX_PER));
+					}
 				}
 				org.setScaleId(rs.getInt(SCALE_ID));
 				org.setTypeId(rs.getInt(TYPE_ID));
@@ -640,6 +650,9 @@ public class DBHandler {
 				org.setShares(this.getOrganizationShares(utin));
 			}
 
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
@@ -842,8 +855,8 @@ public class DBHandler {
 		while (rs.next()) {
 			percents += rs.getInt(SHARE_PERCENT);
 		}
-		Organization.isSharedFlag = -1;
-		return (100-percents);
+
+		return (100 - percents);
 	}
 
 	public String getScaleName(int id) {
@@ -1093,6 +1106,28 @@ public class DBHandler {
 
 		return -1;
 
+	}
+
+	public int getSlabId(double income) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+		int slabId = 0;
+		String query = "select slab_id from org_slab where slab_min_amt<= " + income + " and slab_max_amt > " + income;
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+			if (rs.next()) {
+				slabId = rs.getInt(EMP_SLAB);
+			}
+			return slabId;
+		} catch (Exception e) {
+			System.out.println(e);
+			return 0;
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
 	}
 
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
