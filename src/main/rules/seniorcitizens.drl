@@ -1,4 +1,5 @@
 //created on: Nov 9, 2012
+/*
 package com.taxhouse;
 
 import java.util.ArrayList;
@@ -360,4 +361,4 @@ taxCal=Utils.calculateTax(totalTax,per);
 System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
 System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
 end
-
+*/

@@ -1,4 +1,4 @@
-package com.taxhouse;
+/*package com.taxhouse;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -482,3 +482,4 @@ then
 	System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
 	System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
 end
+*/
