@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.taxhouse.db.DBHandler;
+import com.taxhouse.model.Organization;
 import com.taxhouse.model.TaxPayer;
 
 public class HandleUTIN extends HttpServlet
@@ -48,6 +49,16 @@ public class HandleUTIN extends HttpServlet
 			{
 				requestDispatcher = request.getRequestDispatcher( "details.jsp" );
 				request.setAttribute( "taxpayer", taxPayer );
+				if ( taxPayer instanceof Organization )
+				{
+					Organization organization = (Organization) taxPayer;
+					String scale = DBHandler.getInstance().getScaleName( organization.getScaleId() );
+					String category = DBHandler.getInstance().getCategoryName( organization.getCategoryId() );
+					String type = DBHandler.getInstance().getTypeName( organization.getTypeId() );
+					request.setAttribute( "scale", scale );
+					request.setAttribute( "category", category );
+					request.setAttribute( "type", type );
+				}
 				httpSession.setAttribute("taxpay", taxPayer);
 				requestDispatcher.forward( request, response );
 

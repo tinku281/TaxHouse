@@ -39,18 +39,22 @@ function setText()
 	}
 }
 
-function validate() {
-	if (document.loginForm.utin.value == "") {
+function validate()
+{
+	if (document.loginForm.utin.value == "") 
+	{
 		alert("Please enter UTIN/AdminID");
 		document.loginForm.utin.focus();
 		return false;
 	}
-	else if (document.loginForm.passwd.value == "") {
+	else if (document.loginForm.passwd.value == "") 
+	{
 		alert("Please enter password");
 		document.loginForm.passwd.focus();
 		return false;
 	} 
-	else {
+	else 
+	{
 		document.loginForm.submit();
 	}
 }

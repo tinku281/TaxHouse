@@ -32,6 +32,8 @@
 			return false;
 		}	
 		document.insertEmployee.count.value = ++count;
+		
+		
 		var labelExmpAmount =document.createElement("label");
 		labelExmpAmount.setAttribute("class","label1");
 		labelExmpAmount.innerHTML="Exemption Name";

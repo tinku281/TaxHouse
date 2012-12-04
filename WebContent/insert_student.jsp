@@ -65,7 +65,10 @@ function validate()
 		<h2>Enter Student Details</h2>
 	</div>
 	<form name="insertStudentForm" method="POST" action="EmployeeSubtypeProcessing.do" >
-			<div class="formrow"><label class="label1 ">Free Waiver Amount</label><input class="textbox2 rightfloat" type="text" name="waiver_amount" value="Enter Amount" onFocus="clearText()" onBlur="setText()"/></div>
+			<div class="formrow">
+				<label class="label1 ">Free Waiver Amount</label>
+				<input class="textbox2 rightfloat" type="text" name="waiver_amount" value="Enter Amount" onFocus="clearText()" onBlur="setText()"/>
+			</div>
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 	</form>
 </div>	

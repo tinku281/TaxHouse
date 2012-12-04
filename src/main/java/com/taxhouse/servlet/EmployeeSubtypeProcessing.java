@@ -1,6 +1,7 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,6 +12,8 @@ import javax.servlet.http.HttpSession;
 
 import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.Employee;
+import com.taxhouse.model.SeniorCitizen;
+import com.taxhouse.model.SeniorCitizen.Income;
 import com.taxhouse.model.Student;
 
 public class EmployeeSubtypeProcessing extends HttpServlet
@@ -49,7 +52,7 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			if(DBHandler.getInstance().insertTaxPayer( student ))
 			{
 				//forward to insertion successful page
-				System.out.println("Employee Subtype Processing: SUCCESSFUL");
+				System.out.println("Employee Subtype Processing: Inserted Student");
 			}
 			else
 			{
@@ -59,6 +62,44 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 		}
 		else if ( empType == Employee.SubType.SENIOR_CITIZEN.ordinal() )
 		{
+			SeniorCitizen seniorCitizen = (SeniorCitizen)employee;
+			
+			//retrieving income list from insert_senior_citizen form
+			ArrayList<Income> incomeList = new ArrayList<Income>();
+			
+			int incomeCount = Integer.parseInt( request.getParameter( "count" ));
+			
+			if(incomeCount > 0)
+			{
+				
+				for(int index = 0; index < incomeCount; index++)
+				{
+					int i = index+1;
+					
+					String incomeName = request.getParameter( "incomename"+i );
+					Double incomeAmount = Double.parseDouble( request.getParameter( "incomeamount"+i ));
+					
+					Income income = new Income( incomeName, incomeAmount );
+					incomeList.add( income );
+					System.out.println("Added Income- Source: "+incomeName+" Amount: "+incomeAmount);
+				}
+			}
+			
+			
+			
+			//set Income list for senior citizen
+			seniorCitizen.setIncomes( incomeList );
+			
+			if(DBHandler.getInstance().insertTaxPayer( seniorCitizen ))
+			{
+				//forward to insertion successful page
+				System.out.println("Employee Subtype Processing: Inserted Senior Citizen");
+			}
+			else
+			{
+				// error inserting record
+			}
+			
 			
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
