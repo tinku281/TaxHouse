@@ -843,7 +843,7 @@ public class DBHandler {
 			percents += rs.getInt(SHARE_PERCENT);
 		}
 		Organization.isSharedFlag = -1;
-		return percents;
+		return (100-percents);
 	}
 
 	public String getScaleName(int id) {

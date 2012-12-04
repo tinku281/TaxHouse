@@ -100,7 +100,7 @@ then
 		taxCal=Utils.calculateTax(item.getIncome(),Per);
 		System.out.println("Only three tax for you brave soldier :-)"+Per+ " % : "+taxCal);
 		item.setTax(taxCal);
-		drools.halt();
+		drools.halt(); 
  		}
  end
  
