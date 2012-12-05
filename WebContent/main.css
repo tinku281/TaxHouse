@@ -17,6 +17,8 @@ body
 	height:100px;
 	background-color:#3e93c0;
 	color:#FFF;
+	display: block;
+	clear:both;
 }
 #headers
 {

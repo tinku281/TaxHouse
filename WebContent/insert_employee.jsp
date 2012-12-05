@@ -1,3 +1,7 @@
+<%@page import="com.taxhouse.model.ArmedForcePersonnel"%>
+<%@page import="com.taxhouse.model.SeniorCitizen"%>
+<%@page import="com.taxhouse.model.Student"%>
+<%@page import="com.taxhouse.model.Employee"%>
 <%@page import="com.taxhouse.model.TaxPayer"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
@@ -86,53 +90,64 @@
 	function addInvestmentDetails()
 	{
 		var invAmount,invPer;
-		if(invCount == 0)
-		{	
-			invAmount = document.insertEmployee.investmentamount.value;
-			invPer = document.insertEmployee.investmentper.value;
-		}
-		else
-		{
-			invAmount = document.insertEmployee.elements["investmentamount"+invCount].value;
-			invPer = document.insertEmployee.elements["investmentper"+invCount].value;
-		}	
+		invAmount = document.insertEmployee.investmentamount.value;
+		invPer = document.insertEmployee.investmentper.value;
+		
 		if(invAmount == "" || invPer == "" )
 		{
-			alert("Please complete previous investement details before adding another");	
+			alert("Please fill in the investment details");	
 			return false;
 		}
-		if(!isNumeric(invAmount) || !isNumeric(invPer))
+		if(!isNumeric(invAmount))
 		{
-			alert("Investement details should be in digits");	
+			alert("Investement amount should be in digits");	
 			return false;
 		}
-		if(invCount == 0)
+		if(!isNumeric(invPer))
 		{
-			document.insertEmployee.investmentamount.readOnly="readonly";
-			document.insertEmployee.investmentper.readOnly="readonly";
+			alert("Applicable percentage should be in digits");	
+			return false;
 		}
-		else
-		{
-			document.insertEmployee.elements["investmentamount"+invCount].readOnly = "readonly";
-			document.insertEmployee.elements["investmentper"+invCount].readOnly = "readonly";
-		}	
 		
 		document.insertEmployee.inv_count.value = 	++invCount;
 		
+		/*--------------INVESTMENT NAME--------*/
+		
+		var labelInvName =document.createElement("label");
+		labelInvName.setAttribute("class","label1");
+		labelInvName.innerHTML="Investment Name";
+		
+		var textBoxInvName = document.createElement("input");
+		textBoxInvName.setAttribute("type", "text");
+		textBoxInvName.setAttribute("class", "textbox2 rightfloat");
+		textBoxInvName.setAttribute("name", "investmentname"+invCount)
+		textBoxInvName.setAttribute("value", document.insertEmployee.emp_inv_name.value);
+		textBoxInvName.readOnly = "readonly";
+
+		var divInvName = document.createElement("div");
+		divInvName.setAttribute("class", "formrow");
+		divInvName.appendChild(labelInvName);
+		divInvName.appendChild(textBoxInvName);
+		
+		/*--------------INVESTMENT AMOUNT--------*/
+		
 		var labelInvAmount =document.createElement("label");
 		labelInvAmount.setAttribute("class","label1");
-		labelInvAmount.innerHTML="Exemption Amount";
+		labelInvAmount.innerHTML="Investment Amount";
 		
 		var textBoxInvAmount = document.createElement("input");
 		textBoxInvAmount.setAttribute("type", "text");
 		textBoxInvAmount.setAttribute("class", "textbox2 rightfloat");
 		textBoxInvAmount.setAttribute("name", "investmentamount"+invCount);
+		textBoxInvAmount.setAttribute("value", invAmount);
+		textBoxInvAmount.readOnly = "readonly";
 
 		var divInvAmount = document.createElement("div");
 		divInvAmount.setAttribute("class", "formrow");
 		divInvAmount.appendChild(labelInvAmount);
 		divInvAmount.appendChild(textBoxInvAmount);
 		
+		/*--------------APPLICABLE PERCENTAGE--------*/
 		
 		var labelInvPer =document.createElement("label");
 		labelInvPer.setAttribute("class","label1");
@@ -142,15 +157,16 @@
 		textBoxInvPer.setAttribute("type", "text");
 		textBoxInvPer.setAttribute("class", "textbox2 rightfloat");
 		textBoxInvPer.setAttribute("name", "investmentper"+invCount);
+		textBoxInvPer.setAttribute("value", invPer);
+		textBoxInvPer.readOnly = "readonly";
 		
 		var divInvPer = document.createElement("div");
 		divInvPer.setAttribute("class", "formrow");
 		divInvPer.appendChild(labelInvPer);
 		divInvPer.appendChild(textBoxInvPer);
 		
-		document.getElementById('inv_details').appendChild(divInvAmount).appendChild(divInvPer);
+		document.getElementById('inv_details').appendChild(divInvName).appendChild(divInvAmount).appendChild(divInvPer);
 		return true;
-		
 	}
 	
 	function clearText()
@@ -206,6 +222,26 @@
 </script>
 </head>
 <body>
+
+<%
+		String empType;
+		Employee employee = (Employee)session.getAttribute( "taxpayee" );
+		if(employee != null)
+		{	
+			if(employee instanceof Student)
+				empType = "Student";
+			else if (employee instanceof SeniorCitizen)
+				empType = "Senior Citizen";
+			else if(employee instanceof ArmedForcePersonnel)
+				empType = "Army";
+			else
+				empType="None";
+		}
+		else
+		{
+			
+		}
+%>
 
 <%@ include file="header.jsp" %>
 <%@ include file="admin_panel.html" %>
@@ -267,14 +303,33 @@
 					<option value="2">Percentage</option>
 				</select>
 			</div>
+			<div id="exemp_details"></div>	
 			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
-	<div id="exemp_details"></div>	
+		
 			
 	
 	<div class="header">
 		<h2>Investment Details</h2>
 	</div>
 		<div id="inv_details">
+			<div class="formrow"><label class="label1 ">Investment Name</label>
+			<select name="emp_inv_name" class="drop rightfloat">
+			<%
+				String[] invNames = (String[])request.getAttribute( "investment_names" );
+			
+				if(invNames!= null && invNames.length >= 0)
+				{
+						for(int index=0; index < invNames.length; index++)
+						{
+							String invName = invNames[index];							
+							
+			%>				<option value="<%=invName%>"><%=invName %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
 			<div class="formrow"><label class="label1 ">Investment Amount</label><input class="textbox2 rightfloat" type="text" name="investmentamount"  /></div>
 			<div class="formrow"><label class="label1 ">Applicable Percentage</label><input class="textbox2 rightfloat" type="text" name="investmentper"/></div>
 		</div>	
