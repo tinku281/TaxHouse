@@ -31,7 +31,7 @@ public class InsertProcessing extends HttpServlet
 	{
 		response.setContentType( "text/html" );
 		
-		int iCategory = Integer.parseInt( request.getParameter( "tp_category" ).toString());
+		String sCategory = request.getParameter( "tp_category" );
 		
 		HttpSession httpSession = request.getSession();
 		
@@ -42,29 +42,39 @@ public class InsertProcessing extends HttpServlet
 			requestDispatcher.forward( request, response );
 			return;
 		}
+		
+		int functiontype = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
+		int iCategory;
+		
+		if( functiontype == 4)
+			iCategory = Integer.parseInt( sCategory );
+		
+		else 
+		{
+			if(sCategory.trim().equals( "Employee" ))
+				iCategory = 1;
+			else
+				iCategory =2;
+		}
+		
 				
 		httpSession.setAttribute( "firstname", request.getParameter( "firstname" ));
 		httpSession.setAttribute( "lastname", request.getParameter( "lastname" ));
 		httpSession.setAttribute( "password", request.getParameter( "tp_password" ));
-		httpSession.setAttribute( "city",  request.getParameter( "city" ).toString());
+		httpSession.setAttribute( "city",  request.getParameter( "city" ));
 		httpSession.setAttribute( "state", request.getParameter( "state" ));
 		httpSession.setAttribute( "nationality",request.getParameter( "nationality" ));
-		
 		
 		if(iCategory == TaxPayer.SubType.EMPLOYEE.ordinal())
 		{
 			System.out.println("Employee Ordinal: "+TaxPayer.SubType.EMPLOYEE.ordinal());
 			
 			String[] exempNames = DBHandler.getInstance().getExemptionNames();
-			
-			if(exempNames!= null)
-			System.out.println("Exemeption names length: "+exempNames.length);
-			else
-			System.out.println("Exemption names: NULL");	
-			
+			String[] invNames = DBHandler.getInstance().getInvestmentNames();
 			
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher( "insert_employee.jsp" );
 			request.setAttribute( "exemption_names", exempNames );
+			request.setAttribute( "investment_names", invNames );
 			requestDispatcher.forward( request, response );
 		}
 		else if(iCategory == TaxPayer.SubType.ORGANIZATION.ordinal())

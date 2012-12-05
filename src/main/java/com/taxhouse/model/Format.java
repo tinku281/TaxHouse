@@ -1,14 +1,8 @@
 package com.taxhouse.model;
 
-import java.util.Map;
-
 import org.drools.spi.KnowledgeHelper;
 
-import com.taxhouse.app.TaxRulesLogic;
-import com.taxhouse.app.Utils;
-import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.ArmedForcePersonnel.SpecialTask;
-import com.taxhouse.model.TaxRecord.Entry;
 
 public class Format {
 
@@ -17,7 +11,7 @@ public class Format {
 	KnowledgeHelper drools;
 	SpecialTask specialtask;
 
-	private void format() {
+	public void format() {
 
 		// Date enddate = specialtask.getEndDate();
 		// Date now = new Date();
@@ -39,31 +33,31 @@ public class Format {
 		// exmpPer, -taxCal));
 		// }
 
-		Investment investment;
-		Exemption exemption;
-
-		Map<Integer, Double> shares = item.getShares();
-
-		int shareUtin = 0;
-		double sharePercent = 0;
-		double taxForShare = 0;
-
-		for (Map.Entry<Integer, Double> entry : shares.entrySet()) {
-			shareUtin = entry.getKey();
-			sharePercent = entry.getValue();
-
-			if (shareUtin != 0) {
-				TaxPayer company = DBHandler.getInstance().getTaxPayer(shareUtin);
-				((Organization) company).setHasSharesExecuted(true);
-				((Organization) company).setSharedExecuted(true);
-
-				taxForShare = TaxRulesLogic.triggerRules(company).getTotalTax() * sharePercent;
-				taxRecord.addEntry(new Entry("Tax for share in Organization " + shareUtin, sharePercent, taxForShare));
-			}
-		}
-
-		double fraction = Utils.calculatePercentage(amount, percent);
-		
+		// Investment investment;
+		// Exemption exemption;
+		//
+		// Map<Integer, Double> shares = item.getShares();
+		//
+		// int shareUtin = 0;
+		// double sharePercent = 0;
+		// double taxForShare = 0;
+		//
+		// for (Map.Entry<Integer, Double> entry : shares.entrySet()) {
+		// shareUtin = entry.getKey();
+		// sharePercent = entry.getValue();
+		//
+		// if (shareUtin != 0) {
+		// TaxPayer company = DBHandler.getInstance().getTaxPayer(shareUtin);
+		// ((Organization) company).setHasSharesExecuted(true);
+		// ((Organization) company).setSharedExecuted(true);
+		//
+		// taxForShare = TaxRulesLogic.triggerRules(company).getTotalTax() * sharePercent;
+		// taxRecord.addEntry(new Entry("Tax for share in Organization " + shareUtin, sharePercent, taxForShare));
+		// }
+		// }
+		//
+		// double fraction = Utils.calculatePercentage(amount, percent);
+		//
 
 	}
 }
