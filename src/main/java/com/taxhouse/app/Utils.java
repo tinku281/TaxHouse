@@ -16,8 +16,8 @@ public class Utils {
 		return cal.get(Calendar.YEAR);
 	}
 
-	public static double calculateTax(double salary, double percent) {
-		return (salary / 100) * percent;
+	public static double calculatePercentage(double amount, double percent) {
+		return (amount / 100) * percent;
 	}
 
 	public static String formatDouble(double amount) {

@@ -1,0 +1,31 @@
+//created on: Dec 5, 2012
+package com.taxhouse
+
+import com.taxhouse.model.*;
+import com.taxhouse.model.TaxRecord.Deduction;
+
+rule "Deduct Exemptions"
+salience 99
+
+    when
+        item: TaxPayer(income: income)
+        taxRecord: TaxRecord(  )
+    then
+    
+       	taxRecord.addDeduction(new Deduction("Exemption Deduction", item.getDeductibleExemption())); 
+   
+end
+
+rule "Deduct Investments"
+salience 98
+
+    when
+        item: TaxPayer()
+        taxRecord: TaxRecord(  )
+    then
+    
+       	taxRecord.addDeduction(new Deduction("Investment Deduction", item.getDeductibleInvestment())); 
+   
+end
+
+

@@ -224,7 +224,7 @@ function calculateTax()
 						
 						<div class="display_block">
 							<p class="leftfloat">Stock <%=index+1 %> Purchase Date </p>
-							<p class="leftfloat values"><%=stockList.get(index).getPurchaseDate(  )%></p>
+							<p class="leftfloat values"><%=DBHandler.dateFormat.format(stockList.get(index).getPurchaseDate(  ))%></p>
 							<br />
 						</div>
 						
@@ -297,12 +297,20 @@ function calculateTax()
 						<p class="leftfloat values"><%=exemptions.get(index).getName()%></p>
 						<br />
 					</div>
+					<%if(exemptions.get(index).getAmount(  ) != 0) { %>
 					
 					<div class="display_block">
 						<p class="leftfloat">Exemption <%=index+1 %> Amount</p>
-						<p class="leftfloat values"><%=exemptions.get(index).getAmount(  )%></p>
+						<p class="leftfloat values"><%="$ " + exemptions.get(index).getAmount(  )%></p>
 						<br />
 					</div>
+					<%} else { %>
+					<div class="display_block">
+						<p class="leftfloat">Exemption <%=index+1 %> Per</p>
+						<p class="leftfloat values"><%=exemptions.get(index).getPercentage() + " %"%></p>
+						<br />
+					</div>
+					<%} %>
 			<%
 				}
 			}
@@ -325,7 +333,7 @@ function calculateTax()
 						<div class="display_block">
 							<p class="leftfloat">Investment <%=index+1 %> Amount</p>
 							
-							<p class="leftfloat values"><%=investments.get(index).getAmount(  )%></p>
+							<p class="leftfloat values"><%="$ " + investments.get(index).getAmount(  )%></p>
 							<br />
 						</div>	
 			<%

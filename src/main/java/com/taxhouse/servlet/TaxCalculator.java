@@ -19,6 +19,7 @@ import org.drools.builder.ResourceType;
 import org.drools.io.ResourceFactory;
 import org.drools.runtime.StatefulKnowledgeSession;
 
+import com.taxhouse.app.TaxRulesLogic;
 import com.taxhouse.model.ArmedForcePersonnel;
 import com.taxhouse.model.Employee;
 import com.taxhouse.model.Organization;
@@ -60,7 +61,7 @@ public class TaxCalculator extends HttpServlet {
 			request.setAttribute("taxpayer", taxPayer);
 
 			try {
-				TaxRecord taxRecord = triggerRules(taxPayer);
+				TaxRecord taxRecord = TaxRulesLogic.triggerRules(taxPayer);
 				request.setAttribute("taxrecord", taxRecord);
 
 			} catch (Exception e) {
@@ -72,67 +73,6 @@ public class TaxCalculator extends HttpServlet {
 		}
 	}
 
-	public static TaxRecord triggerRules(TaxPayer taxPayer) throws Exception {
-		KnowledgeBase kbase = null;
-		TaxRecord taxRecord = null;
-
-		if (taxPayer instanceof Employee) {
-
-			if (taxPayer instanceof SeniorCitizen) {
-				kbase = readKnowledgeBase("seniorcitizens.drl");
-
-			} else if (taxPayer instanceof ArmedForcePersonnel) {
-				kbase = readKnowledgeBase("Armedforces.drl");
-
-			} else if (taxPayer instanceof Student) {
-				kbase = readKnowledgeBase("students.drl");
-
-			} else {
-				kbase = readKnowledgeBase("employeePay.drl", "NonProfit.drl");
-			}
-
-		} else if (taxPayer instanceof Organization) {
-			kbase = readKnowledgeBase("organization.drl");
-		}
-
-		if (kbase != null) {
-
-			taxRecord = new TaxRecord();
-
-			StatefulKnowledgeSession ksession = kbase.newStatefulKnowledgeSession();
-//			ksession.addEventListener(new DebugAgendaEventListener());
-//			ksession.addEventListener(new DebugWorkingMemoryEventListener());
-			ksession.insert(taxPayer);
-			ksession.insert(taxRecord);
-			ksession.fireAllRules();
-
-			System.out.println("Total Tax: " + taxPayer.getTax());
-
-		} else
-			System.out.println("Tax cannot be calculated with present information");
-
-		return taxRecord;
-	}
-
-	private static KnowledgeBase readKnowledgeBase(String... resources) throws Exception {
-
-		KnowledgeBuilder kbuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-		for (String resource : resources) {
-			kbuilder.add(ResourceFactory.newClassPathResource(resource), ResourceType.DRL);
-		}
-
-		KnowledgeBuilderErrors errors = kbuilder.getErrors();
-		if (errors.size() > 0) {
-			for (KnowledgeBuilderError error : errors) {
-				System.err.println(error);
-			}
-			throw new IllegalArgumentException("Could not parse knowledge.");
-		}
-
-		KnowledgeBase kbase = KnowledgeBaseFactory.newKnowledgeBase();
-		kbase.addKnowledgePackages(kbuilder.getKnowledgePackages());
-
-		return kbase;
-	}
+	
 
 }

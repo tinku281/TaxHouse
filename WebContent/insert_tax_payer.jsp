@@ -49,7 +49,7 @@ function validate()
 </head>
 <body>
 <%
-		String firstName,lastName,password,city,state,buttonLabel;
+	String firstName,lastName,password,city,state,buttonLabel;
 		int nationality;
 		boolean typeDisabled;
 		
@@ -57,27 +57,26 @@ function validate()
 		
 		if(taxPayer != null)
 		{
-			firstName = taxPayer.getFirstName(  );
-			lastName = taxPayer.getLastName(  );
-			password = taxPayer.getPassowrd(  );
-			city = taxPayer.getCity(  );
-			state =taxPayer.getState(  );
-			nationality = taxPayer.getNationality(  ).ordinal(  );
-			typeDisabled = true;
-			buttonLabel = "Update";
+	firstName = taxPayer.getFirstName(  );
+	lastName = taxPayer.getLastName(  );
+	password = taxPayer.getPassword(  );
+	city = taxPayer.getCity(  );
+	state =taxPayer.getState(  );
+	nationality = taxPayer.getNationality(  ).ordinal(  );
+	typeDisabled = true;
+	buttonLabel = "Update";
 		}
 		else
 		{
-			firstName="";
-			lastName = "";
-			password="";
-			city = "";
-			state = "";
-			nationality = TaxPayer.Nationality.USA.ordinal(  );
-			typeDisabled = false;
-			buttonLabel = "Submit";
+	firstName="";
+	lastName = "";
+	password="";
+	city = "";
+	state = "";
+	nationality = TaxPayer.Nationality.USA.ordinal(  );
+	typeDisabled = false;
+	buttonLabel = "Submit";
 		}
-
 %>
 
 <%@ include file = "header.jsp"%>

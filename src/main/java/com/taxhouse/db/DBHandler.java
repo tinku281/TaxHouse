@@ -124,11 +124,9 @@ public class DBHandler {
 	public static final String COMBAT_ZONE = "combat_zone";
 
 	// Armed Ranks
-
 	public static final String RANK = "rank";
 
 	// HAS_PARTNERSHIP TABLE
-
 	public static final String SHARE_UTIN = "Share_UTIN";
 	public static final String SHARE_PERCENT = "Share_Percent";
 
@@ -244,6 +242,7 @@ public class DBHandler {
 
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
+			return null;
 
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
@@ -360,7 +359,7 @@ public class DBHandler {
 			emp.setExMilatary("N");
 		}
 		if (rs1.next()) {
-			emp.setDependantincome(rs1.getDouble(DEP_AMOUNT));
+			emp.setDependantIncome(rs1.getDouble(DEP_AMOUNT));
 		}
 	}
 
@@ -525,14 +524,14 @@ public class DBHandler {
 
 	}
 
-	private void putExemptionDetails(Employee emp) throws SQLException {
+	private void putExemptionDetails(TaxPayer tp) throws SQLException {
 
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<Exemption> exemptions = null;
 
-		String sql = "select * from exemption natural join has_exmp where utin = " + emp.getUtin();
+		String sql = "select * from exemption natural join has_exmp where utin = " + tp.getUtin();
 
 		try {
 			con = getConnection();
@@ -547,21 +546,21 @@ public class DBHandler {
 						.getDouble(EXEMP_PER)));
 			}
 
-			emp.setExemptions(exemptions);
+			tp.setExemptions(exemptions);
 
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
 	}
 
-	private void putInvestmentDetails(Employee emp) throws SQLException {
+	private void putInvestmentDetails(TaxPayer tp) throws SQLException {
 
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<Investment> investments = null;
 
-		String sql = "select * from investment natural join has_inv where utin = " + emp.getUtin();
+		String sql = "select * from investment natural join has_inv where utin = " + tp.getUtin();
 
 		try {
 			con = getConnection();
@@ -576,7 +575,7 @@ public class DBHandler {
 						.getDouble(INV_APPL_PER)));
 			}
 
-			emp.setInvestments(investments);
+			tp.setInvestments(investments);
 
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
@@ -601,7 +600,7 @@ public class DBHandler {
 		return shares;
 	}
 
-	public Organization getOrganization(int utin) {
+	public Organization getOrganization(int utin) throws SQLException, ParseException {
 		Connection con = null;
 		Statement stmt = null;
 		Statement stmt1 = null;
@@ -618,6 +617,7 @@ public class DBHandler {
 			con = getConnection();
 			stmt = con.createStatement();
 			rs = stmt.executeQuery(sql);
+
 			if (rs.next()) {
 				org = new Organization();
 				org.setUtin(utin);
@@ -628,31 +628,36 @@ public class DBHandler {
 				org.setNationality(Nationality.valueOf(rs.getString(NATIONALITY)));
 				org.setEstblDate((dateFormat.parse(rs.getString(ESTBL_DATE))));
 				org.setCombinationId(rs.getInt(COMBINATION_ID));
+
 				String query1 = "select slab_id from org_slab where slab_min_amt<= " + rs.getDouble(GROSS_PROFIT)
 						+ " and slab_max_amt > " + rs.getDouble(GROSS_PROFIT);
 				stmt2 = con.createStatement();
 				rs2 = stmt2.executeQuery(query1);
+
 				if (rs2.next()) {
 					org.setSlabId(rs2.getInt(ORG_SLAB));
+
 					String query = "select * from org_tax where combination_id=" + rs.getInt(COMBINATION_ID)
 							+ " and slab_id=" + rs2.getInt(ORG_SLAB);
 					stmt1 = con.createStatement();
 					rs1 = stmt1.executeQuery(query);
+
 					if (rs1.next()) {
 						org.setTaxPer(rs1.getDouble(ORG_TAX_PER));
 					}
 				}
+
 				org.setScaleId(rs.getInt(SCALE_ID));
 				org.setTypeId(rs.getInt(TYPE_ID));
 				org.setCategoryId(rs.getInt(CATEGORY_ID));
 				org.setTurnover(rs.getDouble(TURNOVER));
 				org.setIncome(rs.getDouble(GROSS_PROFIT));
 				org.setShares(this.getOrganizationShares(utin));
+
+				putExemptionDetails(org);
+				putInvestmentDetails(org);
 			}
 
-		} catch (Exception e) {
-			System.out.println(e);
-			return null;
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
@@ -1131,7 +1136,61 @@ public class DBHandler {
 	}
 
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
+
+		Connection con = null;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+
 		String sql = "insert into tax_payer(tp_password, firstname, lastname, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
+
+		try {
+			con = getConnection();
+			stmt = con.prepareStatement(sql);
+
+			stmt.setString(1, taxPayer.getPassword());
+			stmt.setString(2, taxPayer.getFirstName());
+			stmt.setString(3, taxPayer.getLastName());
+			stmt.setString(4, taxPayer.getCity());
+			stmt.setString(5, taxPayer.getState());
+			stmt.setString(6, taxPayer.getNationality().toString());
+			stmt.setInt(7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
+					: TaxPayer.SubType.ORGANIZATION.ordinal());
+
+			stmt.executeUpdate();
+			stmt.close();
+			stmt = null;
+			
+			if (taxPayer instanceof Employee) {
+				sql = "insert into employee values(?,?,?,?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				stmt.setInt(1, taxPayer.getUtin());
+				stmt.setString(2, dateFormat.format(((Employee) taxPayer).getDateOfBirth()));
+				stmt.setString(3, ((Employee) taxPayer).getGender().toString());
+				stmt.setInt(4, ((Employee) taxPayer).getNoOfDependants());
+				stmt.setString(5, ((Employee) taxPayer).getMaritalStatus().toString());
+				stmt.setString(6, ((Employee) taxPayer).getResidencyStatus().toString());
+
+				if (taxPayer instanceof Student)
+					stmt.setInt(7, Employee.SubType.STUDENT.ordinal());
+				else if (taxPayer instanceof SeniorCitizen)
+					stmt.setInt(7, Employee.SubType.SENIOR_CITIZEN.ordinal());
+				else if (taxPayer instanceof ArmedForcePersonnel)
+					stmt.setInt(7, Employee.SubType.ARMY.ordinal());
+				else
+					stmt.setInt(7, Employee.SubType.NONE.ordinal());
+				
+				stmt.executeUpdate();
+				stmt.close();
+				stmt = null;
+			}
+
+		} catch (Exception e) {
+			return false;
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
 
 		return true;
 	}

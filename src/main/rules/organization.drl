@@ -1,4 +1,4 @@
-/*package com.taxhouse;
+package com.taxhouse;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -6,1890 +6,1692 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
-import com.taxhouse.model.*;
-import com.taxhouse.db.*;
 import com.taxhouse.app.*;
+import com.taxhouse.db.*;
+import com.taxhouse.model.*;
 import com.taxhouse.model.TaxRecord.Entry;
-import com.taxhouse.servlet.TaxCalculator;
 
-rule "Small Scale Profit Private Class A Federal base rule"
-salience 25
+rule "Small Scale Profit Private Class A Federal base rule" #Base Tax
+salience 50
  when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.5;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*0.7;	
-      }
-      else {
-      	taxPer+=taxPer*2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Small scale Profit Private Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+	double amount = item.getTaxableIncome();
+	double percent = 20;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.5;
+	} else if (slabId == 3) {
+		percent = percent * 0.7;
+	} else {
+		percent = percent * 1.1;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Private Class A organization)", percent, fraction));
  end
  
- rule "Small Scale Profit Private Class A State tax rule"
- salience 24
+ rule "Small Scale Profit Private Class A State tax rule" #Base Tax
+ salience 48
  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
+	  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 13.9;
-         }
-         else{
-         taxPer=15.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 14.5;
-    	}
-    	else{
-    	taxPer= 16.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=15.0;
-         }
-         else{
-         taxPer=16;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Private Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+ 	double amount = item.getTaxableIncome();
+	double percent = 15;
+
+	int slab = item.getSlabId();
+
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+
+	else {
+		if (slab == 1) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Private Class A organization)", percent,
+			fraction));
  end   
- 
- 
- rule "Medium Scale Profit Private Class A Federal base rule"
-salience 25
- when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.8;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*0.9;	
-      }
-      else {
-      	taxPer+=taxPer*2.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Small scale Profit Private Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Private Class A State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 13.9;
-         }
-         else{
-         taxPer=15.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==2){
-         taxPer = 14.5;
-    	}
-    	else{
-    	taxPer= 16.5;
-    	}
-     }
-    
-    else{
-        if(slab ==3){
-         taxPer=15.0;
-         }
-         else{
-         taxPer=16;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Private Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
- 
- 
- 
- rule "Large Scale Profit Private Class A Federal base rule"
-salience 25
- when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.2;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*2;	
-      }
-      else {
-      	taxPer+=taxPer*3;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
- 
-      System.out.println("Base Federal Tax  for Large scale Profit Private Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Private Class A State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 15.9;
-         }
-         else{
-         taxPer=16.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==2){
-         taxPer = 18.5;
-    	}
-    	else{
-    	taxPer= 19.5;
-    	}
-     }
-    
-    else{
-        if(slab ==3){
-         taxPer=20.0;
-         }
-         else{
-         taxPer=22;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Private Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end      
- 
 
-
-
-rule "Small Scale Profit Private Class B Federal base rule"
-salience 25
+ rule "Medium Scale Profit Private Class A Federal base rule"  #Base Tax
+salience 50
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.9;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*1.2;	
-      }
-      else {
-      	taxPer+=taxPer*2.5;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Private Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Small Scale Profit Private Class B State tax rule"
- salience 24
- when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 13.2;
-         }
-         else{
-         taxPer=14.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 15.5;
-    	}
-    	else{
-    	taxPer= 16.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=17.0;
-         }
-         else{
-         taxPer=18;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Private Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
- 
- 
- rule "Medium Scale Profit Private Class B Federal base rule"
-salience 25
- when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.2;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*1.8;	
-      }
-      else {
-      	taxPer+=taxPer*3.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Private Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Private Class B State tax rule"
- salience 24
-  when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 14.2;
-         }
-         else{
-         taxPer=15.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 15.9;
-    	}
-    	else{
-    	taxPer= 17;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=17.5;
-         }
-         else{
-         taxPer=18.5;
-         	}
-        }
+	double amount = item.getTaxableIncome();
+	double percent = 25;
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Private Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.8;
+	} else if (slabId == 3) {
+		percent = percent * 0.9;
+	} else {
+		percent = percent * 1.2;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Private Class A organization)", percent,
+				fraction));   
+end
+ 
+ rule "Medium Scale Profit Private Class A State tax rule" #Base Tax
+ salience 48
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Private Class A organization)", percent,
+			fraction)); 
+end  
  
  
  
-rule "Large Scale Profit Private Class B Federal base rule"
-salience 25
+ rule "Large Scale Profit Private Class A Federal base rule" #Base Tax
+salience 50
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 25;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.2;
+	} else if (slabId == 3) {
+		percent = percent * 1.4;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Private Class A organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Private Class A State tax rule" #Base Tax
+ salience 48
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 15.9;
+		} else {
+			percent = 16.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 18.5;
+		} else {
+			percent = 19.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 20.0;
+		} else {
+			percent = 22;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Private Class A organization)", percent,
+			fraction));
+end      
+ 
+rule "Small Scale Profit Private Class B Federal base rule" #Base Tax
+salience 49
 when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.5;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*2;	
-      }
-      else {
-      	taxPer+=taxPer*3.5;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Large scale Profit Private Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Private Class B State tax rule"
- salience 24
- when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 14.2;
-         }
-         else{
-         taxPer=15.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 15.9;
-    	}
-    	else{
-    	taxPer= 17;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=17.5;
-         }
-         else{
-         taxPer=18.5;
-         	}
-        }
+	double amount = item.getTaxableIncome();
+	double percent = 14;
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Private Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 0.9;
+	} else if (slabId == 3) {
+		percent = percent * 1.2;
+	} else {
+		percent = percent * 1.4;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Private Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Small Scale Profit Private Class B State tax rule" #Base Tax
+ salience 49
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slabId = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slabId == 1) {
+			percent = 13.2;
+		} else {
+			percent = 14.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slabId == 1) {
+			percent = 15.5;
+		} else {
+			percent = 16.5;
+		}
+	} else {
+		if (slabId == 1) {
+			percent = 17.0;
+		} else {
+			percent = 18;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Private Class B organization)", percent,
+			fraction));
+end   
+ 
+ 
+rule "Medium Scale Profit Private Class B Federal base rule" #Base Tax
+salience 49
+ when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 19;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.1;
+	} else if (slabId == 3) {
+		percent = percent * 1.25;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Private Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Medium Scale Profit Private Class B State tax rule" #Base Tax
+ salience 47
+when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.2;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 15.9;
+		} else {
+			percent = 17;
+		}
+	} else {
+		if (slab == 1) {
+			percent = 17.5;
+		} else {
+			percent = 18.5;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Private Class B organization)", percent,
+			fraction));
+end  
+ 
+ 
+ 
+rule "Large Scale Profit Private Class B Federal base rule" #Base Tax
+salience 49
+when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 28;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.1;
+	} else if (slabId == 3) {
+		percent = percent * 1.2;
+	} else {
+		percent = percent * 1.35;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Private Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Private Class B State tax rule" #Base Tax
+ salience 47
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.9;
+		} else {
+			percent = 13.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 12.5;
+		} else {
+			percent = 16.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.0;
+		} else {
+			percent = 22.8;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Private Class B organization)", percent,
+			fraction));
  end      
  
  
  
- rule "Small Scale Profit Private Class C Federal base rule"
-salience 25
+ rule "Small Scale Profit Private Class C Federal base rule" #Base Tax
+salience 45
 when
-  item:Organization(scaleId == Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY)) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE))
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.4;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*1.9;	
-      }
-      else {
-      	taxPer+=taxPer*2.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Private Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Small Scale Profit Private Class C State tax rule"
- salience 24
- when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 12.2;
-         }
-         else{
-         taxPer=11.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 13.5;
-    	}
-    	else{
-    	taxPer= 14.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=15.0;
-         }
-         else{
-         taxPer=16;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Private Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
- 
- 
- rule "Medium Scale Profit Private Class C Federal base rule"
- when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.9;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*1.8;	
-      }
-      else {
-      	taxPer+=taxPer*4.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Private Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Private Class C State tax rule"
- salience 24
- when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 13.7;
-         }
-         else{
-         taxPer=14.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 14.5;
-    	}
-    	else{
-    	taxPer= 15.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=16.0;
-         }
-         else{
-         taxPer=17;
-         	}
-        }
- 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Private Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
- 
- 
- 
-rule "Large Scale Profit Private Class C Federal base rule"
-salience 25
- when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*2.9;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*2.8;	
-      }
-      else {
-      	taxPer+=taxPer*5.2;
-      }
-      
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Private Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Private Class C State tax rule"
- salience 24
-  when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 15.7;
-         }
-         else{
-         taxPer=15.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 17.5;
-    	}
-    	else{
-    	taxPer= 18.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=20.0;
-         }
-         else{
-         taxPer=22;
-         	}
-        }
+	 item:Organization(scaleId == Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY)) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE))
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 15;
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Private Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end      
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.5;
+	} else if (slabId == 3) {
+		percent = percent * 0.7;
+	} else {
+		percent = percent * 1.1;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Private Class C organization)", percent, fraction));
+ end
+ 
+ rule "Small Scale Profit Private Class C State tax rule" #Base Tax
+ salience 43
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 13;
+
+	int slab = item.getSlabId();
+
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 11.9;
+		} else {
+			percent = 21.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 11.5;
+		} else {
+			percent = 18.5;
+		}
+	}else {
+		if (slab == 1) {
+			percent = 19.0;
+		} else {
+			percent = 12;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Private Class C organization)", percent,
+			fraction));
+end   
+ 
+ 
+ rule "Medium Scale Profit Private Class C Federal base rule" #Base Tax
+ salience 45
+ when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 15;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.6;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 1.4;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Private Class C organization)", percent,
+				fraction));   
+end
+ 
+ rule "Medium Scale Profit Private Class C State tax rule" #Base Tax
+ salience 43
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 15.5;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 15.3;
+		} else {
+			percent = 18;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Private Class C organization)", percent,
+			fraction)); 
+end  
+ 
+ 
+ 
+rule "Large Scale Profit Private Class C Federal base rule" #Base Tax
+salience 45
+ when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 25;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.2;
+	} else if (slabId == 3) {
+		percent = percent * 1.4;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Private Class C organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Private Class C State tax rule" #Base Tax
+ salience 43
+  when
+	  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 21.9;
+		} else {
+			percent = 25.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 23.5;
+		} else {
+			percent = 27.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.0;
+		} else {
+			percent = 22.8;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Private Class C organization)", percent,
+			fraction));
+end      
  
  
  
   
- rule "Small Scale Profit Private Class D Federal base rule"
-salience 25
+ rule "Small Scale Profit Private Class D Federal base rule" #Base Tax
+salience 44
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.2;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*1.8;	
-      }
-      else {
-      	taxPer+=taxPer*1.6;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Private Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
+	double amount = item.getTaxableIncome();
+	double percent = 24;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 1.5;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 1.18;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Private Class D organization)", percent, fraction));
+end
  
  rule "Small Scale Profit Private Class D State tax rule"
- salience 24
+ salience 42
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 11.2;
-         }
-         else{
-         taxPer=12.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 12.5;
-    	}
-    	else{
-    	taxPer= 13.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=14.0;
-         }
-         else{
-         taxPer=15;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Private Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+
+	else {
+		if (slab == 1) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Private Class D organization)", percent,
+			fraction));
+end   
  
  
- rule "Medium Scale Profit Private Class D Federal base rule"
+ rule "Medium Scale Profit Private Class D Federal base rule" #Base Tax
+  salience 44
  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.9;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*1.9;	
-      }
-      else {
-      	taxPer+=taxPer*2.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Private Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
+	double amount = item.getTaxableIncome();
+	double percent = 22;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 1.5;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 0.8;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Private Class D organization)", percent,
+				fraction));    
+end
  
- rule "Medium Scale Profit Private Class D State tax rule"
- salience 24
+ rule "Medium Scale Profit Private Class D State tax rule" #Base Tax
+ salience 42
  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 12.7;
-         }
-         else{
-         taxPer=11.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 13.5;
-    	}
-    	else{
-    	taxPer= 12.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=15.0;
-         }
-         else{
-         taxPer=16;
-         	}
-        }
- 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Private Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 8.6;
+		} else {
+			percent = 5.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 4.5;
+		} else {
+			percent = 6.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 5.0;
+		} else {
+			percent = 11;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Private Class D organization)", percent,
+			fraction));  
+end  
  
  
  
 rule "Large Scale Profit Private Class D Federal base rule"
-salience 25
+salience 44
  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*2.8;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*2.7;	
-      }
-      else {
-      	taxPer+=taxPer*5;
-      }
-      
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Private Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
+	double amount = item.getTaxableIncome();
+	double percent = 30;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.35;
+	} else if (slabId == 3) {
+		percent = percent * 1.5;
+	} else {
+		percent = percent * 1.12;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Private Class D organization)", percent,
+			fraction));
+end
  
  rule "Large Scale Profit Private Class D State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 14.7;
-         }
-         else{
-         taxPer=13.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 16.5;
-    	}
-    	else{
-    	taxPer= 17.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=19.0;
-         }
-         else{
-         taxPer=21;
-         	}
-        }
-
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Private Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end                 
- 
- 
-
-rule "Small Scale Profit Public Class A Federal base rule"
-salience 25
+ salience 42
  when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.1;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*0.4;	
-      }
-      else {
-      	taxPer+=taxPer*1.7;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Small scale Profit Public  Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 21.2;
+		} else {
+			percent = 16.2;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 12.3;
+		} else {
+			percent = 17.3;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.3;
+		} else {
+			percent = 25.7;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Private Class D organization)", percent,
+			fraction));
+end                 
+  
+rule "Small Scale Profit Public Class A Federal base rule" #Base Tax
+salience 40
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 20;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.5;
+	} else if (slabId == 3) {
+		percent = percent * 0.7;
+	} else {
+		percent = percent * 1.1;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Public Class A organization)", percent, fraction));
  end
  
- rule "Small Scale Profit Profit Class A State tax rule"
- salience 24
+ rule "Small Scale Profit Public Class A State tax rule" #Base Tax
+ salience 38
  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
+	  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 3.9;
-         }
-         else{
-         taxPer=5.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 4.5;
-    	}
-    	else{
-    	taxPer= 6.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=5.0;
-         }
-         else{
-         taxPer=6;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Public Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+ 	double amount = item.getTaxableIncome();
+	double percent = 15;
+
+	int slab = item.getSlabId();
+
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+
+	else {
+		if (slab == 1) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Public Class A organization)", percent,
+			fraction));
  end   
+
+ rule "Medium Scale Profit Public Class A Federal base rule"  #Base Tax
+salience 40
+when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 25;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.8;
+	} else if (slabId == 3) {
+		percent = percent * 0.9;
+	} else {
+		percent = percent * 1.2;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Public Class A organization)", percent,
+				fraction));   
+end
  
- 
- rule "Medium Scale Profit Public Class A Federal base rule"
-salience 25
+ rule "Medium Scale Profit Public Class A State tax rule" #Base Tax
+ salience 38
  when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.4;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*0.6;	
-      }
-      else {
-      	taxPer+=taxPer*1.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Small scale Profit Public Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Public Class A State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 3;
-         }
-         else{
-         taxPer=5;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==2){
-         taxPer = 4;
-    	}
-    	else{
-    	taxPer= 6;
-    	}
-     }
-    
-    else{
-        if(slab ==3){
-         taxPer=4;
-         }
-         else{
-         taxPer=3;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Public Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Public Class A organization)", percent,
+			fraction)); 
+end  
  
  
  
- rule "Large Scale Profit Public Class A Federal base rule"
-salience 25
+ rule "Large Scale Profit Public Class A Federal base rule" #Base Tax
+salience 40
  when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.2;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*2;	
-      }
-      else {
-      	taxPer+=taxPer*3.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 25;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.2;
+	} else if (slabId == 3) {
+		percent = percent * 1.4;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Public Class A organization)", percent,
+			fraction));
+end
  
-      System.out.println("Base Federal Tax  for Large scale Profit Public Class A organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Public Class A State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
- ))
- taxRecord:TaxRecord(  )
+ rule "Large Scale Profit Public Class A State tax rule" #Base Tax
+ salience 38
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.AGRICULTURE) ) || (categoryId==Organization.Category.getId(Organization.Category.EDUCATIONAL)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ARMY) ) || (categoryId == Organization.Category.getId(Organization.Category.HEALTH) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 5.9;
-         }
-         else{
-         taxPer=6.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==2){
-         taxPer = 8.5;
-    	}
-    	else{
-    	taxPer= 9.5;
-    	}
-     }
-    
-    else{
-        if(slab ==3){
-         taxPer=10.0;
-         }
-         else{
-         taxPer=11;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Public Class A organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 15.9;
+		} else {
+			percent = 16.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 18.5;
+		} else {
+			percent = 19.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 20.0;
+		} else {
+			percent = 22;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Public Class A organization)", percent,
+			fraction));
+end      
+ 
+rule "Small Scale Profit Public Class B Federal base rule" #Base Tax
+salience 39
+when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 14;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 0.9;
+	} else if (slabId == 3) {
+		percent = percent * 1.2;
+	} else {
+		percent = percent * 1.4;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Public Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Small Scale Profit Public Class B State tax rule" #Base Tax
+ salience 37
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slabId = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slabId == 1) {
+			percent = 13.2;
+		} else {
+			percent = 14.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slabId == 1) {
+			percent = 15.5;
+		} else {
+			percent = 16.5;
+		}
+	} else {
+		if (slabId == 1) {
+			percent = 17.0;
+		} else {
+			percent = 18;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Public Class B organization)", percent,
+			fraction));
+end   
+ 
+ 
+rule "Medium Scale Profit Public Class B Federal base rule" #Base Tax
+salience 39
+ when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 19;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.1;
+	} else if (slabId == 3) {
+		percent = percent * 1.25;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Public Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Medium Scale Profit Public Class B State tax rule" #Base Tax
+ salience 37
+when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.2;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 15.9;
+		} else {
+			percent = 17;
+		}
+	} else {
+		if (slab == 1) {
+			percent = 17.5;
+		} else {
+			percent = 18.5;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Public Class B organization)", percent,
+			fraction));
+end  
+ 
+ 
+ 
+rule "Large Scale Profit Public Class B Federal base rule" #Base Tax
+salience 39
+when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 28;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.1;
+	} else if (slabId == 3) {
+		percent = percent * 1.2;
+	} else {
+		percent = percent * 1.35;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Public Class B organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Public Class B State tax rule" #Base Tax
+ salience 37
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.9;
+		} else {
+			percent = 13.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 12.5;
+		} else {
+			percent = 16.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.0;
+		} else {
+			percent = 22.8;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Public Class B organization)", percent,
+			fraction));
  end      
  
-
-
-
-rule "Small Scale Profit Public Class B Federal base rule"
-salience 25
+ rule "Small Scale Profit Public Class C Federal base rule" #Base Tax
+salience 35
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.45;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*0.6;	
-      }
-      else {
-      	taxPer+=taxPer*1.25;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Public Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
+	 item:Organization(scaleId == Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY)) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE))
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 15;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.5;
+	} else if (slabId == 3) {
+		percent = percent * 0.7;
+	} else {
+		percent = percent * 1.1;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Public Class C organization)", percent, fraction));
  end
  
- rule "Small Scale Profit Public Class B State tax rule"
- salience 24
+ rule "Small Scale Profit Public Class C State tax rule" #Base Tax
+ salience 33
  when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 6.56;
-         }
-         else{
-         taxPer=7.45;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 7.75;
-    	}
-    	else{
-    	taxPer= 8.25;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=8.5;
-         }
-         else{
-         taxPer=9;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Public Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
+	double amount = item.getTaxableIncome();
+	double percent = 13;
+
+	int slab = item.getSlabId();
+
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 11.9;
+		} else {
+			percent = 21.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 11.5;
+		} else {
+			percent = 18.5;
+		}
+	}else {
+		if (slab == 1) {
+			percent = 19.0;
+		} else {
+			percent = 12;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Public Class C organization)", percent,
+			fraction));
+end   
  
  
- rule "Medium Scale Profit Public Class B Federal base rule"
-salience 25
+ rule "Medium Scale Profit Public Class C Federal base rule" #Base Tax
+ salience 35
  when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.6;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*0.9;	
-      }
-      else {
-      	taxPer+=taxPer*1.6;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Public Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
+	double amount = item.getTaxableIncome();
+	double percent = 15;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 0.6;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 1.4;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Public Class C organization)", percent,
+				fraction));   
+end
  
- rule "Medium Scale Profit Public Class B State tax rule"
- salience 24
+ rule "Medium Scale Profit Public Class C State tax rule" #Base Tax
+ salience 33
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 15.5;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 15.3;
+		} else {
+			percent = 18;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Public Class C organization)", percent,
+			fraction)); 
+end  
+ 
+ 
+ 
+rule "Large Scale Profit Public Class C Federal base rule" #Base Tax
+salience 35
+ when
+	item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 25;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.2;
+	} else if (slabId == 3) {
+		percent = percent * 1.4;
+	} else {
+		percent = percent * 1.6;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Public Class C organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Public Class C State tax rule" #Base Tax
+ salience 33
   when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 7.1;
-         }
-         else{
-         taxPer=7.29;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 7.95;
-    	}
-    	else{
-    	taxPer= 8.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=8.75;
-         }
-         else{
-         taxPer=9.25;
-         	}
-        }
+	  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
+	 ))
+	 taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Public Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
- 
- 
- 
-rule "Large Scale Profit Public Class B Federal base rule"
-salience 25
-when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.75;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*1;	
-      }
-      else {
-      	taxPer+=taxPer*1.75;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Large scale Profit Public Class B organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Public Class B State tax rule"
- salience 24
- when
- item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INSURANCE) ) || (categoryId==Organization.Category.getId(Organization.Category.FINANCE)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.ENTERTAINMENT) ) || (categoryId == Organization.Category.getId(Organization.Category.AUTOMOBILE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 7.1;
-         }
-         else{
-         taxPer=7.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 8.9;
-    	}
-    	else{
-    	taxPer= 9.9;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=10;
-         }
-         else{
-         taxPer=11;
-         	}
-        }
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 21.9;
+		} else {
+			percent = 25.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 23.5;
+		} else {
+			percent = 27.5;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.0;
+		} else {
+			percent = 22.8;
+		}
+	}
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Public Class B organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end      
- 
- 
- 
- rule "Small Scale Profit Public Class C Federal base rule"
-salience 25
-when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.2;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*0.95;	
-      }
-      else {
-      	taxPer+=taxPer*1.1;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Public Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Small Scale Profit Public Class C State tax rule"
- salience 24
- when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- &&( (categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 6.1;
-         }
-         else{
-         taxPer=7;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 6.25;
-    	}
-    	else{
-    	taxPer= 7.26;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=7.5;
-         }
-         else{
-         taxPer=8;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Public Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
- 
- 
- rule "Medium Scale Profit Public Class C Federal base rule"
- when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.95;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*2.2;	
-      }
-      else {
-      	taxPer+=taxPer*3.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Public Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Public Class C State tax rule"
- salience 24
- when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 7;
-         }
-         else{
-         taxPer=7.85;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 8;
-    	}
-    	else{
-    	taxPer= 8.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=9.0;
-         }
-         else{
-         taxPer=9.5;
-         	}
-        }
- 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Public Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
- 
- 
- 
-rule "Large Scale Profit Public Class C Federal base rule"
-salience 25
- when
-item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.8;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*2;	
-      }
-      else {
-      	taxPer+=taxPer*3.2;
-      }
-      
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Public Class C organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Public Class C State tax rule"
- salience 24
-  when
-   item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.INFORMATION_TECHNOLOGY) ) || (categoryId==Organization.Category.getId(Organization.Category.CHEMICALS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.PETROLEUM) ) || (categoryId == Organization.Category.getId(Organization.Category.REAL_ESTATE) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 8;
-         }
-         else{
-         taxPer=8.5;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 9;
-    	}
-    	else{
-    	taxPer= 10;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer = 11.0;
-         }
-         else{
-         taxPer=12;
-         	}
-        }
-
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Public Class C organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end      
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Public Class C organization)", percent,
+			fraction));
+end      
  
  
  
   
- rule "Small Scale Profit Public Class D Federal base rule"
-salience 25
+ rule "Small Scale Profit Public Class D Federal base rule" #Base Tax
+salience 34
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.2;	 
-      }
-      else if(slabId == 3)
-     {
-        taxPer+=taxPer*0.8;	
-      }
-      else {
-      	taxPer+=taxPer*0.6;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax for Small scale Profit Public Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
+	double amount = item.getTaxableIncome();
+	double percent = 24;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 1.5;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 1.18;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Small scale Profit Public Class D organization)", percent, fraction));
+end
  
  rule "Small Scale Profit Public Class D State tax rule"
- salience 24
+ salience 32
 when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.SMALL) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 1.2;
-         }
-         else{
-         taxPer=2.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 2.5;
-    	}
-    	else{
-    	taxPer= 3.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=4.0;
-         }
-         else{
-         taxPer=5;
-         	}
-        }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Small scale Profit Public Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end   
- 
- 
- rule "Medium Scale Profit Public Class D Federal base rule"
- when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT)  || categoryId==Organization.Category.getId(Organization.Category.LOGISTICS) ||
- categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) || categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING)
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*0.2;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*0.9;	
-      }
-      else {
-      	taxPer+=taxPer*1.2;
-      }
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Public Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Medium Scale Profit Public Class D State tax rule"
- salience 24
- when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 2.7;
-         }
-         else{
-         taxPer=1.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 3.5;
-    	}
-    	else{
-    	taxPer= 2.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=5.0;
-         }
-         else{
-         taxPer=6;
-         	}
-        }
- 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Medium scale Profit Public Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end  
- 
- 
- 
-rule "Large Scale Profit Public Class D Federal base rule"
-salience 25
- when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT)  || categoryId==Organization.Category.getId(Organization.Category.LOGISTICS) ||
- categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION)  || categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING)
- ))
- taxRecord:TaxRecord(  )
-then 
-      int slabId=item.getSlabId();
-      double taxPer = item.getTaxPer();
-      double grossProfit=item.getIncome();
-      if(slabId==2)
-      {
-      taxPer+=taxPer*1.8;	
-      } 
-     else if(slabId ==3)
-     {
-        taxPer+=taxPer*1.7;	
-      }
-      else {
-      	taxPer+=taxPer*2;
-      }
-      
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base Federal Tax  for Medium scale Profit Public Class D organization: @  " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end
- 
- rule "Large Scale Profit Public Class D State tax rule"
- salience 24
-  when
-  item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
- && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
- (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
- ))
- taxRecord:TaxRecord(  )
-then 
- int slab=item.getSlabId();
- double taxPer=0;
- double grossProfit=item.getIncome();
-   if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B"){
-        if(slab==1){
-         taxPer = 4.7;
-         }
-         else{
-         taxPer=3.9;
-         }
-    }
-   	else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         if(slab==1){
-         taxPer = 6.5;
-    	}
-    	else{
-    	taxPer= 7.5;
-    	}
-     }
-    
-    else{
-        if(slab==1){
-         taxPer=9.0;
-         }
-         else{
-         taxPer=10;
-         	}
-        }
+	double amount = item.getTaxableIncome();
+	double percent = 0;
 
-      double taxcal = Utils.calculateTax(grossProfit,taxPer);
-      System.out.println("Base State Tax for Large scale Profit Public Class D organization: @ " + taxPer + "% : " +taxcal);
-      item.setTax(item.getTax()+taxcal);
- end     
- 
+	int slab = item.getSlabId();
 
- 
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 13.9;
+		} else {
+			percent = 15.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			percent = 14.5;
+		} else {
+			percent = 16.5;
+		}
+	}
 
- rule "Non-Profit-Private Tax Base rule  "
- salience 25
+	else {
+		if (slab == 1) {
+			percent = 15.0;
+		} else {
+			percent = 16;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Small scale Profit Public Class D organization)", percent,
+			fraction));
+end   
+ 
+ 
+ rule "Medium Scale Profit Public Class D Federal base rule" #Base Tax
+  salience 34
  when
- item:Organization(typeId==Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE))
- taxRecord:TaxRecord(  )
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 22;
+
+	int slabId = item.getSlabId();
+
+	if (slabId == 2) {
+		percent = percent * 1.5;
+	} else if (slabId == 3) {
+		percent = percent * 1.3;
+	} else {
+		percent = percent * 0.8;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Medium scale Profit Public Class D organization)", percent,
+				fraction));    
+end
+ 
+ rule "Medium Scale Profit Public Class D State tax rule" #Base Tax
+ salience 32
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.MEDIUM) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 &&( (categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
 then
- int slabId=item.getSlabId();
- double ftaxPer=item.getTaxPer();
- double staxPer=0;
- double grossProfit=item.getIncome();
-  
-  if(slabId == 2)
-      {
-      ftaxPer+=ftaxPer*0.2;
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-      {
-      staxPer=2;	
-      }
-      else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-      {
-      staxPer=2.5;
-      }
-      else{
-      staxPer=3;
-      }
-      } 
-     else if(slabId == 3)
-     {
-        ftaxPer+=ftaxPer*0.3;
-        if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-        staxPer=3;	
-      	}
-      	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-         {
-       		staxPer=3.5;
-      	 }
-      	else{
-      		staxPer=4;
-      	
-      	}
-      }
-      
-      else {
-      	ftaxPer+=ftaxPer*0.4;
-      	 if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-        staxPer=4;	
-      	}
-      	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-         {
-       		staxPer=4.5;
-      	 }
-      	else{
-      		staxPer=5;
-      	
-      	}
-      }
-      double ftaxcal = Utils.calculateTax(grossProfit,ftaxPer);  
-      double staxcal = Utils.calculateTax(grossProfit,staxPer);
-      taxRecord.addEntry(new Entry("Base Federal Tax Non-Profit Private" , ftaxPer, ftaxcal));
-      taxRecord.addEntry(new Entry("Base State Tax Non-Profit Private" , staxPer, staxcal));
-      System.out.println("Base Federal Tax  for Non - Profit - Private organization: @  " + ftaxPer + "% : " +ftaxcal);
-	  System.out.println("Base State Tax  for Non - Profit - Private organization: @  " + staxPer + "% : " +staxcal);      
-      item.setTax(staxcal+ftaxcal);
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 8.6;
+		} else {
+			percent = 5.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 4.5;
+		} else {
+			percent = 6.5;
+		}
+	}
+	else {
+		if (slab == 3) {
+			percent = 5.0;
+		} else {
+			percent = 11;
+		}
+	}
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Public Class D organization)", percent,
+			fraction));  
+end  
  
- end
+ 
+ 
+rule "Large Scale Profit Public Class D Federal base rule" #Base Tax
+salience 34
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 30;
+
+	int slabId = item.getSlabId();
+	if (slabId == 2) {
+		percent = percent * 1.35;
+	} else if (slabId == 3) {
+		percent = percent * 1.5;
+	} else {
+		percent = percent * 1.12;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Large scale Profit Public Class D organization)", percent,
+			fraction));
+end
+ 
+ rule "Large Scale Profit Public Class D State tax rule" #Base Tax 
+ salience 32
+ when
+	 item:Organization(scaleId==Organization.Scale.getId(Organization.Scale.LARGE) && typeId==Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) 
+	 && ((categoryId == Organization.Category.getId(Organization.Category.TRANSPORT) ) || (categoryId==Organization.Category.getId(Organization.Category.LOGISTICS)  ) ||
+	 (categoryId == Organization.Category.getId(Organization.Category.TELECOMMUNICATION) ) || (categoryId == Organization.Category.getId(Organization.Category.MANUFACTURING) )
+	 ))
+	 taxRecord:TaxRecord()
+then 
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+	int slab = item.getSlabId();
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			percent = 21.2;
+		} else {
+			percent = 16.2;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 2) {
+			percent = 12.3;
+		} else {
+			percent = 17.3;
+		}
+	} else {
+		if (slab == 3) {
+			percent = 21.3;
+		} else {
+			percent = 25.7;
+		}
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Public Class D organization)", percent,
+			fraction));
+end      
+
+ rule "Non-Profit-Private Tax Base rule" #Base Tax
+ salience 30
+ when
+	 item:Organization(typeId==Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE))
+	 taxRecord:TaxRecord()
+then
+
+ 
+end
  
  rule "Non-Profit-Public Tax Base rule"
  salience 25
  when
  item:Organization(typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
- taxRecord:TaxRecord(  )
+ taxRecord:TaxRecord()
 then
  int slabId=item.getSlabId();
- double ftaxPer=item.getTaxPer();
- double staxPer=0;
- double grossProfit=item.getIncome();
+ double fpercent=item.getpercent();
+ double spercent=0;
+ double grossProfit=item.getTaxableIncome();
   
   if(slabId == 2)
       {
-      ftaxPer+=ftaxPer*0.1;
+      fpercent+=fpercent*0.1;
       if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
       {
-      staxPer=1;	
+      spercent=1;	
       }
       else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
       {
-      staxPer=1.5;
+      spercent=1.5;
       }
       else{
-      staxPer=2;
+      spercent=2;
       }
       } 
      else if(slabId == 3)
      {
-        ftaxPer+=ftaxPer*0.2;
+        fpercent+=fpercent*0.2;
         if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
         {
-        staxPer=2;	
+        spercent=2;	
       	}
       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
          {
-       		staxPer=2.5;
+       		spercent=2.5;
       	 }
       	else{
-      		staxPer=3;
+      		spercent=3;
       	
       	}
       }
       
       else {
-      	ftaxPer+=ftaxPer*0.3;
+      	fpercent+=fpercent*0.3;
       	 if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
         {
-        staxPer=3;	
+        spercent=3;	
       	}
       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
          {
-       		staxPer=3.5;
+       		spercent=3.5;
       	 }
       	else{
-      		staxPer=4;
+      		spercent=4;
           	}
       }
-      double ftaxcal = Utils.calculateTax(grossProfit,ftaxPer);  
-      double staxcal = Utils.calculateTax(grossProfit,staxPer);
-      System.out.println("Base Federal Tax  for Non - Profit - Public organization: @  " + ftaxPer + "% : " +ftaxcal);
-	  System.out.println("Base State Tax  for Non - Profit - Public organization: @  " + staxPer + "% : " +staxcal);      
+      double ftaxcal = Utils.calculatePercentage(grossProfit,fpercent);  
+      double staxcal = Utils.calculatePercentage(grossProfit,spercent);
+      System.out.println("Base Federal Tax  for Non - Profit - Public organization: @  " + fpercent + "% : " +ftaxcal);
+	  System.out.println("Base State Tax  for Non - Profit - Public organization: @  " + spercent + "% : " +staxcal);      
       item.setTax(staxcal+ftaxcal);
  
  end
             
- ****** END OF BASE RULES *****
+ //****** END OF BASE RULES *****/
 
 
 rule"History 3 years Rule for Organizations."
 salience 22
 	when 
 		 item:Organization(mUtin : utin)
-	taxRecord:TaxRecord(  )
+	taxRecord:TaxRecord()
 then
 	
 		Date now = new Date();
@@ -1908,23 +1710,23 @@ then
 			
 		if(!latePayment){
 			double Tax= item.getTax();
-			int taxPer = 0;
+			int percent = 0;
 			if(item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
 			{
-			taxPer=15;
+			percent=15;
 			}
 			else if( item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC)){
-			taxPer=7;
+			percent=7;
 			}
 			else if(item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)){
-			taxPer=3;
+			percent=3;
 			}
 			else if(item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)){
-			taxPer=2;
+			percent=2;
 			}
 			
-			double Remtax = Utils.calculateTax(Tax , taxPer);
-			System.out.println("On-time Payment Deduction for Organizations @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
+			double Remtax = Utils.calculatePercentage(Tax , percent);
+			System.out.println("On-time Payment Deduction for Organizations @ " + percent + "% : -" +Remtax + " (calculating from history in MongoDB)");
 			item.setTax(Tax - Remtax);
 		}
 	
@@ -1934,8 +1736,8 @@ rule "Organizations invested in Charity "
 salience 23
 when 
 item:Organization()
-investment:Investment(id == 3) from item.investments
-taxRecord:TaxRecord(  )
+investment:Investment(id == 3) from item.getInvestments() 
+taxRecord:TaxRecord()
 then
 double exmpPer=investment.getApplicablePercent();
 double amt=investment.getAmount();
@@ -1949,8 +1751,8 @@ rule "Exemption for Political Investment"
 salience 22
 when 
 item:Organization()
-investment:Investment(id == 4) from item.investments 
-taxRecord:TaxRecord(  )
+investment:Investment(id == 4) from item.getInvestments() 
+taxRecord:TaxRecord()
 then
 double exmpPer=investment.getApplicablePercent();
 double amt=investment.getAmount();
@@ -1962,8 +1764,8 @@ end
  rule "Exempting shares"
 salience 21
 when
-item:Organization(item.isSharedFlag!=-1)
-taxRecord:TaxRecord(  )
+item:Organization(SharedExecuted == false)
+taxRecord:TaxRecord()
 then
 double percentage=DBHandler.getInstance().getSharePercents(item.getUtin());
 double actualtax= item.getTax()*percentage/100;
@@ -1977,8 +1779,8 @@ end
 rule "Shared organizations tax"
 salience 20
 when 
-item:Organization(item.hasShareFlag !=-1)
-taxRecord:TaxRecord(  )
+item:Organization(hasSharesExecuted==false)
+taxRecord:TaxRecord()
 then
 Map<Integer,Double> shares= item.getShares();
 int cutin=0;
@@ -1993,20 +1795,23 @@ for(Map.Entry<Integer,Double> entry : shares.entrySet())
 	TaxPayer company = DBHandler.getInstance().getTaxPayer(cutin);	
 	System.out.println(cutin+" Company's Total Tax:");
 	System.out.println("----------------------------------");
-	item.hasShareFlag=-1;
-	TaxCalculator.triggerRules(company);
-	item.hasShareFlag=0;
-	ctax = Utils.calculateTax(company.getTax(),sharePer);
-	System.out.println("Tax percentage for share with "+cutin+ " : " +ctax);
+	TaxRulesLogic trl= new TaxRulesLogic();
+	((Organization)company).setHasSharesExecuted(true);
+	((Organization)company).setSharedExecuted(true);
+	trl.triggerRules(company);
+	ctax = Utils.calculatePercentage(company.getTax(),sharePer);
 	System.out.println("----------------------------------");
+	System.out.println("Tax percentage for share with "+cutin+ " : " +ctax);
+	
 	item.setSharedTax(item.getSharedTax()+ctax);
 	//item.setTax(item.getTax()+ctax);
 	}
+	item.setTax(item.getTax()+item.getSharedTax());
 }
 
 end
 
-*/
+
 
 
 

@@ -19,7 +19,7 @@
 		TaxRecord taxRecord = (TaxRecord) request.getAttribute("taxrecord");
 		String error="";
 	%>
-	<div class="subheader width500 padding_bottom20">
+	<div class="subheader width800 padding_bottom20">
 		<div class="header">
 			<h2>Tax Details</h2>
 		</div>
@@ -37,8 +37,10 @@
 					{
 			%>
 			<div class="display_block fullwidth">
-				<p class="leftfloat"><%=taxRecord.getEntry(index).getName()+" @ "%>
-				 <%=Utils.formatDouble(taxRecord.getEntry(index).getRate()) +"%"%>
+				<p class="leftfloat"><%=taxRecord.getEntry(index).getName()%>
+				<%if (taxRecord.getEntry(index).getRate() != 0){ %>
+				 <%=" @ "+Utils.formatDouble(taxRecord.getEntry(index).getRate()) +"%"%>
+				 <%} %>
 				 </p>
 				<p class="leftfloat values2"><%="$ " +Utils.formatDouble(taxRecord.getEntry(index).getValue())%></p>
 			</div>

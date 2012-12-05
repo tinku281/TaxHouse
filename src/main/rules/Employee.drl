@@ -1,0 +1,616 @@
+//created on: 21 Oct, 2012
+package com.taxhouse
+
+import com.taxhouse.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import com.taxhouse.app.*;
+import com.taxhouse.db.*;
+import com.taxhouse.model.*;
+import com.taxhouse.model.TaxRecord.Entry;
+
+
+//tested
+rule "Base Federal rule for Profit private/public Employees" #Base Tax
+salience 50
+when
+    item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+	
+	int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
+	
+	if (slab == 1) {
+		percent = 20;
+	} else if (slab == 2) {
+		percent = 22;
+	} else if (slab == 3) {
+		percent = 24;
+	} else {
+		percent = 35;
+	}
+	
+	double reduction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Profit Organization Employee)", percent, reduction));
+end
+
+//tested
+rule "Base Fedral rule for Non Profit private/public Employees"  #Base Tax
+salience 49
+when
+    item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+    taxRecord:TaxRecord()
+then
+		double amount = item.getTaxableIncome();
+		double percent;
+
+		int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
+		if (slab == 1) {
+			percent = 13;
+		} else if (slab == 2) {
+			percent = 15;
+		} else if (slab == 3) {
+			percent = 17;
+		} else {
+			percent = 18;
+		}
+		
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base Federal Tax Non-profit Organization Employee", percent, fraction));
+end
+
+//tested
+rule "Base State rule for Profit private/public Employees" #Base Tax
+salience 48
+when
+    item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double taxPer = 0;
+	
+	int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
+	
+	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+		if (slab == 1) {
+			taxPer = 15.9;
+		} else {
+			taxPer = 16.9;
+		}
+	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+		if (slab == 1) {
+			taxPer = 17.5;
+		} else {
+			taxPer = 18.5;
+		}
+	} else {
+		if (slab == 1) {
+			taxPer = 19.0;
+		} else {
+			taxPer = 20;
+		}
+	}
+	
+	double taxcal = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("Base State Tax(Profit Organization Employee)", taxPer, taxcal));
+end  
+
+//tested
+rule "Base State tax for Non-Profit private/public Employees" #Base Tax
+salience 47
+when
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+	taxRecord:TaxRecord()
+then
+		double amount = item.getTaxableIncome();
+		double percent = 0;
+
+		int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
+
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			if (slab == 1) {
+				percent = 8.9;
+			} else {
+				percent = 9.9;
+			}
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			if (slab == 1) {
+				percent = 15.5;
+			} else {
+				percent = 16.5;
+			}
+		}
+
+		else {
+			if (slab == 1) {
+				percent = 17.0;
+			} else {
+				percent = 18;
+			}
+		}
+		
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base State Tax(Non profit Organization Employee)", percent, fraction));
+end    
+
+//tested
+rule "SSN & Medicare for Profit Public/Private" #Increment on Tax
+salience 46
+when
+    item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 13;
+	
+	double taxCal = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("SSN and Medicare Tax", taxPer, taxCal));
+end
+
+
+
+//tested
+rule "SSN and Medicare for Non-Profit Public/Private" #Increment on Tax
+salience 45
+ when
+ 	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+ 	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 3;
+	
+	double taxCal = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("SSN and Medicare Tax", taxPer, taxCal));
+end
+
+
+//tested
+rule "Marital Status Single Profit Employee" #Increment on Tax
+salience 44
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), maritalStatus == Employee.MaritalStatus.SINGLE)
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent = 5;
+	
+	double increment = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Martial Status Tax(Single)", percent, increment));
+end
+
+rule "Marital Status Single Non-Profit Employee" #Increment on Tax
+salience 43
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), maritalStatus == Employee.MaritalStatus.SINGLE)
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent = 2;
+	
+	double increment = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Martial Status Tax(Single)", percent, increment));
+end
+
+//tested
+rule "Alien status Profit" #Increment on Tax
+salience 42
+when 
+item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
+taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent = 6;
+	
+	double increment = Utils.calculatePercentage(amount , percent);
+	taxRecord.addEntry(new Entry("Alien Status Tax(Non Citizen)", percent, increment));	
+end
+
+//tested
+rule "Alien status Non-Profit" #Increment on Tax
+salience 41
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), nationality != Employee.Nationality.USA)
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent = 3;
+	
+	double increment = Utils.calculatePercentage(amount , percent);
+	taxRecord.addEntry(new Entry("Alien Status Tax(Non Citizen)", percent, increment));		
+end
+
+//tested
+rule "Women Welfare Profit" #Rebate on Tax
+salience 40
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent  = 6;
+	
+	double reduction = Utils.calculatePercentage(amount , percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(Woman welfare)", percent,-reduction));	
+end	
+
+//tested
+rule "Women Welfare Non-Profit" #Rebate on Tax
+salience 39
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC) ,   gender == Employee.Gender.FEMALE  )
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int percent  = 10;
+	
+	double reduction = Utils.calculatePercentage(amount , percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(Woman welfare)", percent,-reduction));	
+end	
+
+//tested
+rule "Residency status Profit" #Rebate on Tax
+salience 38
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
+	taxRecord:TaxRecord()
+then
+	double amount= taxRecord.getTotalTax();
+	int taxPer = 5;
+	
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+	taxRecord.addEntry(new Entry("Residential Status Tax(Non-Resident)", taxPer, -reduction));
+end	
+
+//tested
+rule "Residency status Non-Profit" #Rebate on Tax
+salience 37
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), residencyStatus != Employee.ResidencyStatus.FULL_TIME)
+	taxRecord:TaxRecord()
+then
+	double amount= taxRecord.getTotalTax();
+	int taxPer = 10;
+	
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+	taxRecord.addEntry(new Entry("Residential Status Tax(Non-Resident)", taxPer, -reduction));
+end		
+
+//tested	
+rule "WIDOW ALLOWANCE MALE PROFIT" #Rebate on Tax
+salience 36
+when 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), 
+	 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.MALE)
+	taxRecord:TaxRecord()
+then
+	double amount= taxRecord.getTotalTax();
+	int taxPer = 5;
+	
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Martial Status-Male Widow)", amount ,-reduction));	
+end
+
+rule "WIDOW ALLOWANCE MALE NON-PROFIT" #Rebate on Tax
+salience 35
+	when 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), 
+	 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.MALE)
+	taxRecord:TaxRecord()
+then
+    double amount= taxRecord.getTotalTax();
+	int taxPer = 7;
+	
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Martial Status-Male Widow)", amount ,-reduction));
+end
+
+//tested
+rule "WIDOW ALLOWANCE FEMALE PROFIT" #Rebate on Tax
+salience 34
+when 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), 
+	 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.FEMALE)
+	taxRecord:TaxRecord()
+then
+	double amount= taxRecord.getTotalTax();
+	int taxPer = 6;
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+
+	taxRecord.addEntry(new Entry("Tax Rebate(Martial Status-female Widow)", taxPer,-reduction));
+end
+
+// tested
+rule "WIDOW ALLOWANCE FEMALE NON-PROFIT" #Rebate on Tax
+salience 33
+when 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), 
+	 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.FEMALE)
+	taxRecord:TaxRecord()
+then
+   	double amount= taxRecord.getTotalTax();
+	int taxPer = 12;
+	double reduction = Utils.calculatePercentage(amount , taxPer);
+
+	taxRecord.addEntry(new Entry("Tax Rebate(Martial Status-female Widow)", taxPer,-reduction));
+end
+
+
+//tested
+rule "Dependents Rebate Profit" #Rebate On Tax
+salience 32
+when 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC)
+	 &&(noOfDependants>3),income<40000)
+	taxRecord:TaxRecord()
+then	
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 10;
+	
+	double reduction = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Dependents>3)", taxPer, -reduction));
+end
+
+//tested
+rule "Dependents Rebate Non-Profit" #Rebate On Tax
+salience 31
+when  
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)
+	&&
+	(noOfDependants > 3) ,income < 600000)
+	taxRecord:TaxRecord()
+then	
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 12;
+	
+	double reduction = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Dependents)", taxPer, -reduction));
+end
+
+rule "ExMilatary Rebate Profit" #Rebate On Tax
+salience 30
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	|| organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), exMilatary == 'Y')
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 10;
+	
+	double reduction = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Ex-Military Personnel)", taxPer,-reduction));	
+end
+
+rule "ExMilatary Non-Profit" #Rebate On Tax
+salience 29
+when
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	int taxPer = 15;
+	
+	double reduction = Utils.calculatePercentage(amount, taxPer);
+	taxRecord.addEntry(new Entry("Tax Rebate(Ex-Military Personnel)", taxPer, -reduction));	
+end
+
+rule "Having worked in the same org for 15 years Profit employee" #Rebate on Tax
+salience 28
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+	 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC))
+	 taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent = 0;
+
+	Date startDate = item.getJobStartDate();
+	Date now = new Date();
+
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(startDate);
+
+	Calendar cal1 = Calendar.getInstance();
+	cal1.setTime(now);
+	cal.add(Calendar.YEAR, -15); // subtract 15 years from current date
+
+	if (cal.after(cal1)) {
+		percent = 18;
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Rebate(Employer Loyalty)", percent, -fraction));
+	}
+end
+
+rule "Having worked in the same org for 15 years Non-Profit employee" #Rebate on Tax
+salience 27
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)
+	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+	 taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent = 0;
+
+	Date startDate = item.getJobStartDate();
+	Date now = new Date();
+
+	Calendar cal = Calendar.getInstance();
+	cal.setTime(startDate);
+
+	Calendar cal1 = Calendar.getInstance();
+	cal1.setTime(now);
+	cal.add(Calendar.YEAR, -15); // subtract 15 years from current date
+
+	if (cal.after(cal1)) {
+		percent = 20;
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Rebate(Employer Loyalty)", percent, -fraction));
+	}
+end
+
+rule "History 3 years Rule Profit" #Rebate on Tax
+salience 26
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+	 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) && hasLatePayments(3))
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent = 18;
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(On Time payment for last 3 years)", percent, -fraction));		
+end	
+
+rule "History 3 years Rule Non-Profit" #Rebate on Tax
+salience 25
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)
+	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC) && hasLatePayments(3))
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent = 16;
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(On Time payment for last 3 years)", percent, -fraction));		
+end	
+
+rule "Profit Employees with Stocks" # Increment/Rebate on Tax
+salience 24
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
+	  || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) && isProfitedByStocks())
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent, fraction;
+	
+	if (item.isProfitedByStocks()) {
+		percent = 11;
+		fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Increment (for Stock Profit)", percent, fraction));
+		
+	} else {
+		percent = 6;
+		fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Rebate (for Stock Loss)", percent, -fraction));
+	}	
+end
+
+rule "Non-Profit Employees with Stocks" # Increment/Rebate on Tax
+salience 23
+when 
+	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)
+	  || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC) && isProfitedByStocks())
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent, fraction;
+	
+	if (item.isProfitedByStocks()) {
+		percent = 9;
+		fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Increment (for Stock Profit)", percent, fraction));
+		
+	} else {
+		percent = 7;
+		fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Tax Rebate (for Stock Loss)", percent, -fraction));
+	}	
+end
+
+//tested
+rule "Having invested in Health Insurance" #Rebate on Investment
+salience 4
+when 
+	item:Employee()
+	investment:Investment(id==22) from item.getInvestments() 
+	taxRecord:TaxRecord()
+then
+	double amount = investment.getAmount();
+	double percent = 2;
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(Health Insurance Investment) on" + amount, percent, -fraction));
+end
+
+rule "for Employees invested in Charity" #Rebate on Investment
+salience 3
+when 
+	item:Employee()
+	investment:Investment(id==2) from item.getInvestments() 
+	taxRecord:TaxRecord()
+then
+	double amount = investment.getAmount();
+	double percent = 13;
+	
+			
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(Charity Investment) on" + amount, percent, -fraction));
+end
+
+rule "For Employees Citizens with physical disability" #Rebate on Exemption
+salience 2
+when
+	item:Employee()
+	exemption:Exemption(id==4) from item.getExemptions() 
+	taxRecord:TaxRecord()
+then
+	double amount = exemption.getAmount();
+	if(amount == 0) amount = 800;
+	double percent = exemption.getPercentage();
+	if(percent == 0) percent = 6;
+	
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Exemption Rebate(Physical Disability) on" + amount, percent, -fraction));
+end
+
+//tested
+rule "For Married Employees"
+salience 1
+when
+	item: Employee(item.getMaritalStatus().toString() == "MARRIED" && item.getSpouseEvaluated() == false, sUtin : spouseUtin)
+	taxRecord:TaxRecord()
+then
+	if (sUtin != 0) {
+		Employee spouse = (Employee) DBHandler.getInstance().getTaxPayer(sUtin);
+		spouse.setSpouseEvaluated(true); // not to evaluate the combined tax rule again
+
+		try {
+			TaxRecord spouseRecord = TaxRulesLogic.triggerRules(spouse);
+
+			if (spouseRecord != null && spouseRecord.getTotalTax() != 0) {
+
+				taxRecord.addEntry(new Entry("Spouse's Tax", spouseRecord.getTotalTax()));
+
+				double percent;
+				if (spouse instanceof ArmedForcePersonnel) {
+					percent = 25;
+				} else if (spouse instanceof SeniorCitizen) {
+					percent = 15;
+				} else {
+					percent = 10;
+				}
+
+				double combinedTax = taxRecord.getTotalTax() + spouseRecord.getTotalTax();
+				double reduction = Utils.calculatePercentage(combinedTax, percent);
+
+				taxRecord.addEntry(new Entry("Tax Rebate (on Combined Tax)", percent, -reduction));
+
+			}
+
+		} catch (Exception e) {
+
+		}
+	}
+end

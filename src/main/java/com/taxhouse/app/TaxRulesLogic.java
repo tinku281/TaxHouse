@@ -34,7 +34,6 @@ public class TaxRulesLogic {
 				System.out.println("Please provide a valid input.");
 			}
 
-		
 			TaxPayer taxPayer = DBHandler.getInstance().getTaxPayer(utin);
 
 			if (taxPayer == null) {
@@ -45,32 +44,30 @@ public class TaxRulesLogic {
 			System.out.println("\nName: " + taxPayer.getFirstName() + " " + taxPayer.getLastName() + ",");
 			System.out.println("\nGross Income: " + taxPayer.getIncome());
 
-			// put applicable rule files in KnowledgeBase
 			triggerRules(taxPayer);
-			
-			
+
 		} catch (Exception e) {
 			System.err.println(e);
 		}
 	}
-	
-	
-	public static void triggerRules(TaxPayer taxPayer) throws Exception
-	{
+
+	public static TaxRecord triggerRules(TaxPayer taxPayer) throws Exception {
 		KnowledgeBase kbase = null;
+		TaxRecord taxRecord = null;
+
 		if (taxPayer instanceof Employee) {
 
 			if (taxPayer instanceof SeniorCitizen) {
-				kbase = readKnowledgeBase("seniorcitizens.drl");
+				kbase = readKnowledgeBase("Deductions.drl", "seniorcitizens.drl");
 
 			} else if (taxPayer instanceof ArmedForcePersonnel) {
 				kbase = readKnowledgeBase("Armedforces.drl");
-				
+
 			} else if (taxPayer instanceof Student) {
 				kbase = readKnowledgeBase("students.drl");
 
 			} else {
-				kbase = readKnowledgeBase("employeePay.drl", "NonProfit.drl");
+				kbase = readKnowledgeBase("Employee.drl");
 			}
 
 		} else if (taxPayer instanceof Organization) {
@@ -78,16 +75,22 @@ public class TaxRulesLogic {
 		}
 
 		if (kbase != null) {
+
+			taxRecord = new TaxRecord();
+
 			StatefulKnowledgeSession ksession = kbase.newStatefulKnowledgeSession();
+			// ksession.addEventListener(new DebugAgendaEventListener());
+			// ksession.addEventListener(new DebugWorkingMemoryEventListener());
 			ksession.insert(taxPayer);
+			ksession.insert(taxRecord);
 			ksession.fireAllRules();
-			if(!(taxPayer instanceof Employee && ((Employee) taxPayer).isMarriedExecuted())){
-				
-			System.out.println("Your total Tax: " + taxPayer.getTax());
-			}
+
+			System.out.println("Total Tax: " + taxRecord.getTotalTax());
+
 		} else
 			System.out.println("Tax cannot be calculated with present information");
 
+		return taxRecord;
 	}
 
 	private static KnowledgeBase readKnowledgeBase(String... resources) throws Exception {
@@ -110,5 +113,4 @@ public class TaxRulesLogic {
 
 		return kbase;
 	}
-
 }

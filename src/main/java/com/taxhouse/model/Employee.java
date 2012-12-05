@@ -3,6 +3,10 @@ package com.taxhouse.model;
 import java.util.Date;
 import java.util.List;
 
+import com.taxhouse.db.DBHandler;
+import com.taxhouse.db.HistoryProvider;
+import com.taxhouse.db.StockProvider;
+
 public class Employee extends TaxPayer {
 
 	public enum Gender {
@@ -36,16 +40,16 @@ public class Employee extends TaxPayer {
 
 	private String exMilatary;
 	private double dependantincome;
-	private boolean marriedExecuted = false;
-	
+	private boolean evalSpouse;
+
 	private int slabId;
 
-	public boolean isMarriedExecuted() {
-		return marriedExecuted;
+	public boolean getSpouseEvaluated() {
+		return evalSpouse;
 	}
 
-	public void setMarriedExecuted(boolean marriedExecuted) {
-		this.marriedExecuted = marriedExecuted;
+	public void setSpouseEvaluated(boolean marriedExecuted) {
+		this.evalSpouse = marriedExecuted;
 	}
 
 	public String getExMilatary() {
@@ -56,11 +60,11 @@ public class Employee extends TaxPayer {
 		this.exMilatary = exMilatary;
 	}
 
-	public double getDependantincome() {
+	public double getDependantIncome() {
 		return dependantincome;
 	}
 
-	public void setDependantincome(double dependantincome) {
+	public void setDependantIncome(double dependantincome) {
 		this.dependantincome = dependantincome;
 	}
 
@@ -156,4 +160,26 @@ public class Employee extends TaxPayer {
 		this.slabId = slabId;
 	}
 
+	public boolean isProfitedByStocks() {
+
+		if (hasStocks()) {
+			double purchaseAmount = 0;
+			double currentAmount = 0;
+
+			String pdate, symbol;
+			for (Stock stock : stocks) {
+				symbol = stock.getSymbol();
+				pdate = DBHandler.dateFormat.format(stock.getPurchaseDate()).toString();
+
+				currentAmount += StockProvider.GetCurrentRate(symbol);
+				purchaseAmount += HistoryProvider.GetHistoricRate(symbol, pdate);
+			}
+
+			if (currentAmount < purchaseAmount)
+				return true;
+		}
+
+		return false;
+	}
+	
 }
