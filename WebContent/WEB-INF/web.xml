@@ -74,4 +74,14 @@
     <servlet-name>TaxCalculator</servlet-name>
     <url-pattern>/calculateTax.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>OrganizationProcessing</display-name>
+    <servlet-name>OrganizationProcessing</servlet-name>
+    <servlet-class>com.taxhouse.servlet.OrganizationProcessing</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>OrganizationProcessing</servlet-name>
+    <url-pattern>/OrganizationProcessing.do</url-pattern>
+  </servlet-mapping>
 </web-app>

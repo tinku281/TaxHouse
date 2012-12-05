@@ -1,3 +1,4 @@
+<%@page import="com.taxhouse.model.Employee"%>
 <%@page import="com.taxhouse.model.TaxPayer"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
@@ -52,30 +53,35 @@ function validate()
 	String firstName,lastName,password,city,state,buttonLabel;
 		int nationality;
 		boolean typeDisabled;
-		
+		String taxPayerType = null;
 		TaxPayer taxPayer = (TaxPayer)session.getAttribute( "taxpayee" );
 		
 		if(taxPayer != null)
 		{
-	firstName = taxPayer.getFirstName(  );
-	lastName = taxPayer.getLastName(  );
-	password = taxPayer.getPassword(  );
-	city = taxPayer.getCity(  );
-	state =taxPayer.getState(  );
-	nationality = taxPayer.getNationality(  ).ordinal(  );
-	typeDisabled = true;
-	buttonLabel = "Update";
+			firstName = taxPayer.getFirstName(  );
+			lastName = taxPayer.getLastName(  );
+			password = taxPayer.getPassword(  );
+			city = taxPayer.getCity(  );
+			state =taxPayer.getState(  );
+			nationality = taxPayer.getNationality(  ).ordinal(  );
+			typeDisabled = true;
+			buttonLabel = "Update";
+			
+			if(taxPayer instanceof Employee)
+				taxPayerType = "Employee";
+			else
+				taxPayerType = "Organization";
 		}
 		else
 		{
-	firstName="";
-	lastName = "";
-	password="";
-	city = "";
-	state = "";
-	nationality = TaxPayer.Nationality.USA.ordinal(  );
-	typeDisabled = false;
-	buttonLabel = "Submit";
+			firstName="";
+			lastName = "";
+			password="";
+			city = "";
+			state = "";
+			nationality = TaxPayer.Nationality.USA.ordinal(  );
+			typeDisabled = false;
+			buttonLabel = "Submit";
 		}
 %>
 
@@ -115,16 +121,17 @@ function validate()
 					if(typeDisabled)
 					{	
 				%>
-						<select name="tp_category" class="drop rightfloat" disabled="disabled" >
+						<input type="text" name="tp_category" class="textbox2 rightfloat" readonly ="readonly" value="<%=taxPayerType %>" >
 				<%	}
 					else
 					{	
 				%>		<select name="tp_category" class="drop rightfloat" >
+							<option value="1">Employee</option>
+							<option value="2">Organization</option>
+						</select>
 				<%	}
 				%>
-					<option value="1">Employee</option>
-					<option value="2">Organization</option>
-			</select></div>
+					</div>
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="<%=buttonLabel %>" onClick="validate()"/>
 	</form>
 </div>

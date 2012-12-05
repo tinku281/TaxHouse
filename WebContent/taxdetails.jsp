@@ -31,6 +31,28 @@
 			</div>
 			
 			<%
+				if (taxRecord != null && taxRecord.getDeductionSize() > 0) 
+				{
+					for (int index = 0; index < taxRecord.getDeductionSize(); index++) 
+					{
+			%>
+			<div class="display_block fullwidth">
+				<p class="leftfloat"><%=taxRecord.getDeduction(index).getName()%>
+				
+				<p class="leftfloat values2"><%="$ -" +Utils.formatDouble(taxRecord.getDeduction(index).getValue())%></p>
+			</div>
+				<%
+					}
+				%>
+			<div class="display_block fullwidth">
+				<p class="leftfloat">Taxable Income</p>
+				<p class="leftfloat values2"><%="$ " +Utils.formatDouble(taxPayer.getTaxableIncome())%></p>
+			</div>			
+			<% 	
+				}
+			%>
+			
+			<%
 				if (taxRecord != null) 
 				{
 					for (int index = 0; index < taxRecord.getEntrySize(); index++) 

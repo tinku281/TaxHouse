@@ -154,6 +154,7 @@ public class DBHandler {
 	}
 
 	private Connection getConnection() throws SQLException {
+
 		// Class.forName("com.mysql.jdbc.Driver");
 		// return DriverManager.getConnection("jdbc:mysql://" + MySQL_HOST +
 		// "/tax_house", MySQL_USERNAME,
@@ -227,7 +228,8 @@ public class DBHandler {
 			if (rs.next()) {
 
 				final int tpCategory = rs.getInt(TP_CATEGORY); // to check the
-																// sub type of
+																// sub type
+																// of
 																// Tax Payer
 
 				if (tpCategory == TaxPayer.SubType.EMPLOYEE.ordinal()) { // Employee
@@ -243,8 +245,9 @@ public class DBHandler {
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 			return null;
+		}
 
-		} finally {
+		finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
 
@@ -277,7 +280,8 @@ public class DBHandler {
 			rs2 = stmt2.executeQuery(query1);
 			if (rs.next()) {
 
-				final int empCategory = rs.getInt(EMP_CATEGORY); // to check the
+				final int empCategory = rs.getInt(EMP_CATEGORY); // to check
+																	// the
 																	// sub type
 																	// of
 																	// Employee
@@ -299,7 +303,8 @@ public class DBHandler {
 
 				putEmployeeDetails(emp, rs, rs1, rs2); // for putting basic
 														// employee
-														// details from Employee
+														// details from
+														// Employee
 														// and
 														// TaxPayer table
 
@@ -309,7 +314,8 @@ public class DBHandler {
 																		// details
 					putMarriageDetails(emp); // from MarriedTo table
 
-				if (emp instanceof SeniorCitizen) // for putting income details
+				if (emp instanceof SeniorCitizen) // for putting income
+													// details
 					putIncomeDetails((SeniorCitizen) emp); // from SC_Income
 															// table
 				else
@@ -358,9 +364,10 @@ public class DBHandler {
 		} else {
 			emp.setExMilatary("N");
 		}
-		if (rs1.next()) {
+
+		if (rs1.next())
 			emp.setDependantIncome(rs1.getDouble(DEP_AMOUNT));
-		}
+
 	}
 
 	private void putMarriageDetails(Employee emp) throws SQLException, ClassNotFoundException {
@@ -583,6 +590,7 @@ public class DBHandler {
 	}
 
 	public HashMap<Integer, Double> getOrganizationShares(int utin) throws SQLException {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -601,6 +609,7 @@ public class DBHandler {
 	}
 
 	public Organization getOrganization(int utin) throws SQLException, ParseException {
+
 		Connection con = null;
 		Statement stmt = null;
 		Statement stmt1 = null;
@@ -619,6 +628,7 @@ public class DBHandler {
 			rs = stmt.executeQuery(sql);
 
 			if (rs.next()) {
+
 				org = new Organization();
 				org.setUtin(utin);
 				org.setFirstName(rs.getString(FIRST_NAME));
@@ -631,6 +641,7 @@ public class DBHandler {
 
 				String query1 = "select slab_id from org_slab where slab_min_amt<= " + rs.getDouble(GROSS_PROFIT)
 						+ " and slab_max_amt > " + rs.getDouble(GROSS_PROFIT);
+
 				stmt2 = con.createStatement();
 				rs2 = stmt2.executeQuery(query1);
 
@@ -639,6 +650,7 @@ public class DBHandler {
 
 					String query = "select * from org_tax where combination_id=" + rs.getInt(COMBINATION_ID)
 							+ " and slab_id=" + rs2.getInt(ORG_SLAB);
+
 					stmt1 = con.createStatement();
 					rs1 = stmt1.executeQuery(query);
 
@@ -656,6 +668,7 @@ public class DBHandler {
 
 				putExemptionDetails(org);
 				putInvestmentDetails(org);
+
 			}
 
 		} finally {
@@ -705,6 +718,7 @@ public class DBHandler {
 	// }
 
 	public HashMap<String, Integer> getAllOrganizationScale() {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -733,6 +747,7 @@ public class DBHandler {
 	}
 
 	public HashMap<String, Integer> getAllOrganizationType() {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -761,6 +776,7 @@ public class DBHandler {
 	}
 
 	public HashMap<String, Integer> getAllOrganizationCategory() {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -789,6 +805,7 @@ public class DBHandler {
 	}
 
 	public List<Exemption> getEmployeeExemptions(int utin) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -819,6 +836,7 @@ public class DBHandler {
 	}
 
 	public List<Investment> getEmployeeInvestments(int utin) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -846,22 +864,6 @@ public class DBHandler {
 		}
 
 		return investments;
-	}
-
-	public double getSharePercents(int utin) throws Exception {
-		Connection con = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		con = getConnection();
-		String query = "select Share_Percent from has_partnership where Share_UTIN=" + utin;
-		double percents = 0;
-		stmt = con.createStatement();
-		rs = stmt.executeQuery(query);
-		while (rs.next()) {
-			percents += rs.getInt(SHARE_PERCENT);
-		}
-
-		return (100 - percents);
 	}
 
 	public String getScaleName(int id) {
@@ -1051,6 +1053,7 @@ public class DBHandler {
 	}
 
 	public String[] getExemptionNames() {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1089,7 +1092,48 @@ public class DBHandler {
 		return null;
 	}
 
+	public String[] getInvestmentNames() {
+
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sqlTotal = "Select COUNT(DISTINCT " + INV_NAME + ") AS namecount FROM investment";
+		String sql = "Select DISTINCT " + INV_NAME + " FROM investment";
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sqlTotal);
+			rs.next();
+			int count = rs.getInt("namecount");
+
+			System.out.println("Count of investment names: " + count);
+			if (count <= 0)
+				return null;
+
+			String[] invNames = new String[count];
+
+			rs = stmt.executeQuery(sql);
+
+			int index = 0;
+			while (rs.next()) {
+				invNames[index++] = rs.getString(INV_NAME);
+			}
+
+			return invNames;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return null;
+	}
+
 	public int getExemptionId(String exempetionName) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1114,6 +1158,7 @@ public class DBHandler {
 	}
 
 	public int getSlabId(double income) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1133,6 +1178,32 @@ public class DBHandler {
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
+	}
+
+	public double getSharePercents(int utin) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			con = getConnection();
+
+			String query = "select Share_Percent from has_partnership where Share_UTIN=" + utin;
+			double percents = 0;
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+
+			while (rs.next()) {
+				percents += rs.getInt(SHARE_PERCENT);
+			}
+
+			return (100 - percents);
+
+		} catch (SQLException e) {
+
+		}
+
+		return 0;
 	}
 
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
@@ -1159,7 +1230,7 @@ public class DBHandler {
 			stmt.executeUpdate();
 			stmt.close();
 			stmt = null;
-			
+
 			if (taxPayer instanceof Employee) {
 				sql = "insert into employee values(?,?,?,?,?,?,?);";
 				stmt = con.prepareStatement(sql);
@@ -1179,7 +1250,7 @@ public class DBHandler {
 					stmt.setInt(7, Employee.SubType.ARMY.ordinal());
 				else
 					stmt.setInt(7, Employee.SubType.NONE.ordinal());
-				
+
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
@@ -1214,6 +1285,7 @@ public class DBHandler {
 	}
 
 	private void closeConnectionObjects(ResultSet rs, Statement stmt, Connection con) {
+
 		if (rs != null)
 			try {
 				rs.close();

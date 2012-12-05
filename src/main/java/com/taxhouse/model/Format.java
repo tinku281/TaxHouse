@@ -1,22 +1,17 @@
 package com.taxhouse.model;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.drools.spi.KnowledgeHelper;
 
-import com.taxhouse.app.Utils;
 import com.taxhouse.model.ArmedForcePersonnel.SpecialTask;
-import com.taxhouse.model.TaxRecord.Entry;
 
 public class Format {
 
-	SeniorCitizen item;
+	Organization item;
 	TaxRecord taxRecord;
 	KnowledgeHelper drools;
 	SpecialTask specialtask;
 
-	private void format() {
+	public void format() {
 
 		// Date enddate = specialtask.getEndDate();
 		// Date now = new Date();
@@ -39,24 +34,31 @@ public class Format {
 		// exmpPer, -taxCal));
 		// }
 
-		Investment investment;
-		Exemption exemption;
-
-		double amount = item.getTaxableIncome();
-		double percent = 0;
-
-		if (item.getState().substring(0, 1) == "A"
-				|| item.getState().substring(0, 1) == "B") {
-			percent = 8;
-		} else if (item.getState().substring(0, 1) == "C"
-				|| item.getState().substring(0, 1) == "D") {
-			percent = 9;
-		} else {
-			percent = 7;
-		}
-
-		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax for Graduate Assistants @ ", percent,fraction));
+		// Investment investment;
+		// Exemption exemption;
+		//
+		// Map<Integer, Double> shares = item.getShares();
+		//
+		// int shareUtin = 0;
+		// double sharePercent = 0;
+		// double taxForShare = 0;
+		//
+		// for (Map.Entry<Integer, Double> entry : shares.entrySet()) {
+		// shareUtin = entry.getKey();
+		// sharePercent = entry.getValue();
+		//
+		// if (shareUtin != 0) {
+		// TaxPayer company = DBHandler.getInstance().getTaxPayer(shareUtin);
+		// ((Organization) company).setHasSharesExecuted(true);
+		// ((Organization) company).setSharedExecuted(true);
+		//
+		// taxForShare = TaxRulesLogic.triggerRules(company).getTotalTax() * sharePercent;
+		// taxRecord.addEntry(new Entry("Tax for share in Organization " + shareUtin, sharePercent, taxForShare));
+		// }
+		// }
+		//
+		// double fraction = Utils.calculatePercentage(amount, percent);
+		//
 
 	}
 }

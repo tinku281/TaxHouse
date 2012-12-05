@@ -488,7 +488,7 @@ rule "Profit Employees with Stocks" # Increment/Rebate on Tax
 salience 24
 when 
 	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)
-	  || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) && isProfitedByStocks())
+	  || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC) && hasStocks())
     taxRecord:TaxRecord()
 then
 	double amount = taxRecord.getTotalTax();
@@ -510,7 +510,7 @@ rule "Non-Profit Employees with Stocks" # Increment/Rebate on Tax
 salience 23
 when 
 	item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)
-	  || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC) && isProfitedByStocks())
+	  || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC) && hasStocks())
     taxRecord:TaxRecord()
 then
 	double amount = taxRecord.getTotalTax();

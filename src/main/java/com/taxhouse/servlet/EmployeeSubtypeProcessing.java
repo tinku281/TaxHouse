@@ -1,7 +1,9 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.taxhouse.db.DBHandler;
+import com.taxhouse.model.ArmedForcePersonnel;
+import com.taxhouse.model.ArmedForcePersonnel.SpecialTask;
 import com.taxhouse.model.Employee;
 import com.taxhouse.model.SeniorCitizen;
 import com.taxhouse.model.SeniorCitizen.Income;
@@ -104,7 +108,58 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
 		{
+			ArmedForcePersonnel armedForcePersonnel = (ArmedForcePersonnel)employee;
 			
+			//retrieving special tasks list from insert_armed form
+			ArrayList<SpecialTask> specialTaskList = new ArrayList<SpecialTask>();
+			
+			int spCount = Integer.parseInt( request.getParameter( "count" ));
+			
+			if(spCount > 0)
+			{
+				
+				for(int index = 0; index < spCount; index++)
+				{
+					int i = index+1;
+					
+					String scName = request.getParameter( "scname"+i );
+					String scCombatZone =  request.getParameter( "sccombat"+i );
+					String scStartDate = request.getParameter( "scstartdate"+i );
+					String scEndDate = request.getParameter( "scenddate"+i );
+					
+					SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+					Date startDate = null,endDate = null;
+					
+					try
+					{
+						startDate = simpleDateFormat.parse( scStartDate );
+						endDate = simpleDateFormat.parse( scEndDate );
+						System.out.println("Start Date is: "+startDate.toString()+" , End Date is: "+endDate.toString());
+					}
+					catch(Exception e)
+					{
+						System.out.println("EmployeeSubtypeProcessing, Date Parse Exception");
+					}
+					
+					SpecialTask specialTask = new SpecialTask( 0, scName, startDate, endDate, scCombatZone );
+					specialTaskList.add( specialTask );
+					System.out.println("Added Special Task: "+scName+" Cobat zone: "+scCombatZone);
+				}
+			}
+			
+			
+			
+			//set Income list for senior citizen
+			
+			if(DBHandler.getInstance().insertTaxPayer( armedForcePersonnel ))
+			{
+				//forward to insertion successful page
+				System.out.println("Employee Subtype Processing: Inserted Armed Force Personnel");
+			}
+			else
+			{
+				// error inserting record
+			}
 		}
 
 	}

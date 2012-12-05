@@ -1402,10 +1402,7 @@ then
 	taxRecord.addEntry(new Entry("Base State Tax(Large scale Profit Public Class C organization)", percent,
 			fraction));
 end      
- 
- 
- 
-  
+
  rule "Small Scale Profit Public Class D Federal base rule" #Base Tax
 salience 34
 when
@@ -1473,7 +1470,6 @@ then
 			fraction));
 end   
  
- 
  rule "Medium Scale Profit Public Class D Federal base rule" #Base Tax
   salience 34
  when
@@ -1540,8 +1536,6 @@ then
 	taxRecord.addEntry(new Entry("Base State Tax(Medium scale Profit Public Class D organization)", percent,
 			fraction));  
 end  
- 
- 
  
 rule "Large Scale Profit Public Class D Federal base rule" #Base Tax
 salience 34
@@ -1613,203 +1607,194 @@ end
 	 item:Organization(typeId==Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE))
 	 taxRecord:TaxRecord()
 then
+	double amount = item.getTaxableIncome();
+	int slabId = item.getSlabId();
+	
+	double fpercent = item.getTaxPer();
+	double spercent = 0;
 
- 
+	if (slabId == 2) {
+		fpercent += fpercent * 0.2;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 2;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 2.5;
+		} else {
+			spercent = 3;
+		}
+	} else if (slabId == 3) {
+		fpercent += fpercent * 0.3;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 3;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 3.5;
+		} else {
+			spercent = 4;
+
+		}
+	} else {
+		fpercent += fpercent * 0.4;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 4;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 4.5;
+		} else {
+			spercent = 5;
+
+		}
+	}
+
+	double ftaxcal = Utils.calculatePercentage(amount, fpercent);
+	double staxcal = Utils.calculatePercentage(amount, spercent);
+	
+	taxRecord.addEntry(new Entry("Base Federal Tax(Non-Profit Private organization)", fpercent, ftaxcal));
+	taxRecord.addEntry(new Entry("Base State Tax(Non-Profit Private organization)", spercent, staxcal));
 end
  
- rule "Non-Profit-Public Tax Base rule"
- salience 25
+ rule "Non-Profit-Public Tax Base rule" #Base Tax
+ salience 30
  when
- item:Organization(typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
- taxRecord:TaxRecord()
+	 item:Organization(typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC))
+	 taxRecord:TaxRecord()
 then
- int slabId=item.getSlabId();
- double fpercent=item.getpercent();
- double spercent=0;
- double grossProfit=item.getTaxableIncome();
-  
-  if(slabId == 2)
-      {
-      fpercent+=fpercent*0.1;
-      if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-      {
-      spercent=1;	
-      }
-      else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-      {
-      spercent=1.5;
-      }
-      else{
-      spercent=2;
-      }
-      } 
-     else if(slabId == 3)
-     {
-        fpercent+=fpercent*0.2;
-        if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-        spercent=2;	
-      	}
-      	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-         {
-       		spercent=2.5;
-      	 }
-      	else{
-      		spercent=3;
-      	
-      	}
-      }
-      
-      else {
-      	fpercent+=fpercent*0.3;
-      	 if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-        spercent=3;	
-      	}
-      	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D")
-         {
-       		spercent=3.5;
-      	 }
-      	else{
-      		spercent=4;
-          	}
-      }
-      double ftaxcal = Utils.calculatePercentage(grossProfit,fpercent);  
-      double staxcal = Utils.calculatePercentage(grossProfit,spercent);
-      System.out.println("Base Federal Tax  for Non - Profit - Public organization: @  " + fpercent + "% : " +ftaxcal);
-	  System.out.println("Base State Tax  for Non - Profit - Public organization: @  " + spercent + "% : " +staxcal);      
-      item.setTax(staxcal+ftaxcal);
- 
- end
+	double amount = item.getTaxableIncome();
+	double percent = 28;
+
+	int slabId = item.getSlabId();
+
+	double fpercent = item.getTaxPer();
+	double spercent = 0;
+
+	if (slabId == 2) {
+		fpercent += fpercent * 0.1;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 1;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 1.5;
+		} else {
+			spercent = 2;
+		}
+	} else if (slabId == 3) {
+		fpercent += fpercent * 0.2;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 2;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 2.5;
+		} else {
+			spercent = 3;
+
+		}
+	}
+
+	else {
+		fpercent += fpercent * 0.3;
+		if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+			spercent = 3;
+		} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+			spercent = 3.5;
+		} else {
+			spercent = 4;
+		}
+	}
+
+	double ftaxcal = Utils.calculatePercentage(amount, fpercent);
+	double staxcal = Utils.calculatePercentage(amount, spercent);
+	taxRecord.addEntry(new Entry("Base Federal Tax(Non-Profit Public organization)", fpercent, ftaxcal));
+	taxRecord.addEntry(new Entry("Base State Tax(Non-Profit Public organization)", spercent, staxcal));
+end
             
  //****** END OF BASE RULES *****/
 
 
-rule"History 3 years Rule for Organizations."
-salience 22
-	when 
-		 item:Organization(mUtin : utin)
+rule "History 3 years Rule for Organizations" #Tax Rebate
+salience 25
+when 
+	item:Organization( hasLatePayments(3) == true)
 	taxRecord:TaxRecord()
 then
-	
-		Date now = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(now);
-		int lastYear = cal.get(Calendar.YEAR) - 1;
-		boolean latePayment = false;
-		for (int year = lastYear; year > lastYear - 3; year--) {
-			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
-			if (tHistory != null){
-				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
-				if(latePayment) 
-					break;
-			}
-		}
-			
-		if(!latePayment){
-			double Tax= item.getTax();
-			int percent = 0;
-			if(item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
-			{
-			percent=15;
-			}
-			else if( item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC)){
-			percent=7;
-			}
-			else if(item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)){
-			percent=3;
-			}
-			else if(item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)){
-			percent=2;
-			}
-			
-			double Remtax = Utils.calculatePercentage(Tax , percent);
-			System.out.println("On-time Payment Deduction for Organizations @ " + percent + "% : -" +Remtax + " (calculating from history in MongoDB)");
-			item.setTax(Tax - Remtax);
-		}
-	
+	double amount = taxRecord.getTotalTax();
+	double percent = 18;
+
+	if (item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE)) {
+		percent = 15;
+	} else if (item.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC)) {
+		percent = 7;
+	} else if (item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE)) {
+		percent = 3;
+	} else if (item.getTypeId() == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC)) {
+		percent = 2;
+	}
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate for On-time Payment", percent, -fraction));
 end 
 
-rule "Organizations invested in Charity "
+rule "Rebate for Organizations invested in Charity" # Tax Rebate
 salience 23
 when 
-item:Organization()
-investment:Investment(id == 3) from item.getInvestments() 
-taxRecord:TaxRecord()
+	item:Organization()
+	investment:Investment(id == 3) from item.getInvestments() 
+	taxRecord:TaxRecord()
 then
-double exmpPer=investment.getApplicablePercent();
-double amt=investment.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Exemption for Charity @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
+	double amount = investment.getAmount();
+	double percent = investment.getApplicablePercent();
+
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax rebate for charity", percent, -fraction));
 end
 
-rule "Exemption for Political Investment"
-salience 22
-when 
-item:Organization()
-investment:Investment(id == 4) from item.getInvestments() 
-taxRecord:TaxRecord()
-then
-double exmpPer=investment.getApplicablePercent();
-double amt=investment.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Exemption for political Investment @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
-end
- rule "Exempting shares"
+rule "Rebate for Political Investment" # Tax Rebate
 salience 21
-when
-item:Organization(SharedExecuted == false)
-taxRecord:TaxRecord()
-then
-double percentage=DBHandler.getInstance().getSharePercents(item.getUtin());
-double actualtax= item.getTax()*percentage/100;
-System.out.println("-------------------------------------");
-System.out.println("Total tax for "+item.getUtin()+" organization is "+item.getTax());
-System.out.println("Your actual tax according to your "+percentage+" % share in" +item.getUtin()+" is :" +actualtax);
-item.setTax(actualtax);
-end
-
-
-rule "Shared organizations tax"
-salience 20
 when 
-item:Organization(hasSharesExecuted==false)
-taxRecord:TaxRecord()
+	item:Organization()
+	investment:Investment(id == 4) from item.getInvestments() 
+	taxRecord:TaxRecord()
 then
-Map<Integer,Double> shares= item.getShares();
-int cutin=0;
-double totalTax=0,ctax;
-double sharePer=0;
-for(Map.Entry<Integer,Double> entry : shares.entrySet())
-{
-	cutin=entry.getKey();
-	sharePer=entry.getValue();
-	if(cutin!=0)
-	{
-	TaxPayer company = DBHandler.getInstance().getTaxPayer(cutin);	
-	System.out.println(cutin+" Company's Total Tax:");
-	System.out.println("----------------------------------");
-	TaxRulesLogic trl= new TaxRulesLogic();
-	((Organization)company).setHasSharesExecuted(true);
-	((Organization)company).setSharedExecuted(true);
-	trl.triggerRules(company);
-	ctax = Utils.calculatePercentage(company.getTax(),sharePer);
-	System.out.println("----------------------------------");
-	System.out.println("Tax percentage for share with "+cutin+ " : " +ctax);
-	
-	item.setSharedTax(item.getSharedTax()+ctax);
-	//item.setTax(item.getTax()+ctax);
-	}
-	item.setTax(item.getTax()+item.getSharedTax());
-}
+	double amount = investment.getAmount();
+	double percent = investment.getApplicablePercent();
 
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax rebate for political investment", percent, -fraction));
+end
+
+rule "Tax Deduction for shares not held" #Tax Deduction
+salience 15
+when
+	item:Organization(SharedExecuted == false)
+	taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double sharePercent = DBHandler.getInstance().getSharePercents(item.getUtin());
+	double percent = 100 - sharePercent;
+	
+	double fraction = Utils.calculatePercentage(amount , percent);
+	taxRecord.addEntry(new Entry("Tax Deduction for shares not held", percent, -fraction));
 end
 
 
+rule "Tax for Shares in other organizations"
+salience 14
+when 
+	item:Organization(hasSharesExecuted==false)
+	taxRecord:TaxRecord()
+then
+	Map<Integer, Double> shares = item.getShares();
 
-
-
+	int shareUtin = 0;
+	double sharePercent = 0;
+	double taxForShare = 0;
+	
+	for (Map.Entry<Integer, Double> entry : shares.entrySet()) {
+		shareUtin = entry.getKey();
+		sharePercent = entry.getValue();
+	
+		if (shareUtin != 0) {
+			TaxPayer company = DBHandler.getInstance().getTaxPayer(shareUtin);
+			((Organization) company).setHasSharesExecuted(true);
+			((Organization) company).setSharedExecuted(true);
+	
+			taxForShare = TaxRulesLogic.triggerRules(company).getTotalTax() * sharePercent;
+			taxRecord.addEntry(new Entry("Tax for shares in Organization " + shareUtin, sharePercent, taxForShare));
+		}
+	}
+end
