@@ -1,337 +1,332 @@
-//created on: Nov 7, 2012
 package com.taxhouse
 
 import com.taxhouse.*;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import com.taxhouse.app.*;
 import com.taxhouse.db.*;
 import com.taxhouse.model.*;
+import com.taxhouse.model.TaxRecord.Entry;
 
-
-//Students
-//tested
-rule "For GA's Federal Tax"
+rule "Base Federal Tax for GA's" #Base Tax
 salience 15
-    when
-        item:Student(designation == "GA")
-    taxRecord:TaxRecord()
+when
+	item:Student(designation == "GA")
+	taxRecord:TaxRecord()
 then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        int taxPer = 12;
-         taxCal = Utils.calculateTax(salary,taxPer);
-         System.out.println("Base Federal tax for Graduate Assistants @ " + taxPer + "% : " +taxCal);
-         item.setTax(taxCal);
-
+	double amount = item.getTaxableIncome();
+	double percent = 12;
+    double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal tax (Graduate Assistants @)", percent,fraction));
 end
-//tested
-rule "For GA's State Tax"
+
+
+rule "Base State Tax for GA's"  #Base Tax
 salience 14
-    when
-        item:Student(designation == "GA")
+when
+    item:Student(designation == "GA")
     taxRecord:TaxRecord()
 then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        double taxPer=0;
-        
-        if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-         taxPer = 8;
-        }
-       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         taxPer = 9;
-         }
-         else{
-         taxPer=7;
-         }
-         taxCal = Utils.calculateTax(salary,taxPer);
-         System.out.println("Base State for Graduate Assistants @ " + taxPer + "% : " +taxCal);
-         item.setTax(taxCal);
+	    double amount = item.getTaxableIncome();
+		double percent = 0;
+
+		if (item.getState().substring(0, 1) == "A"
+				|| item.getState().substring(0, 1) == "B") {
+			percent = 8;
+		} else if (item.getState().substring(0, 1) == "C"
+				|| item.getState().substring(0, 1) == "D") {
+			percent = 9;
+		} else {
+			percent = 7;
+		}
+
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base State tax (Graduate Assistants) @ ", percent,fraction));
+       
+end
+
+
+rule "For TA's Federal Tax"   #Base Tax
+salience 13
+when
+    item:Student(designation == "TA")
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 6;
+    double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal tax (Teaching Assistants @)", percent,fraction));
 end
 
 //tested
-rule "For TA's Federal Tax"
+rule "For TA's State Tax"	#Base Tax
+salience 12
+when
+    item:Student(designation == "TA")
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+		if (item.getState().substring(0, 1) == "A"
+				|| item.getState().substring(0, 1) == "B") {
+			percent = 4;
+		} else if (item.getState().substring(0, 1) == "C"
+				|| item.getState().substring(0, 1) == "D") {
+			percent = 5;
+		} else {
+			percent = 6;
+		}
+
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base State tax (Teaching Assistants) @ ", percent,fraction));
+end
+
+
+
+rule "For RA's Federal Tax" #Base Tax
 salience 15
-    when
-        item:Student(designation == "TA")
+when
+    item:Student(designation == "RA")
     taxRecord:TaxRecord()
 then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        int taxPer = 6;
-        taxCal = Utils.calculateTax(salary,taxPer);
-        System.out.println("Base Federal tax for Teaching Assistants @ " + taxPer + "% : " +taxCal);
-        item.setTax(taxCal);
-
+	double amount = item.getTaxableIncome();
+	double percent = 8;
+    double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal tax (Research Assistants @)", percent,fraction));
 end
 
-//tested
-rule "For TA's State Tax"
-salience 14
-    when
-        item:Student(designation == "TA")
-    taxRecord:TaxRecord()
-then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        int taxPer = 0 ;
-          if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-         taxPer = 4;
-        }
-       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         taxPer = 5;
-         }
-         else{
-         taxPer=6;
-         }
-         
-         taxCal = Utils.calculateTax(salary,taxPer);
-         System.out.println("Base State Tax for Teaching Assistants @ " + taxPer + "% : " +taxCal);
-         item.setTax(taxCal);
 
-end
-//tested
-rule "For RA's Federal Tax"
-salience 15
-    when
-        item:Student(designation == "RA")
-    taxRecord:TaxRecord()
-then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        int taxPer = 8;
-        taxCal = Utils.calculateTax(salary,taxPer);
-        System.out.println("Base Federal for Research Assistants @ " + taxPer + "% : " +taxCal);
-        item.setTax(taxCal);
-end
-//tested
 rule "For RA's State Tax"
 salience 14
-    when
-        item:Student(designation == "RA")
+when
+    item:Student(designation == "RA")
     taxRecord:TaxRecord()
 then
-        double salary = item.getIncome();
-        double taxCal = 0;
-        int taxPer = 0 ;
-        
-         if(item.getState().substring(0,1) == "A" || item.getState().substring(0,1) == "B")
-        {
-         taxPer = 7;
-        }
-       	 else if(item.getState().substring(0,1) == "C" || item.getState().substring(0,1) == "D") {
-         taxPer = 6;
-         }
-         else{
-         taxPer=4;
-         }
-         taxCal = Utils.calculateTax(salary,taxPer);
-         System.out.println("Base State Tax for Research Assistants @ " + taxPer + "% : " +taxCal);
-         item.setTax(taxCal);
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+		if (item.getState().substring(0, 1) == "A"
+				|| item.getState().substring(0, 1) == "B") {
+			percent = 7;
+		} else if (item.getState().substring(0, 1) == "C"
+				|| item.getState().substring(0, 1) == "D") {
+			percent = 5;
+		} else {
+			percent = 4;
+		}
+
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base State tax (Research Assistants) @ ", percent,fraction));
 end
 
-//tested
-rule "For Feewaiver"
+
+
+rule "For On-Campus working Federal tax" #Base Tax
+salience 15
+when
+    item:Student(designation == "OnCampus")
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 8;
+    double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Base Federal tax (On-Campus work @)", percent,fraction));
+end
+
+
+rule "For On-Campus working state tax" #Base Tax
+salience 14
+when
+    item:Student(designation == "OnCampus")
+    taxRecord:TaxRecord()
+then
+	double amount = item.getTaxableIncome();
+	double percent = 0;
+
+		if (item.getState().substring(0, 1) == "A"
+				|| item.getState().substring(0, 1) == "B") {
+			percent = 7;
+		} else if (item.getState().substring(0, 1) == "C"
+				|| item.getState().substring(0, 1) == "D") {
+			percent = 5;
+		} else {
+			percent = 4;
+		}
+
+		double fraction = Utils.calculatePercentage(amount, percent);
+		taxRecord.addEntry(new Entry("Base State tax (On-campus work) @ ", percent,fraction));
+end
+
+
+rule "For Feewaiver" #Increment on Tax
 salience 13
 when item:Student(feeWaiverAmt!=0)
 taxRecord:TaxRecord()
 then
-double fwaiver=item.getFeeWaiverAmt();
-double taxCal=0;
-int taxPer=5;
-taxCal=Utils.calculateTax(fwaiver,taxPer);
-System.out.println("Tax on Fee Waiver @"+taxPer+"% : " +taxCal);
-item.setTax(item.getTax()+taxCal);
+double amount=item.getFeeWaiverAmt();
+double percent=5;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Tax on Feewaiver @ ", percent,fraction));
 end
 
-//tested
-rule "Private universities"
+
+rule "Private universities" #Increment on Tax
 salience 12
 when
  item:Student(organization.getTypeId() == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE))
 taxRecord:TaxRecord()
 then
- double Per=2;
- double taxCal=0;
- taxCal=Utils.calculateTax(item.getTax(),Per);
- System.out.println("Tax for Private university @ :" +Per+ " % :" +taxCal);
- item.setTax(item.getTax()+taxCal);
- end
+double amount=taxRecord.getTotalTax();
+double percent=5;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Private University Tax @ ", percent,fraction));
+end
 
-//tested
-rule"Resident rule"
+rule"Alien stat" #Increment on Tax
 salience 11
-	when 
-		 item:Student((designation == "GA" || designation == "TA" || designation == "RA"), residencyStatus != Student.ResidencyStatus.FULL_TIME)
-	taxRecord:TaxRecord()
+when 
+item:Student((designation == "GA" || designation == "TA" || designation == "RA"), nationality != Student.Nationality.USA)
+taxRecord:TaxRecord()
 then
-		double salary = item.getIncome();
-		double Tax= item.getTax();
-		int taxPer = 2;
-		double Remtax = Utils.calculateTax(Tax , taxPer);
-		System.out.println("Non-Permanent Resident Tax @ " + taxPer + "% : " +Remtax);
-		item.setTax(Tax + Remtax);
-	
+double amount=taxRecord.getTotalTax();
+double percent=7;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Private University Tax @ ", percent,fraction));
 end	
+
 //tested
-rule"Alien stat"
+
+rule"Resident rule"  #Rebate on Tax
 salience 10
-	when 
-		 item:Student((designation == "GA" || designation == "TA" || designation == "RA"), nationality != Student.Nationality.USA)
-	taxRecord:TaxRecord()
+when 
+item:Student((designation == "GA" || designation == "TA" || designation == "RA"), residencyStatus != Student.ResidencyStatus.FULL_TIME)
+taxRecord:TaxRecord()
 then
-		double salary = item.getIncome();
-		double Tax= item.getTax();
-		int taxPer = 5;
-		double Remtax = Utils.calculateTax(Tax , taxPer);
-		System.out.println("Alien Tax @ " + taxPer + "% : " +Remtax);
-		item.setTax(Tax + Remtax);
+double amount=taxRecord.getTotalTax();
+double percent=2;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for Residency Status @ ", percent, -fraction));
 end	
 
-//tested
-rule "for Student_investment in student organizations"
-salience 9
-when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
-investment:Investment(id==1) from item.getInvestments() 
-taxRecord:TaxRecord()
-then
-double exmpPer=investment.getApplicablePercent();
-double amt=investment.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Investment Exemption for Students @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
-end
-
-//tested
-rule "for Student_investment in Charity"
-salience 8
-when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
-investment:Investment(id==2) from item.getInvestments() 
-
-taxRecord:TaxRecord()
-then
-double exmpPer=investment.getApplicablePercent();
-double amt=investment.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Investment Exemption for Students @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
-end
-
-//tested
-
-rule "For Student Exemption Minority"
-salience 7
-when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
-exemption:Exemption(id==2) from item.getExemptions() 
-taxRecord:TaxRecord()
-then
-double exmpPer=exemption.getPercentage();
-double amt=exemption.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Physical Disability Exemption @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
-end
-
-//tested
-rule "For Student Exemption physical disability"
-salience 6
-when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
-exemption:Exemption(id==4) from item.getExemptions() 
-taxRecord:TaxRecord()
-then
-double exmpPer=exemption.getPercentage();
-double amt=exemption.getAmount();
-double taxCal;
-taxCal=amt*exmpPer/100;
-System.out.println("Physical Disability Exemption @ "+exmpPer+"% :-"+taxCal);
-item.setTax(item.getTax()-taxCal);
-end
-
-//tested
-rule"History 3 years Rule for students"
-salience 5
-	when 
-		 item:Student((designation == "GA" || designation == "TA" || designation == "RA"),mUtin : utin)
-	taxRecord:TaxRecord()
-then
-	
-		Date now = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(now);
-		int lastYear = cal.get(Calendar.YEAR) - 1;
-		boolean latePayment = false;
-		for (int year = lastYear; year > lastYear - 3; year--) {
-			TaxHistory tHistory = HistoryProvider.getTaxHistory(mUtin, year);
-			if (tHistory != null){
-				latePayment = tHistory.getTaxDueDate().before(tHistory.getTaxPaidDate());
-				if(latePayment) 
-					break;
-			}
-		}
-			
-		if(!latePayment){
-			double Tax= item.getTax();
-			int taxPer = 5;
-			double Remtax = Utils.calculateTax(Tax , taxPer);
-			System.out.println("On-time Payment Deduction @ " + taxPer + "% : -" +Remtax + " (calculating from history in MongoDB)");
-			item.setTax(Tax - Remtax);
-		}
-	
-end
-
-//tested
-rule "Having Dependants"
-salience 4
+rule "Having Dependants" #Rebate on Tax
+salience 9 
 when 
 item:Student(noOfDependants>0)
 taxRecord:TaxRecord()
 then
-double amount=item.getDependantincome();
-double exmpPer=6;
-double Remtax=0;
-Remtax=Utils.calculateTax(amount,exmpPer);
-System.out.println("Exemption on Dependants @ :" +exmpPer+ " % :" +Remtax);
-item.setTax(item.getTax()-Remtax);
+double amount=taxRecord.getTotalTax();
+double percent=4;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for having Dependants @ ", percent, -fraction));
 end
 
-//tested
-rule "For Married Students"
-salience 3
-when item:Student(item.getMaritalStatus().toString() == "MARRIED" && item.isMarriedExecuted() == false)
+
+rule "for Student_investment in student organizations"   #Rebate on investment
+salience 8
+when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
+investment:Investment(id==1) from item.getInvestments() 
 taxRecord:TaxRecord()
 then
-int sutin=item.getSpouseUtin();
-TaxPayer spouse =(Employee) DBHandler.getInstance().getTaxPayer(sutin);
-((Employee)spouse).setMarriedExecuted(true);
-System.out.println("Your spouse Tax details:");
-double taxCal=0;
-double totalTax=0,stax=0;
-double per;
-TaxRulesLogic trl= new TaxRulesLogic();
-trl.triggerRules(spouse);
-totalTax= (item.getTax()+spouse.getTax());
-if(spouse instanceof ArmedForcePersonnel)
-{
-per=50;
-}
-else if(spouse instanceof SeniorCitizen)
-{
-per=20;
-}
-else
-{
-per=10;
-}
-System.out.println("Your Spouse total Tax is :"+spouse.getTax());
-taxCal=Utils.calculateTax(totalTax,per);
-System.out.println("Exemption if paid together @ "+per+"% :-"+taxCal);
-System.out.println("Total Tax to be paid if paid together: "+(totalTax-taxCal));
-end 
+double amount=investment.getAmount();
+double percent=8;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for investing in Student Organiazations @ ", percent, -fraction));
+end	
+
+rule "for Student_investment in Charity" #Rebate on investment
+salience 7
+when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
+investment:Investment(id==2) from item.getInvestments() 
+taxRecord:TaxRecord()
+then
+double amount=investment.getAmount();
+double percent=4;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for investing in Charity @ ", percent, -fraction));
+end
+
+
+rule "For Student Exemption Minority"  #Rebate on Exemption
+salience 6
+when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
+exemption:Exemption(id==2) from item.getExemptions() 
+taxRecord:TaxRecord()
+then
+double amount=exemption.getAmount();
+if(amount == 0) amount = 200;
+double percent=9;
+if(percent == 0) percent = 10;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for Student Minority Exemption @ ", percent, -fraction));
+end
+
+rule "For Student Exemption physical disability"
+salience 5
+when item:Student((designation == "GA" || designation == "TA" || designation == "RA"))
+exemption:Exemption(id==4) from item.getExemptions() 
+taxRecord:TaxRecord()
+then
+double amount=exemption.getAmount();
+if(amount == 0) amount = 900;
+double percent=9;
+if(percent == 0) percent = 13;
+double fraction = Utils.calculatePercentage(amount, percent);
+taxRecord.addEntry(new Entry("Rebate for Student physical disability exemption @ ", percent, -fraction));
+end
+
+
+rule "History 3 years Rule Students" #Rebate on Tax
+salience 4
+when 
+	item:Student(hasLatePayments(3) == true)
+    taxRecord:TaxRecord()
+then
+	double amount = taxRecord.getTotalTax();
+	double percent = 20;
+	
+	double fraction = Utils.calculatePercentage(amount, percent);
+	taxRecord.addEntry(new Entry("Tax Rebate(On Time payment for last 3 years)", percent, -fraction));		
+end
+
+	
+rule "For Married Senior Citizens"  #Rebate on Combined Tax
+salience 3
+when
+	item: Student(item.getMaritalStatus().toString() == "MARRIED" && item.getSpouseEvaluated() == false, sUtin : spouseUtin)
+	taxRecord:TaxRecord()
+then
+	if (sUtin != 0) {
+		Employee spouse = (Employee) DBHandler.getInstance().getTaxPayer(sUtin);
+		spouse.setSpouseEvaluated(true); // not to evaluate the combined tax rule again
+
+		try {
+			TaxRecord spouseRecord = TaxRulesLogic.triggerRules(spouse);
+
+			if (spouseRecord != null && spouseRecord.getTotalTax() != 0) {
+
+				taxRecord.addEntry(new Entry("Spouse's Tax", spouseRecord.getTotalTax()));
+
+				double percent;
+				if (spouse instanceof ArmedForcePersonnel) {
+					percent = 25;
+				} else if (spouse instanceof SeniorCitizen) {
+					percent = 15;
+				} else {
+					percent = 10;
+				}
+
+				double combinedTax = taxRecord.getTotalTax() + spouseRecord.getTotalTax();
+				double reduction = Utils.calculatePercentage(combinedTax, percent);
+
+				taxRecord.addEntry(new Entry("Tax Rebate (on Combined Tax)", percent, -reduction));
+
+			}
+
+		} catch (Exception e) {
+
+		}
+	}
+end
