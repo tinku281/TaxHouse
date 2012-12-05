@@ -848,22 +848,6 @@ public class DBHandler {
 		return investments;
 	}
 
-	public double getSharePercents(int utin) throws Exception {
-		Connection con = null;
-		Statement stmt = null;
-		ResultSet rs = null;
-		con = getConnection();
-		String query = "select Share_Percent from has_partnership where Share_UTIN=" + utin;
-		double percents = 0;
-		stmt = con.createStatement();
-		rs = stmt.executeQuery(query);
-		while (rs.next()) {
-			percents += rs.getInt(SHARE_PERCENT);
-		}
-
-		return (100 - percents);
-	}
-
 	public String getScaleName(int id) {
 
 		Connection con = null;
@@ -1134,6 +1118,32 @@ public class DBHandler {
 			closeConnectionObjects(rs, stmt, con);
 		}
 	}
+	
+	public double getSharePercents(int utin) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			con = getConnection();
+
+			String query = "select Share_Percent from has_partnership where Share_UTIN=" + utin;
+			double percents = 0;
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(query);
+			
+			while (rs.next()) {
+				percents += rs.getInt(SHARE_PERCENT);
+			}
+
+			return (100 - percents);
+
+		} catch (SQLException e) {
+
+		}
+
+		return 0;
+	}
 
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
 
@@ -1159,7 +1169,7 @@ public class DBHandler {
 			stmt.executeUpdate();
 			stmt.close();
 			stmt = null;
-			
+
 			if (taxPayer instanceof Employee) {
 				sql = "insert into employee values(?,?,?,?,?,?,?);";
 				stmt = con.prepareStatement(sql);
@@ -1179,7 +1189,7 @@ public class DBHandler {
 					stmt.setInt(7, Employee.SubType.ARMY.ordinal());
 				else
 					stmt.setInt(7, Employee.SubType.NONE.ordinal());
-				
+
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;

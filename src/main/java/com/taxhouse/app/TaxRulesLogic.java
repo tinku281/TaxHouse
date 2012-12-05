@@ -61,17 +61,17 @@ public class TaxRulesLogic {
 				kbase = readKnowledgeBase("Deductions.drl", "seniorcitizens.drl");
 
 			} else if (taxPayer instanceof ArmedForcePersonnel) {
-				kbase = readKnowledgeBase("Armedforces.drl");
+				kbase = readKnowledgeBase("Deductions.drl", "Armedforces.drl");
 
 			} else if (taxPayer instanceof Student) {
-				kbase = readKnowledgeBase("students.drl");
+				kbase = readKnowledgeBase("Deductions.drl", "students.drl");
 
 			} else {
-				kbase = readKnowledgeBase("Employee.drl");
+				kbase = readKnowledgeBase("Deductions.drl", "Employee.drl");
 			}
 
 		} else if (taxPayer instanceof Organization) {
-			kbase = readKnowledgeBase("organization.drl");
+			kbase = readKnowledgeBase("Deductions.drl", "organization.drl");
 		}
 
 		if (kbase != null) {

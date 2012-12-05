@@ -1,17 +1,18 @@
 package com.taxhouse.model;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.Map;
 
 import org.drools.spi.KnowledgeHelper;
 
+import com.taxhouse.app.TaxRulesLogic;
 import com.taxhouse.app.Utils;
+import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.ArmedForcePersonnel.SpecialTask;
 import com.taxhouse.model.TaxRecord.Entry;
 
 public class Format {
 
-	SeniorCitizen item;
+	Organization item;
 	TaxRecord taxRecord;
 	KnowledgeHelper drools;
 	SpecialTask specialtask;
@@ -41,13 +42,28 @@ public class Format {
 		Investment investment;
 		Exemption exemption;
 
-		double amount = taxRecord.getTotalTax();
-		double percent = 0.5;
+		Map<Integer, Double> shares = item.getShares();
+
+		int shareUtin = 0;
+		double sharePercent = 0;
+		double taxForShare = 0;
+
+		for (Map.Entry<Integer, Double> entry : shares.entrySet()) {
+			shareUtin = entry.getKey();
+			sharePercent = entry.getValue();
+
+			if (shareUtin != 0) {
+				TaxPayer company = DBHandler.getInstance().getTaxPayer(shareUtin);
+				((Organization) company).setHasSharesExecuted(true);
+				((Organization) company).setSharedExecuted(true);
+
+				taxForShare = TaxRulesLogic.triggerRules(company).getTotalTax() * sharePercent;
+				taxRecord.addEntry(new Entry("Tax for share in Organization " + shareUtin, sharePercent, taxForShare));
+			}
+		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Widow Senior Citizen Exemption", percent,
-
-		fraction));
+		
 
 	}
 }
