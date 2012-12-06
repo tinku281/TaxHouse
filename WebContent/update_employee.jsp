@@ -13,6 +13,7 @@
     
   <%
 		String empType,maritalStatus;
+  		String spouseUTIN ="Enter Spouse UTIN";
 		Employee employee = (Employee)session.getAttribute( "taxpayee" );
 		
 		if(employee instanceof Student)
@@ -25,6 +26,9 @@
 			empType="None";
 		
 		maritalStatus = employee.getMaritalStatus( ).name(  );
+		
+		if(maritalStatus.equals(Employee.MaritalStatus.MARRIED.name(  ) ))
+			spouseUTIN = String.valueOf( employee.getSpouseUtin(  ));
 		
 		ArrayList<String> maritalStatusList = new ArrayList<String>();
 		maritalStatusList.add(Employee.MaritalStatus.SINGLE.name(  ));
@@ -158,7 +162,7 @@
 		var textBoxInvName = document.createElement("input");
 		textBoxInvName.setAttribute("type", "text");
 		textBoxInvName.setAttribute("class", "textbox2 rightfloat");
-		textBoxInvName.setAttribute("name", "investmentname"+invCount)
+		textBoxInvName.setAttribute("name", "investmentname"+invCount);
 		textBoxInvName.setAttribute("value", document.insertEmployee.emp_inv_name.value);
 		textBoxInvName.readOnly = "readonly";
 
@@ -262,6 +266,7 @@
 <body>
 
 <%@ include file="header.jsp" %>
+<%@ include file = "subheader.jsp"%>
 <%@ include file="admin_panel.html" %>
 
 <form name="insertEmployee" method="POST" action="insert_employee.do">
@@ -290,7 +295,7 @@
 				</select>
 		</div>
 		<div class="formrow">
-			<input class="textbox2 rightfloat" type="text" name="spouse_utin" value="Enter Spouse UTIN" disabled=<%= (maritalStatus.equals( Employee.MaritalStatus.MARRIED.name() )?false:true) %> onFocus="clearText()" onBlur="setText()"/>
+			<input class="textbox2 rightfloat" type="text" name="spouse_utin" value="<%=spouseUTIN %>" <%= (!maritalStatus.equals( Employee.MaritalStatus.MARRIED.name() )?"disabled":"") %> onFocus="clearText()" onBlur="setText()"/>
 		</div>
 			
 	
@@ -342,7 +347,9 @@
 		}
 	}	
 	%>	
-	
+			<div class="header">
+				<h2>Add Exemptions</h2>
+			</div>
 			<div class="formrow"><label class="label1 ">Exemption Name</label>
 			<select name="emp_exemp_name" class="drop rightfloat">
 			<%
@@ -371,10 +378,57 @@
 			<div id="exemp_details"></div>	
 			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
 		
-			
-	
 	<div class="header">
 		<h2>Investment Details</h2>
+	</div>
+	
+	<%
+	if(investmentList != null && investmentList.size(  ) > 0)
+	{
+		for(int i=0;i <investmentList.size(  ); i++ )
+		{
+			String investmentName = investmentList.get( i ).getName(  );
+			Double investmentAmount = investmentList.get( i ).getAmount(  );
+			Double investmentPer = investmentList.get( i ).getApplicablePercent(  );
+	%>
+			<div class="formrow"><label class="label1 ">Exemption Name</label>
+			<select name="<%="investmentname"+(i+1)%>" class="drop rightfloat">
+			<%
+				String[] investmentNames = (String[])request.getAttribute( "investment_names" );
+			
+				if(investmentNames!= null && investmentNames.length >= 0)
+				{
+						for(int index=0; index < investmentNames.length; index++)
+						{
+							String invName = investmentNames[index];							
+			%>				
+							<option value="<%=invName%>" <%=((invName.equals( investmentName ))?"selected":"") %>><%=invName %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
+			
+			<div class="formrow">
+				
+				<label class="label1 ">Investment Amount</label>
+				<input class="textbox2 rightfloat" type="text" name="<%="investmentamount"+(i+1) %>" value="<%=investmentAmount %>" />
+			</div>
+			
+			<div class="formrow">
+				
+				<label class="label1 ">Applicable Percentage</label>
+				<input class="textbox2 rightfloat" type="text" name="<%="investmentper"+(i+1) %>" value="<%=investmentPer %>" />
+			</div>
+			
+	<%
+		}
+	}	
+	%>			
+	
+	<div class="header">
+		<h2>Add Investments</h2>
 	</div>
 		<div id="inv_details">
 			<div class="formrow"><label class="label1 ">Investment Name</label>

@@ -49,10 +49,27 @@ public class EmployeeProcessing extends HttpServlet
 			return;
 		}
 
+		int functiontype = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
 		int exmpCount = Integer.parseInt( request.getParameter( "count" ).toString() );
 		int invCount = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
 
-		int empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
+		int empType;
+		if ( functiontype == 4 )
+			empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
+		else
+		{
+			String sEmpType = request.getParameter( "emp_type" ).toString();
+			
+			if(sEmpType.equals( "Student" ))
+				empType = 1;
+			else if(sEmpType.equals( "Senior Citizen" ))
+				empType = 2;
+			else if(sEmpType.equals( "Army" ))
+				empType = 3;
+			else
+				empType = 0;
+		}
+
 		int empMaritalStatus = Integer.parseInt( request.getParameter( "emp_mar_status" ).toString() );
 		int spouseUtin = 0;
 		if ( empMaritalStatus == 1 )
@@ -87,29 +104,29 @@ public class EmployeeProcessing extends HttpServlet
 				exemptionsList.add( exemption );
 			}
 		}
-		
+
 		ArrayList<Investment> investmentsList = new ArrayList<Investment>();
 
 		if ( invCount > 0 )
 		{
-//			DBHandler dbHandler = new DBHandler();
+			// DBHandler dbHandler = new DBHandler();
 
-			for ( int index = 0; index < exmpCount; index++ )
+			for ( int index = 0; index < invCount; index++ )
 			{
 				int i = index + 1;
 				String invName = request.getParameter( "investmentname" + i );
 				Double invAmount = Double.parseDouble( request.getParameter( "investmentamount" + i ) );
 				Double invPer = Double.parseDouble( request.getParameter( "investmentper" + i ) );
-				int invId =0; //handle the id, retrieve from database or whatever you want
+				int invId = 0; // handle the id, retrieve from database or
+								// whatever you want
 
 				Investment investment = new Investment( invId, invName, invAmount, invPer );
 				investmentsList.add( investment );
-				
-				System.out.println("Investment Name: "+invName+", Investment Amount: "+invAmount+", Investment Percentage: "+invPer);
-				
+
+				System.out.println( "Investment Name: " + invName + ", Investment Amount: " + invAmount + ", Investment Percentage: " + invPer );
+
 			}
 		}
-
 
 		Employee employee;
 
@@ -161,7 +178,7 @@ public class EmployeeProcessing extends HttpServlet
 
 		if ( exmpCount > 0 )
 			employee.setExemptions( exemptionsList );
-		if(invCount > 0)
+		if ( invCount > 0 )
 			employee.setInvestments( investmentsList );
 
 		System.out.println( "\nEmployee FirstName: " + employee.getFirstName() );
@@ -190,17 +207,27 @@ public class EmployeeProcessing extends HttpServlet
 
 		if ( empType == Employee.SubType.STUDENT.ordinal() )
 		{
+			request.setAttribute( "type", functiontype );
 			requestDispatcher = request.getRequestDispatcher( "insert_student.jsp" );
 			requestDispatcher.forward( request, response );
 		}
 		else if ( empType == Employee.SubType.SENIOR_CITIZEN.ordinal() )
 		{
-			requestDispatcher = request.getRequestDispatcher( "insert_senior_citizen.jsp" );
+			if( functiontype == 4)
+				requestDispatcher = request.getRequestDispatcher( "insert_senior_citizen.jsp" );
+			else
+				requestDispatcher = request.getRequestDispatcher( "update_senior_citizen.jsp" );
+			
 			requestDispatcher.forward( request, response );
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
 		{
-			requestDispatcher = request.getRequestDispatcher( "insert_armed.jsp" );
+			
+			if( functiontype == 4)
+				requestDispatcher = request.getRequestDispatcher( "insert_armed.jsp" );
+			else
+				requestDispatcher = request.getRequestDispatcher( "update_armed.jsp" );
+			
 			requestDispatcher.forward( request, response );
 		}
 		else

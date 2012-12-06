@@ -67,6 +67,7 @@ function validate()
 <body>
 <% int functionType = Integer.parseInt( session.getAttribute( "functionType" ).toString(  ) ); %>
 	<%@ include file="header.jsp" %>
+	<%@ include file = "subheader.jsp"%>
 	<%@ include file="admin_panel.html" %>
 	<div class="subheader width300">
 	<div class="header">

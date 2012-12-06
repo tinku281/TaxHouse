@@ -99,6 +99,7 @@ function validate()
 </head>
 <body>
 <%@ include file = "header.jsp"%>
+<%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
 
 <div class="subheader width500" >
@@ -135,7 +136,7 @@ function validate()
 			</div>
 			<div class="formrow">
 				<label class="label1 ">Income Amount</label>
-				<input class="textbox2 rightfloat" type="text" vlaue="Enter Amount" name="income_amount" onFocus="clearText()" onBlur="setText()"/>
+				<input class="textbox2 rightfloat" type="text" value="Enter Amount" name="income_amount" onFocus="clearText()" onBlur="setText()"/>
 			</div>
 			<div id="income_details"></div>	
 			<div class="formrow ">

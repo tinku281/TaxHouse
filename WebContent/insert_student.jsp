@@ -1,3 +1,4 @@
+<%@page import="com.taxhouse.model.Student"%>
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -57,7 +58,18 @@ function validate()
 </script>
 </head>
 <body>
+<%  int type  = Integer.parseInt( request.getAttribute( "type" ).toString());
+	String freeWaiverAmt= "Enter Amount";
+			if(type != 4)
+			{
+				Student student = (Student)session.getAttribute( "taxpayee" );
+				
+				if(student != null)
+					freeWaiverAmt = String.valueOf( student.getFeeWaiverAmt(  ));
+			}
+%>
 <%@ include file = "header.jsp"%>
+<%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
 
 <div class="subheader width500" >
@@ -67,7 +79,7 @@ function validate()
 	<form name="insertStudentForm" method="POST" action="EmployeeSubtypeProcessing.do" >
 			<div class="formrow">
 				<label class="label1 ">Free Waiver Amount</label>
-				<input class="textbox2 rightfloat" type="text" name="waiver_amount" value="Enter Amount" onFocus="clearText()" onBlur="setText()"/>
+				<input class="textbox2 rightfloat" type="text" name="waiver_amount" value="<%=freeWaiverAmt %>" onFocus="clearText()" onBlur="setText()"/>
 			</div>
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 	</form>

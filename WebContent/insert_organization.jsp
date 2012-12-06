@@ -129,6 +129,7 @@ function validate()
 </head>
 <body>
 <%@ include file = "header.jsp"%>
+<%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
 
 <div class="subheader width700" >

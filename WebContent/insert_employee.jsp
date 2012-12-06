@@ -120,7 +120,7 @@
 		var textBoxInvName = document.createElement("input");
 		textBoxInvName.setAttribute("type", "text");
 		textBoxInvName.setAttribute("class", "textbox2 rightfloat");
-		textBoxInvName.setAttribute("name", "investmentname"+invCount)
+		textBoxInvName.setAttribute("name", "investmentname"+invCount);
 		textBoxInvName.setAttribute("value", document.insertEmployee.emp_inv_name.value);
 		textBoxInvName.readOnly = "readonly";
 
@@ -244,6 +244,7 @@
 %>
 
 <%@ include file="header.jsp" %>
+<%@ include file = "subheader.jsp"%>
 <%@ include file="admin_panel.html" %>
 
 <form name="insertEmployee" method="POST" action="insert_employee.do">
