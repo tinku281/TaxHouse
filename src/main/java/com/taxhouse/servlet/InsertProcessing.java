@@ -72,7 +72,8 @@ public class InsertProcessing extends HttpServlet
 			String[] exempNames = DBHandler.getInstance().getExemptionNames();
 			String[] invNames = DBHandler.getInstance().getInvestmentNames();
 			
-			RequestDispatcher requestDispatcher = request.getRequestDispatcher( "insert_employee.jsp" );
+			String  forwardPage = (functiontype == 4) ?"insert_employee.jsp":"update_employee.jsp";
+			RequestDispatcher requestDispatcher = request.getRequestDispatcher(forwardPage );
 			request.setAttribute( "exemption_names", exempNames );
 			request.setAttribute( "investment_names", invNames );
 			requestDispatcher.forward( request, response );
