@@ -607,8 +607,6 @@ then
 			fraction));
 end      
  
- 
- 
   
  rule "Small Scale Profit Private Class D Federal base rule" #Base Tax
 salience 44

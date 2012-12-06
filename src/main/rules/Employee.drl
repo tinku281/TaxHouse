@@ -73,27 +73,27 @@ then
 	double amount = item.getTaxableIncome();
 	double taxPer = 0;
 	
-	int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
-	
-	if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
-		if (slab == 1) {
-			taxPer = 15.9;
-		} else {
-			taxPer = 16.9;
-		}
-	} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
-		if (slab == 1) {
-			taxPer = 17.5;
-		} else {
-			taxPer = 18.5;
-		}
+int slab = DBHandler.getInstance().getSlabId(item.getTaxableIncome());
+
+if (item.getState().substring(0, 1) == "A" || item.getState().substring(0, 1) == "B") {
+	if (slab == 1) {
+		taxPer = 15.9;
 	} else {
-		if (slab == 1) {
-			taxPer = 19.0;
-		} else {
-			taxPer = 20;
-		}
+		taxPer = 16.9;
 	}
+} else if (item.getState().substring(0, 1) == "C" || item.getState().substring(0, 1) == "D") {
+	if (slab == 1) {
+		taxPer = 17.5;
+	} else {
+		taxPer = 18.5;
+	}
+} else {
+	if (slab == 1) {
+		taxPer = 19.0;
+	} else {
+		taxPer = 20;
+	}
+}
 	
 	double taxcal = Utils.calculatePercentage(amount, taxPer);
 	taxRecord.addEntry(new Entry("Base State Tax(Profit Organization Employee)", taxPer, taxcal));
@@ -262,7 +262,7 @@ then
 	int taxPer = 5;
 	
 	double reduction = Utils.calculatePercentage(amount , taxPer);
-	taxRecord.addEntry(new Entry("Residential Status Tax(Non-Resident)", taxPer, -reduction));
+	taxRecord.addEntry(new Entry("Residential Status Tax Rebate(Non-Resident)", taxPer, -reduction));
 end	
 
 //tested
@@ -569,8 +569,6 @@ then
 	if(amount == 0) amount = 800;
 	double percent = exemption.getPercentage();
 	if(percent == 0) percent = 6;
-	
-	
 	double fraction = Utils.calculatePercentage(amount, percent);
 	taxRecord.addEntry(new Entry("Tax Exemption Rebate(Physical Disability) on" + amount, percent, -fraction));
 end

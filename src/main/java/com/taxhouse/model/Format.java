@@ -27,9 +27,10 @@ public class Format {
 		// double taxCal = 0;
 		// double exmpPer = 60;
 		//
-		// taxCal = Utils.calculatePercentage(item.getTax(), exmpPer);
-		// item.setTax(item.getTax() - taxCal);
-		// taxRecord.addEntry(new Entry("Tax Exemption Rebate (Personnel Previously worked in A2 Combat Zone)",
+		// taxCal = Utils.calculatePercentage(taxRecord.getTotalTax(), exmpPer);
+		// item.setTax(taxRecord.getTotalTax() - taxCal);
+		// taxRecord.addEntry(new
+		// Entry("Tax Exemption Rebate (Personnel Previously worked in A2 Combat Zone)",
 		// exmpPer, -taxCal));
 		// }
 
