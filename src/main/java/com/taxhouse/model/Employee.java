@@ -1,5 +1,6 @@
 package com.taxhouse.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -165,15 +166,14 @@ public class Employee extends TaxPayer {
 		if (hasStocks()) {
 			double purchaseAmount = 0;
 			double currentAmount = 0;
-
-			String pdate, symbol;
+			ArrayList<String> dates = new ArrayList<String>();
+			ArrayList<String> symbols = new ArrayList<String>();
 			for (Stock stock : stocks) {
-				symbol = stock.getSymbol();
-				pdate = DBHandler.dateFormat.format(stock.getPurchaseDate()).toString();
-
-				currentAmount += StockProvider.GetCurrentRate(symbol);
-				purchaseAmount += HistoryProvider.GetHistoricRate(symbol, pdate);
+				symbols.add(stock.getSymbol());
+				dates.add(DBHandler.dateFormat.format(stock.getPurchaseDate()).toString());
 			}
+			currentAmount += StockProvider.GetCurrentRate(symbols);
+			purchaseAmount += HistoryProvider.GetHistoricRate(symbols, dates);
 
 			if (currentAmount < purchaseAmount)
 				return true;
