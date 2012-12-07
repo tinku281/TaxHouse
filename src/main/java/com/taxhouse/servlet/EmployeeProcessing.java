@@ -224,7 +224,7 @@ public class EmployeeProcessing extends HttpServlet
 		}
 
 		ResidencyStatus resStatus[] = Employee.ResidencyStatus.values();
-		for ( int i = 0; i < gender.length; i++ )
+		for ( int i = 0; i < resStatus.length; i++ )
 		{
 			if ( iResStatus == resStatus[i].ordinal() )
 			{

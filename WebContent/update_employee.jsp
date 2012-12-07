@@ -1,18 +1,27 @@
+<%@page import="java.text.SimpleDateFormat"%>
 <%@page import="com.taxhouse.model.Investment"%>
 <%@page import="com.taxhouse.model.SeniorCitizen.Income"%>
 <%@page import="com.taxhouse.model.Exemption"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.List"%>
+<%@page import="java.util.Date"%>
 <%@page import="com.taxhouse.model.ArmedForcePersonnel"%>
 <%@page import="com.taxhouse.model.SeniorCitizen"%>
 <%@page import="com.taxhouse.model.Student"%>
 <%@page import="com.taxhouse.model.Employee"%>
 <%@page import="com.taxhouse.model.TaxPayer"%>
+<%@page import="com.taxhouse.model.Stock"%>
+<%@page import="com.taxhouse.model.Employee.Gender"%>
+<%@page import="com.taxhouse.model.Employee.ResidencyStatus"%>
+
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
     
   <%
-		String empType,maritalStatus;
+		String empType,maritalStatus,dob,gender,resStatus,exMilitary;
+  		int noOfDependents;
+  		double dependantsIncome;
+  		
   		String spouseUTIN ="Enter Spouse UTIN";
 		Employee employee = (Employee)session.getAttribute( "taxpayee" );
 		
@@ -25,6 +34,7 @@
 		else
 			empType="None";
 		
+		
 		maritalStatus = employee.getMaritalStatus( ).name(  );
 		
 		if(maritalStatus.equals(Employee.MaritalStatus.MARRIED.name(  ) ))
@@ -36,14 +46,26 @@
 		maritalStatusList.add(Employee.MaritalStatus.DIVORCED.name(  ));
 		maritalStatusList.add(Employee.MaritalStatus.WIDOW.name(  ));
 		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		
+		dob =simpleDateFormat.format( employee.getDateOfBirth(  ) );
+		gender = employee.getGender().name(  );
+		resStatus = employee.getResidencyStatus().name(  );
+		exMilitary = employee.getExMilatary( );
+		noOfDependents = employee.getNoOfDependants(  );
+		dependantsIncome = employee.getDependantIncome(  );
+		
 		List<Exemption> exemptionList = employee.getExemptions(  );
 		List<Investment> investmentList = employee.getInvestments(  );
+		List<Stock> stockList = employee.getStocks(  );
 		
-		int exmpsize =0,invSize = 0;
+		int exmpsize =0,invSize = 0,stockSize=0;
 		if(exemptionList!= null)
 			exmpsize = exemptionList.size(  );
 		if(investmentList != null)
 			invSize = investmentList.size(  );
+		if(stockList != null)
+			stockSize = stockList.size(  );
 		
 		
 %>
@@ -55,6 +77,19 @@
 <script>
 	var count = <%=exmpsize%>;
 	var invCount = <%=invSize%>;
+	var stockCount = <%=stockSize%>;
+	
+	String.prototype.isValidDate = function() {
+		var IsoDateRe = new RegExp("^([0-9]{4})-([0-9]{2})-([0-9]{2})$");
+		var matches = IsoDateRe.exec(this);
+		
+		if(!matches)
+			return false;
+		
+		var composedDate = new Date(matches[1] , matches[2]-1,matches[3]);
+		
+		return ((composedDate.getMonth() == (matches[2] -1) )  &&  (composedDate.getDate() == matches[3]) && (composedDate.getFullYear() == matches[1]));
+	};
 	
 	function isNumeric(val)
 	{
@@ -211,6 +246,88 @@
 		return true;
 	}
 	
+	function addStockDetails()
+	{
+		var stockDate,stockQuantity;
+		stockDate = document.insertEmployee.stockdate.value;
+		stockQuantity = document.insertEmployee.stockquantity.value;
+		
+		if(stockDate == "" || stockQuantity == "" )
+		{
+			alert("Please fill in the stock details");	
+			return false;
+		}
+		if(!(stockDate.isValidDate()))
+		{
+			alert("Stock Purchase Date is not valid");	
+			return false;
+		}
+		if(!isNumeric(stockQuantity))
+		{
+			alert("Stock Quantity should be in digits");	
+			return false;
+		}
+		
+		document.insertEmployee.stock_count.value = ++stockCount;
+		
+		/*--------------STOCK SYMBOL--------*/
+		
+		var labelStockName =document.createElement("label");
+		labelStockName.setAttribute("class","label1");
+		labelStockName.innerHTML="Stock Symbol";
+		
+		var textBoxStockName = document.createElement("input");
+		textBoxStockName.setAttribute("type", "text");
+		textBoxStockName.setAttribute("class", "textbox2 rightfloat");
+		textBoxStockName.setAttribute("name", "stocksymbol"+stockCount);
+		textBoxStockName.setAttribute("value", document.insertEmployee.emp_stock_symbol.value);
+		textBoxStockName.readOnly = "readonly";
+
+		var divStockName = document.createElement("div");
+		divStockName.setAttribute("class", "formrow");
+		divStockName.appendChild(labelStockName);
+		divStockName.appendChild(textBoxStockName);
+		
+		/*--------------STOCK PURCHASE DATE--------*/
+		
+		var labelstockDate =document.createElement("label");
+		labelstockDate.setAttribute("class","label1");
+		labelstockDate.innerHTML="Stock Purchase Date";
+		
+		var textBoxstockDate = document.createElement("input");
+		textBoxstockDate.setAttribute("type", "text");
+		textBoxstockDate.setAttribute("class", "textbox2 rightfloat");
+		textBoxstockDate.setAttribute("name", "stockdate"+stockCount);
+		textBoxstockDate.setAttribute("value", stockDate);
+		textBoxstockDate.readOnly = "readonly";
+
+		var divstockDate = document.createElement("div");
+		divstockDate.setAttribute("class", "formrow");
+		divstockDate.appendChild(labelstockDate);
+		divstockDate.appendChild(textBoxstockDate);
+		
+		/*--------------STOCK QUANTITY--------*/
+		
+		var labelstockQuantity =document.createElement("label");
+		labelstockQuantity.setAttribute("class","label1");
+		labelstockQuantity.innerHTML="Stock Quantity";
+		
+		var textBoxstockQuantity = document.createElement("input");
+		textBoxstockQuantity.setAttribute("type", "text");
+		textBoxstockQuantity.setAttribute("class", "textbox2 rightfloat");
+		textBoxstockQuantity.setAttribute("name", "stockquantity"+stockCount);
+		textBoxstockQuantity.setAttribute("value", stockQuantity);
+		textBoxstockQuantity.readOnly = "readonly";
+		
+		var divstockQuantity = document.createElement("div");
+		divstockQuantity.setAttribute("class", "formrow");
+		divstockQuantity.appendChild(labelstockQuantity);
+		divstockQuantity.appendChild(textBoxstockQuantity);
+		
+		document.getElementById('stock_details').appendChild(divStockName).appendChild(divstockDate).appendChild(divstockQuantity);
+		return true;
+	}
+	
 	function clearText()
 	{
 		if (document.insertEmployee.spouse_utin.value == "Enter Spouse UTIN") 
@@ -243,6 +360,48 @@
 	
 	function validate() 
 	{
+		var empDob = document.insertEmployee.emp_dob.value;
+		var empNoDependants =  document.insertEmployee.emp_no_dependants.value;
+		var dependantsIncome = document.insertEmployee.emp_dependant_income.value;
+		
+		if(empDob == "")
+		{
+			alert("Date of Birth cannot be empty");
+			return false;
+		}	
+		if(empNoDependants == "")
+		{
+			alert("Enter number of dependants");
+			return false;
+		}
+		
+		if(!(empDob.isValidDate()))
+		{
+			alert("Please enter a valid Date of Birth");
+			return false;
+		}
+		
+		if(!isNumeric(empNoDependants))
+		{
+			alert("Please enter a number of dependants as digits");
+			return false;
+		}	
+		
+		if(parseInt(empNoDependants) > 5)
+		{
+			alert("Number of dependants cannot be more than 5");
+			return false;
+		}
+		if(parseInt(empNoDependants) == 0 || dependantsIncome == "")
+		{
+			document.insertEmployee.emp_dependant_income.value = 0;
+		}
+		else if(!isNumeric(dependantsIncome))
+		{
+			alert("Dependants income should be in digits");
+			return false;
+		}	
+		
 		if(document.insertEmployee.emp_mar_status.value == "1")
 		{
 			var utinValue = document.insertEmployee.spouse_utin.value;
@@ -279,6 +438,46 @@
 				<label class="label1">Employee Type</label>
 				<input class="textbox2 rightfloat" type="text" name="emp_type" value="<%=empType%>" readonly="readonly"/>
 			</div>
+			
+			<div class="formrow">
+				<label class="label1 ">Employee DOB (yyyy-mm-dd)</label>
+				<input class="textbox2 rightfloat" type="text" name="emp_dob"  value="<%=dob %>" />
+			</div>
+			
+			<div class="formrow">
+				<label class="label1 ">Number of Dependants (max 5)</label>
+				<input class="textbox2 rightfloat" type="text" name="emp_no_dependants" value ="<%=noOfDependents %>"  />
+			</div>
+			
+			<div class="formrow">
+				<label class="label1">Employee Gender</label>
+				<select name="emp_gender" class="drop rightfloat">
+				<%
+					Gender[] genders = Employee.Gender.values(  );
+					for(int i = 0 ; i < genders.length; i++)
+					{	
+				%>
+						<option value="<%=genders[i].ordinal(  )%>" <%= ((gender.equals( genders[i].name(  ) ))?"selected":"") %>><%=genders[i].name(  ) %></option>
+				<%	
+					}
+				 %>	
+				</select>
+			</div>
+			
+			<div class="formrow">
+				<label class="label1">Employee Residency Status</label>
+				<select name="emp_res_status" class="drop rightfloat">
+				<%
+					ResidencyStatus[] residencyStatus = Employee.ResidencyStatus.values(  );
+					for(int i = 0 ; i < residencyStatus.length; i++)
+					{	
+				%>
+						<option value="<%=residencyStatus[i].ordinal(  )%>" <%= ((resStatus.equals( residencyStatus[i].name(  ) ))?"selected":"") %>><%=residencyStatus[i].name(  ) %></option>
+				<%	
+					}
+				 %>	
+				</select>
+			</div>
 		
 		<div class="formrow">
 				<label class="label1">Marital Status</label>
@@ -297,6 +496,18 @@
 		<div class="formrow">
 			<input class="textbox2 rightfloat" type="text" name="spouse_utin" value="<%=spouseUTIN %>" <%= (!maritalStatus.equals( Employee.MaritalStatus.MARRIED.name() )?"disabled":"") %> onFocus="clearText()" onBlur="setText()"/>
 		</div>
+		
+		<div class="header">
+		<h2>Additional Details</h2>
+	</div>
+	<div class="formrow">
+		<label class="label1">Ex- Miltary</label>
+		<input type ="checkbox" class="checkbox2 rightfloat marginRight200" name="emp_ex_miltary" value="ex_miltary" <%=((exMilitary.equalsIgnoreCase( "y" ))?"checked":"") %>/>
+	</div>			
+	<div class="formrow">
+		<label class="label1 ">Dependant Income</label>
+		<input class="textbox2 rightfloat" type="text" name="emp_dependant_income" value="<%=dependantsIncome %>"  />
+	</div>
 			
 	
 	<div class="header">
@@ -378,13 +589,16 @@
 			<div id="exemp_details"></div>	
 			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
 		
-	<div class="header">
-		<h2>Investment Details</h2>
-	</div>
+	
 	
 	<%
 	if(investmentList != null && investmentList.size(  ) > 0)
 	{
+	%>
+	<div class="header">
+		<h2>Investment Details</h2>
+	</div>
+	<%
 		for(int i=0;i <investmentList.size(  ); i++ )
 		{
 			String investmentName = investmentList.get( i ).getName(  );
@@ -454,9 +668,95 @@
 		</div>	
 			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add More" onClick="addInvestmentDetails()"/></div>
 			
+			
+	
+	
+	<%
+	if(stockList != null && stockList.size(  ) > 0)
+	{
+	%>
+		<div class="header">
+			<h2>Stock Details</h2>
+		</div>	
+	<%	
+		for(int i=0;i < stockList.size(  ); i++ )
+		{
+			String stSymbol = stockList.get( i ).getSymbol(  );
+			Date stPurchaseDate = stockList.get( i ).getPurchaseDate(  );
+			int stQuantity = stockList.get( i ).getQuantity(  );
+	%>
+			<div class="formrow"><label class="label1 ">Stock Symbol</label>
+			<select name="<%="stocksymbol"+(i+1)%>" class="drop rightfloat">
+			<%
+				String[] stockSymbols = (String[])request.getAttribute( "stock_symbols" );
+			
+				if(stockSymbols!= null && stockSymbols.length >= 0)
+				{
+						for(int index=0; index < stockSymbols.length; index++)
+						{
+							String stockSymbol = stockSymbols[index];							
+							
+			%>				<option value="<%=stockSymbol%>" <%=((stockSymbol.equals( stSymbol ))?"selected":"") %>><%=stockSymbol %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
+			
+			<div class="formrow">
+				
+				<label class="label1 ">Stock Purchase Date (yyyy-MM-dd)</label>
+				<input class="textbox2 rightfloat" type="text" name="<%="stockdate"+(i+1) %>" value="<%=simpleDateFormat.format( stPurchaseDate ) %>" />
+			</div>
+			
+			<div class="formrow">
+				
+				<label class="label1 ">Stock Quantity</label>
+				<input class="textbox2 rightfloat" type="text" name="<%="stockquantity"+(i+1) %>" value="<%=stQuantity %>" />
+			</div>
+			
+	<%
+		}
+	}	
+	%>			
+			
+			
+	<div class="header">
+		<h2>Add Stocks</h2>
+	</div>
+		<div id="inv_details">
+			<div class="formrow"><label class="label1 ">Stock Symbol</label>
+			<select name="emp_stock_symbol" class="drop rightfloat">
+			<%
+				String[] stockSymbols = (String[])request.getAttribute( "stock_symbols" );
+			
+				if(stockSymbols!= null && stockSymbols.length >= 0)
+				{
+						for(int index=0; index < stockSymbols.length; index++)
+						{
+							String stockSymbol = stockSymbols[index];							
+							
+			%>				<option value="<%=stockSymbol%>"><%=stockSymbol %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
+			<div class="formrow"><label class="label1 ">Stock Purchase Date (yyyy-MM-dd)</label><input class="textbox2 rightfloat" type="text" name="stockdate"  /></div>
+			<div class="formrow"><label class="label1 ">Stock Quantity</label><input class="textbox2 rightfloat" type="text" name="stockquantity"/></div>
+		</div>	
+		
+		<div id="stock_details"></div>	
+			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add Stock" onClick="addStockDetails()"/></div>
+			
 	
 	<input type="hidden" name="count" value="<%=exmpsize %>" />
 	<input type="hidden" name="inv_count" value="<%=invSize %>" />
+	<input type="hidden" name="stock_count" value="<%=stockSize %>" />
+	
+	
 			
 	<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 	

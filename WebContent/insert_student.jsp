@@ -8,6 +8,18 @@
 <title>Insert Student</title>
 <script>
 
+String.prototype.isValidDate = function() {
+	var IsoDateRe = new RegExp("^([0-9]{4})-([0-9]{2})-([0-9]{2})$");
+	var matches = IsoDateRe.exec(this);
+	
+	if(!matches)
+		return false;
+	
+	var composedDate = new Date(matches[1] , matches[2]-1,matches[3]);
+	
+	return ((composedDate.getMonth() == (matches[2] -1) )  &&  (composedDate.getDate() == matches[3]) && (composedDate.getFullYear() == matches[1]));
+};
+
 function isNumeric(val)
 {
         var validChars = '0123456789.';
@@ -39,6 +51,10 @@ function setText()
 
 function validate() 
 {
+	var orgUtin = document.insertStudentForm.emp_org_utin.value;
+	var empDesg = document.insertStudentForm.emp_designation.value;
+	var empJoinDate = document.insertStudentForm.emp_org_join_date.value;
+	
 	if (document.insertStudentForm.waiver_amount.value == "") 
 	{
 		alert("Please enter Free Waiver Amount");
@@ -51,6 +67,38 @@ function validate()
 		document.insertStudentForm.waiver_amount.focus();
 		return false;
 	}
+	
+	if (orgUtin == "") 
+	{
+		alert("Please enter Organtization UTIN");
+		document.insertStudentForm.emp_org_utin.focus();
+		return false;
+	}
+	
+	if(empDesg == "")
+	{
+		alert("Please enter Designation");
+		document.insertStudentForm.emp_designation.focus();
+		return false;
+	}
+	if(empJoinDate == "")
+	{
+		alert("Please enter Joining Date");
+		document.insertStudentForm.emp_org_join_date.focus();
+		return false;
+	}	
+	if(!isNumeric(orgUtin))
+	{
+		alert("Please enter Organtization UTIN as digits");
+		document.insertStudentForm.emp_org_utin.focus();
+		return false;
+	}	
+	if(!empJoinDate.isValidDate())
+	{
+		alert("Please enter a valid Joining Date");
+		document.insertStudentForm.emp_org_join_date.focus();
+		return false;
+	}	
 
 	document.insertStudentForm.submit();
 	return true;
@@ -72,7 +120,7 @@ function validate()
 <%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
 
-<div class="subheader width500" >
+<div class="subheader width700" >
 	<div class="header">
 		<h2>Enter Student Details</h2>
 	</div>
@@ -81,6 +129,8 @@ function validate()
 				<label class="label1 ">Free Waiver Amount</label>
 				<input class="textbox2 rightfloat" type="text" name="waiver_amount" value="<%=freeWaiverAmt %>" onFocus="clearText()" onBlur="setText()"/>
 			</div>
+			
+			<%@ include file = "insert_works_at.jsp"%>
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 	</form>
 </div>	
