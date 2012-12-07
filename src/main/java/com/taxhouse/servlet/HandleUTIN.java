@@ -77,6 +77,12 @@ public class HandleUTIN extends HttpServlet
 			if ( taxPayer != null )
 			{
 				//code to delete taxpayer whose UTIN = utin from database and delete all relations
+				
+				if(DBHandler.getInstance().deleteTaxPayer(taxPayer.getUtin()))
+					System.out.println("Deleted");
+				else
+					System.out.println("Not Deleted");
+				
 				requestDispatcher = request.getRequestDispatcher( "successful_delete.jsp" );
 				requestDispatcher.forward( request, response );
 

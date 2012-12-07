@@ -102,11 +102,12 @@ public class EmployeeProcessing extends HttpServlet
 			spouseUtin = Integer.parseInt( request.getParameter( "spouse_utin" ).toString() );
 		}
 
+		DBHandler dbHandler = DBHandler.getInstance();
+		
 		ArrayList<Exemption> exemptionsList = new ArrayList<Exemption>();
 
 		if ( exmpCount > 0 )
 		{
-			DBHandler dbHandler = new DBHandler();
 
 			for ( int index = 0; index < exmpCount; index++ )
 			{
@@ -142,12 +143,10 @@ public class EmployeeProcessing extends HttpServlet
 				String invName = request.getParameter( "investmentname" + i );
 				Double invAmount = Double.parseDouble( request.getParameter( "investmentamount" + i ) );
 				Double invPer = Double.parseDouble( request.getParameter( "investmentper" + i ) );
-				int invId = 0; // handle the id, retrieve from database or
-								// whatever you want
+				int invId = dbHandler.getInvestmentId(invName.trim());
 
 				Investment investment = new Investment( invId, invName, invAmount, invPer );
 				investmentsList.add( investment );
-
 
 			}
 		}

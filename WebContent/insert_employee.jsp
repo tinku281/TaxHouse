@@ -331,7 +331,7 @@
 			alert("Number of dependants cannot be more than 5");
 			return false;
 		}
-		if(parseInt(empNoDependants) == 0)
+		if(parseInt(empNoDependants) == 0 || dependantsIncome == "")
 		{
 			document.insertEmployee.emp_dependant_income.value = 0;
 		}

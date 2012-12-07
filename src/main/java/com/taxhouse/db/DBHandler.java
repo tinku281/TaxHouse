@@ -9,7 +9,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -804,6 +806,32 @@ public class DBHandler {
 		return idMap;
 	}
 
+	public int getCombinationId(int scaleId, int typeId, int categoryId) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sql = "select combination_id from combination where scale_id = " + scaleId + " and type_id = " + typeId
+				+ " and category_id = " + categoryId;
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			if (rs.next()) {
+				return rs.getInt(COMBINATION_ID);
+			}
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return 1;
+	}
+
 	public List<Exemption> getEmployeeExemptions(int utin) {
 
 		Connection con = null;
@@ -1215,6 +1243,33 @@ public class DBHandler {
 
 	}
 
+	public int getInvestmentId(String name) {
+
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sql = "Select " + INV_ID + " FROM investment WHERE " + INV_NAME + " = '" + name + "'";
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+
+			rs = stmt.executeQuery(sql);
+
+			rs.next();
+			int id = rs.getInt(INV_ID);
+			return id;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return -1;
+	}
+
 	public int getSlabId(double income) {
 
 		Connection con = null;
@@ -1265,146 +1320,315 @@ public class DBHandler {
 		return 0;
 	}
 
-	public boolean insertTaxPayer( TaxPayer taxPayer )
-	{
+	public boolean insertTaxPayer(TaxPayer taxPayer) {
 
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		
+
 		String sql = "insert into tax_payer(tp_password, first_name, last_name, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
 
-		try
-		{
+		try {
 			con = getConnection();
 			con.setAutoCommit(false);
-			
-			stmt = con.prepareStatement(sql);
 
-			stmt.setString( 1, taxPayer.getPassword() );
-			stmt.setString( 2, taxPayer.getFirstName() );
-			stmt.setString( 3, taxPayer.getLastName() );
-			stmt.setString( 4, taxPayer.getCity() );
-			stmt.setString( 5, taxPayer.getState() );
-			stmt.setString( 6, taxPayer.getNationality().toString() );
-			stmt.setInt( 7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal() : TaxPayer.SubType.ORGANIZATION.ordinal() );
+			stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+			stmt.setString(1, taxPayer.getPassword());
+			stmt.setString(2, taxPayer.getFirstName());
+			stmt.setString(3, taxPayer.getLastName());
+			stmt.setString(4, taxPayer.getCity());
+			stmt.setString(5, taxPayer.getState());
+			stmt.setString(6, taxPayer.getNationality().toString());
+			stmt.setInt(7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
+					: TaxPayer.SubType.ORGANIZATION.ordinal());
 
 			stmt.executeUpdate();
+
+			rs = stmt.getGeneratedKeys();
+			if (rs.next()) {
+				taxPayer.setUtin(rs.getInt(1));
+			}
+
+			rs.close();
 			stmt.close();
 			stmt = null;
 
-			if ( taxPayer instanceof Employee )
-			{
+			if (taxPayer instanceof Employee) {
 				sql = "insert into employee values(?,?,?,?,?,?,?);";
-				stmt = con.prepareStatement( sql );
+				stmt = con.prepareStatement(sql);
 
-				stmt.setInt( 1, taxPayer.getUtin() );
-				stmt.setString( 2, dateFormat.format( ((Employee) taxPayer).getDateOfBirth() ) );
-				stmt.setString( 3, ((Employee) taxPayer).getGender().toString() );
-				stmt.setInt( 4, ((Employee) taxPayer).getNoOfDependants() );
-				stmt.setString( 5, ((Employee) taxPayer).getMaritalStatus().toString() );
-				stmt.setString( 6, ((Employee) taxPayer).getResidencyStatus().toString() );
+				stmt.setInt(1, taxPayer.getUtin());
+				stmt.setString(2, dateFormat.format(((Employee) taxPayer).getDateOfBirth()));
+				stmt.setString(3, ((Employee) taxPayer).getGender().toString());
+				stmt.setInt(4, ((Employee) taxPayer).getNoOfDependants());
+				stmt.setString(5, ((Employee) taxPayer).getMaritalStatus().toString());
+				stmt.setString(6, ((Employee) taxPayer).getResidencyStatus().toString());
 
-				if ( taxPayer instanceof Student )
-					stmt.setInt( 7, Employee.SubType.STUDENT.ordinal() );
-				else if ( taxPayer instanceof SeniorCitizen )
-					stmt.setInt( 7, Employee.SubType.SENIOR_CITIZEN.ordinal() );
-				else if ( taxPayer instanceof ArmedForcePersonnel )
-					stmt.setInt( 7, Employee.SubType.ARMY.ordinal() );
+				if (taxPayer instanceof Student)
+					stmt.setInt(7, Employee.SubType.STUDENT.ordinal());
+				else if (taxPayer instanceof SeniorCitizen)
+					stmt.setInt(7, Employee.SubType.SENIOR_CITIZEN.ordinal());
+				else if (taxPayer instanceof ArmedForcePersonnel)
+					stmt.setInt(7, Employee.SubType.ARMY.ordinal());
 				else
-					stmt.setInt( 7, Employee.SubType.NONE.ordinal() );
+					stmt.setInt(7, Employee.SubType.NONE.ordinal());
 
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
 
-//				if (taxPayer instanceof Student) {
-//					sql = "insert into student values(?,?);";
-//					stmt = con.prepareStatement(sql);
-//
-//					stmt.setInt(1, taxPayer.getUtin());
-//					stmt.setDouble(2, ((Student) taxPayer).getFeeWaiverAmt());
-//
-//					stmt.executeUpdate();
-//					stmt.close();
-//					stmt = null;
-//
-//				} else if (taxPayer instanceof SeniorCitizen) {
-//
-//					sql = "insert into sc_income values(?,?,?,?);";
-//					stmt = con.prepareStatement(sql);
-//
-//					con.setAutoCommit(false);
-//
-//					stmt.setInt(1, taxPayer.getUtin());
-//
-//					for (Income income : ((SeniorCitizen) taxPayer).getIncomes()) {
-//						stmt.setString(2, income.getSource());
-//						stmt.setDouble(3, income.getAmount());
-//
-//						stmt.executeUpdate();
-//					}
-//
-//					con.commit();
-//					con.setAutoCommit(true);
-//
-//					stmt.close();
-//					stmt = null;
-//
-//				} else if (taxPayer instanceof ArmedForcePersonnel) {
-//
-//					sql = "insert into af_specl values(?,?,?,?);";
-//					String sql1 = "insert into combat_zones values(?,?);";
-//
-//					stmt = con.prepareStatement(sql);
-//					PreparedStatement stmt1 = con.prepareStatement(sql1);
-//
-//					con.setAutoCommit(false);
-//
-//					stmt.setInt(1, taxPayer.getUtin());
-//					stmt1.setInt(1, taxPayer.getUtin());
-//
-//					for (SpecialTask task : ((ArmedForcePersonnel) taxPayer).getSpecialTasks()){
-//						stmt.setInt(2, task.getId());
-//						stmt.setString(3, dateFormat.format(task.getStartDate()));
-//						stmt.setString(4, dateFormat.format(task.getEndDate()));
-//						
-//						stmt.executeUpdate();
-//						
-//						if(task.getCombatZone().equalsIgnoreCase("none")) {
-//							stmt1.setString(2, task.getName());
-//							stmt1.executeUpdate();
-//						}
-//					}
-//
-//					con.commit();
-//					con.setAutoCommit(true);
-//
-//					stmt1.close();
-//					stmt.close();
-//					stmt = null;
-//				}
+				if (taxPayer instanceof Student) {
+					sql = "insert into student values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setDouble(2, ((Student) taxPayer).getFeeWaiverAmt());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+
+				} else if (taxPayer instanceof SeniorCitizen) {
+
+					sql = "insert into sc_income values(?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					for (Income income : ((SeniorCitizen) taxPayer).getIncomes()) {
+						stmt.setString(2, income.getSource());
+						stmt.setDouble(3, income.getAmount());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+
+				} else if (taxPayer instanceof ArmedForcePersonnel) {
+
+					sql = "insert into af_specl values(?,?,?,?);";
+					String sql1 = "insert into combat_zones values(?,?);";
+
+					stmt = con.prepareStatement(sql);
+					PreparedStatement stmt1 = con.prepareStatement(sql1);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt1.setInt(1, taxPayer.getUtin());
+
+					for (SpecialTask task : ((ArmedForcePersonnel) taxPayer).getSpecialTasks()) {
+						stmt.setInt(2, task.getId());
+						stmt.setString(3, dateFormat.format(task.getStartDate()));
+						stmt.setString(4, dateFormat.format(task.getEndDate()));
+
+						stmt.executeUpdate();
+
+						if (!task.getCombatZone().equalsIgnoreCase("None")) {
+							stmt1.setString(2, task.getCombatZone());
+							stmt1.executeUpdate();
+						}
+					}
+
+					stmt1.close();
+					stmt.close();
+					stmt = null;
+				}
+
+				// //works_at
+				// if (!(taxPayer instanceof SeniorCitizen)) {
+				//
+				// sql = "insert into works_at values(?,?,?,?,?,?);";
+				// stmt = con.prepareStatement(sql);
+				//
+				// stmt.setInt(1, taxPayer.getUtin());
+				// stmt.setInt(2, ((Employee) taxPayer).getOrganization().getUtin());
+				// stmt.setString(3, dateFormat.format(((Employee) taxPayer).getJobStartDate()));
+				// stmt.setString(4, "");
+				// stmt.setString(5, ((Employee) taxPayer).getDesignation());
+				// stmt.setDouble(6, taxPayer.getIncome());
+				//
+				// stmt.executeUpdate();
+				// stmt.close();
+				// stmt = null;
+				// }
+
+				// marriedto
+				if (((Employee) taxPayer).getMaritalStatus() == MaritalStatus.MARRIED) {
+					sql = "insert into marriedto values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					if (((Employee) taxPayer).getGender() == Gender.MALE) {
+						stmt.setInt(1, taxPayer.getUtin());
+						stmt.setInt(2, ((Employee) taxPayer).getSpouseUtin());
+					} else {
+						stmt.setInt(2, taxPayer.getUtin());
+						stmt.setInt(1, ((Employee) taxPayer).getSpouseUtin());
+					}
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// ex-military
+				if (((Employee) taxPayer).getExMilatary().equals(String.valueOf(true))) {
+					sql = "insert into exmilitary values(?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// dependant income
+				if (((Employee) taxPayer).getDependantIncome() > 0) {
+					sql = "insert into dependant_income values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setDouble(2, ((Employee) taxPayer).getDependantIncome());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// stocks
+				if (((Employee) taxPayer).hasStocks()) {
+					sql = "insert into stockholders values(?,?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					for (Stock stock : ((Employee) taxPayer).getStocks()) {
+
+						stmt.setString(2, stock.getSymbol());
+						stmt.setString(3, dateFormat.format(stock.getPurchaseDate()));
+						stmt.setDouble(4, stock.getQuantity());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+				}
+
+			} else if (taxPayer instanceof Organization) {
+				sql = "insert into organization values(?,?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				stmt.setInt(1, taxPayer.getUtin());
+				stmt.setString(2, dateFormat.format(((Organization) taxPayer).getEstblDate()));
+				stmt.setInt(3, ((Organization) taxPayer).getCombinationId());
+				stmt.setDouble(4, ((Organization) taxPayer).getTurnover());
+				stmt.setDouble(5, taxPayer.getIncome());
+
+				stmt.executeUpdate();
+				stmt.close();
+				stmt = null;
+
+				HashMap<Integer, Double> shares = ((Organization) taxPayer).getShares();
+
+				if (shares != null && shares.size() > 0) {
+
+					sql = "insert into has_partnership values(?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					Iterator<Entry<Integer, Double>> it = shares.entrySet().iterator();
+					Entry<Integer, Double> share = null;
+
+					while (it.hasNext()) {
+						share = it.next();
+
+						stmt.setInt(2, share.getKey());
+						stmt.setDouble(3, share.getValue());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+				}
 
 			}
-			
+
+			if (taxPayer.hasExemptions()) {
+				sql = "insert into has_exmp values(?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				for (Exemption exmp : taxPayer.getExemptions()) {
+
+					stmt.setInt(1, exmp.getId());
+					stmt.setInt(2, taxPayer.getUtin());
+					stmt.setDouble(3, exmp.getAmount());
+					stmt.setDouble(4, exmp.getPercentage());
+
+					stmt.executeUpdate();
+				}
+
+				stmt.close();
+				stmt = null;
+			}
+
+			if (taxPayer.hasInvestments()) {
+				sql = "insert into has_inv values(?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				for (Investment investment : taxPayer.getInvestments()) {
+
+					stmt.setInt(1, investment.getId());
+					stmt.setInt(2, taxPayer.getUtin());
+					stmt.setDouble(3, investment.getAmount());
+					stmt.setDouble(4, investment.getApplicablePercent());
+
+					stmt.executeUpdate();
+				}
+
+				stmt.close();
+				stmt = null;
+			}
+
 			con.commit();
 			con.setAutoCommit(true);
 
-		}
-		catch ( Exception e )
-		{
+		} catch (Exception e) {
 			return false;
 
-		}
-		finally
-		{
-			closeConnectionObjects( rs, stmt, con );
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
 		}
 
 		return true;
 	}
 
 	public boolean updateTaxPayer(Employee employee) {
+		return false;
+	}
+
+	public boolean deleteTaxPayer(int utin) {
+		Connection con = null;
+		Statement stmt = null;
+
+		String sql = "Delete from tax_payer where utin = " + utin;
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			stmt.executeUpdate(sql);
+
+			return true;
+			
+		} catch (SQLException e) {
+
+		} finally {
+			closeConnectionObjects(null, stmt, con);
+		}
+
 		return false;
 	}
 

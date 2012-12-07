@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -90,6 +91,11 @@ public class EmployeeSubtypeProcessing extends HttpServlet {
 			int spCount = Integer.parseInt(request.getParameter("count"));
 
 			if (spCount > 0) {
+				
+				HashMap<String, Integer> taskIds = new HashMap<String, Integer>();
+				taskIds.put("Red Cross", 1);
+				taskIds.put("US Marine", 2);
+				taskIds.put("Combat", 3);
 
 				for (int index = 0; index < spCount; index++) {
 					int i = index + 1;
@@ -110,11 +116,13 @@ public class EmployeeSubtypeProcessing extends HttpServlet {
 					} catch (Exception e) {
 						System.out.println("EmployeeSubtypeProcessing, Date Parse Exception");
 					}
-
-					SpecialTask specialTask = new SpecialTask(0, scName, startDate, endDate, scCombatZone);
+					
+					SpecialTask specialTask = new SpecialTask(taskIds.get(scName), scName, startDate, endDate, scCombatZone);
 					specialTaskList.add(specialTask);
 					System.out.println("Added Special Task: " + scName + " Cobat zone: " + scCombatZone);
 				}
+				
+				armedForcePersonnel.setSpecialTasks(specialTaskList);
 			}
 
 			sendToDB(functionType, armedForcePersonnel);
