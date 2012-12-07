@@ -1435,23 +1435,23 @@ public class DBHandler {
 					stmt = null;
 				}
 
-				// //works_at
-				// if (!(taxPayer instanceof SeniorCitizen)) {
-				//
-				// sql = "insert into works_at values(?,?,?,?,?,?);";
-				// stmt = con.prepareStatement(sql);
-				//
-				// stmt.setInt(1, taxPayer.getUtin());
-				// stmt.setInt(2, ((Employee) taxPayer).getOrganization().getUtin());
-				// stmt.setString(3, dateFormat.format(((Employee) taxPayer).getJobStartDate()));
-				// stmt.setString(4, "");
-				// stmt.setString(5, ((Employee) taxPayer).getDesignation());
-				// stmt.setDouble(6, taxPayer.getIncome());
-				//
-				// stmt.executeUpdate();
-				// stmt.close();
-				// stmt = null;
-				// }
+				// works_at
+				if (!(taxPayer instanceof SeniorCitizen)) {
+
+					sql = "insert into works_at values(?,?,?,?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setInt(2, ((Employee) taxPayer).getOrganization().getUtin());
+					stmt.setString(3, dateFormat.format(((Employee) taxPayer).getJobStartDate()));
+					stmt.setString(4, "");
+					stmt.setString(5, ((Employee) taxPayer).getDesignation());
+					stmt.setDouble(6, taxPayer.getIncome());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
 
 				// marriedto
 				if (((Employee) taxPayer).getMaritalStatus() == MaritalStatus.MARRIED) {
@@ -1622,7 +1622,7 @@ public class DBHandler {
 			stmt.executeUpdate(sql);
 
 			return true;
-			
+
 		} catch (SQLException e) {
 
 		} finally {
