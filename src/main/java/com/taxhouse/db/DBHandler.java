@@ -1150,6 +1150,46 @@ public class DBHandler {
 		return null;
 	}
 
+	public String[] getStockSymbols() {
+
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sqlTotal = "Select COUNT(DISTINCT " + SYMBOL + ") AS namecount FROM stockcompanies";
+		String sql = "Select DISTINCT " + SYMBOL + " FROM stockcompanies";
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sqlTotal);
+			rs.next();
+			int count = rs.getInt("namecount");
+
+			System.out.println("Count of stock symbols: " + count);
+			if (count <= 0)
+				return null;
+
+			String[] stockSymbols = new String[count];
+
+			rs = stmt.executeQuery(sql);
+
+			int index = 0;
+			while (rs.next()) {
+				stockSymbols[index++] = rs.getString(SYMBOL);
+			}
+
+			return stockSymbols;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return null;
+	}
+
 	public int getExemptionId(String exempetionName) {
 
 		Connection con = null;
@@ -1199,6 +1239,7 @@ public class DBHandler {
 	}
 
 	public double getSharePercents(int utin) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1224,7 +1265,8 @@ public class DBHandler {
 		return 0;
 	}
 
-	public boolean insertTaxPayer(TaxPayer taxPayer) {
+	public boolean insertTaxPayer( TaxPayer taxPayer )
+	{
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -1232,44 +1274,45 @@ public class DBHandler {
 		
 		String sql = "insert into tax_payer(tp_password, first_name, last_name, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
 
-		try {
+		try
+		{
 			con = getConnection();
 			con.setAutoCommit(false);
 			
 			stmt = con.prepareStatement(sql);
 
-			stmt.setString(1, taxPayer.getPassword());
-			stmt.setString(2, taxPayer.getFirstName());
-			stmt.setString(3, taxPayer.getLastName());
-			stmt.setString(4, taxPayer.getCity());
-			stmt.setString(5, taxPayer.getState());
-			stmt.setString(6, taxPayer.getNationality().toString());
-			stmt.setInt(7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
-					: TaxPayer.SubType.ORGANIZATION.ordinal());
+			stmt.setString( 1, taxPayer.getPassword() );
+			stmt.setString( 2, taxPayer.getFirstName() );
+			stmt.setString( 3, taxPayer.getLastName() );
+			stmt.setString( 4, taxPayer.getCity() );
+			stmt.setString( 5, taxPayer.getState() );
+			stmt.setString( 6, taxPayer.getNationality().toString() );
+			stmt.setInt( 7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal() : TaxPayer.SubType.ORGANIZATION.ordinal() );
 
 			stmt.executeUpdate();
 			stmt.close();
 			stmt = null;
 
-			if (taxPayer instanceof Employee) {
+			if ( taxPayer instanceof Employee )
+			{
 				sql = "insert into employee values(?,?,?,?,?,?,?);";
-				stmt = con.prepareStatement(sql);
+				stmt = con.prepareStatement( sql );
 
-				stmt.setInt(1, taxPayer.getUtin());
-				stmt.setString(2, dateFormat.format(((Employee) taxPayer).getDateOfBirth()));
-				stmt.setString(3, ((Employee) taxPayer).getGender().toString());
-				stmt.setInt(4, ((Employee) taxPayer).getNoOfDependants());
-				stmt.setString(5, ((Employee) taxPayer).getMaritalStatus().toString());
-				stmt.setString(6, ((Employee) taxPayer).getResidencyStatus().toString());
+				stmt.setInt( 1, taxPayer.getUtin() );
+				stmt.setString( 2, dateFormat.format( ((Employee) taxPayer).getDateOfBirth() ) );
+				stmt.setString( 3, ((Employee) taxPayer).getGender().toString() );
+				stmt.setInt( 4, ((Employee) taxPayer).getNoOfDependants() );
+				stmt.setString( 5, ((Employee) taxPayer).getMaritalStatus().toString() );
+				stmt.setString( 6, ((Employee) taxPayer).getResidencyStatus().toString() );
 
-				if (taxPayer instanceof Student)
-					stmt.setInt(7, Employee.SubType.STUDENT.ordinal());
-				else if (taxPayer instanceof SeniorCitizen)
-					stmt.setInt(7, Employee.SubType.SENIOR_CITIZEN.ordinal());
-				else if (taxPayer instanceof ArmedForcePersonnel)
-					stmt.setInt(7, Employee.SubType.ARMY.ordinal());
+				if ( taxPayer instanceof Student )
+					stmt.setInt( 7, Employee.SubType.STUDENT.ordinal() );
+				else if ( taxPayer instanceof SeniorCitizen )
+					stmt.setInt( 7, Employee.SubType.SENIOR_CITIZEN.ordinal() );
+				else if ( taxPayer instanceof ArmedForcePersonnel )
+					stmt.setInt( 7, Employee.SubType.ARMY.ordinal() );
 				else
-					stmt.setInt(7, Employee.SubType.NONE.ordinal());
+					stmt.setInt( 7, Employee.SubType.NONE.ordinal() );
 
 				stmt.executeUpdate();
 				stmt.close();
@@ -1347,18 +1390,21 @@ public class DBHandler {
 			con.commit();
 			con.setAutoCommit(true);
 
-		} catch (Exception e) {
+		}
+		catch ( Exception e )
+		{
 			return false;
 
-		} finally {
-			closeConnectionObjects(rs, stmt, con);
+		}
+		finally
+		{
+			closeConnectionObjects( rs, stmt, con );
 		}
 
 		return true;
 	}
 
 	public boolean updateTaxPayer(Employee employee) {
-
 		return false;
 	}
 

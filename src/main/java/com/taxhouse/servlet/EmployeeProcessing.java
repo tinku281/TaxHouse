@@ -1,7 +1,9 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -14,10 +16,13 @@ import javax.servlet.http.HttpSession;
 import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.ArmedForcePersonnel;
 import com.taxhouse.model.Employee;
+import com.taxhouse.model.Employee.Gender;
 import com.taxhouse.model.Employee.MaritalStatus;
+import com.taxhouse.model.Employee.ResidencyStatus;
 import com.taxhouse.model.Exemption;
 import com.taxhouse.model.Investment;
 import com.taxhouse.model.SeniorCitizen;
+import com.taxhouse.model.Stock;
 import com.taxhouse.model.Student;
 import com.taxhouse.model.TaxPayer.Nationality;
 
@@ -52,6 +57,26 @@ public class EmployeeProcessing extends HttpServlet
 		int functionType = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
 		int exmpCount = Integer.parseInt( request.getParameter( "count" ).toString() );
 		int invCount = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
+		int stocksCount = Integer.parseInt( request.getParameter( "stock_count" ).toString() );
+		int noDependants = Integer.parseInt( request.getParameter( "emp_no_dependants" ) );
+		int iGender = Integer.parseInt( request.getParameter( "emp_gender" ) );
+		int iResStatus = Integer.parseInt( request.getParameter( "emp_res_status" ) );
+		double dependantsIncome = Double.parseDouble(  request.getParameter( "emp_dependant_income" ) );
+		
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateOfBirth = null;
+		try
+		{
+			dateOfBirth=simpleDateFormat.parse( request.getParameter( "emp_dob") );
+		}
+		catch(Exception e)
+		{
+			
+		}
+		
+		boolean isExMilitary = false;
+		if(request.getParameter( "emp_ex_miltary" ) != null)
+			isExMilitary =true;
 
 		int empType;
 		if ( functionType == 4 )
@@ -59,12 +84,12 @@ public class EmployeeProcessing extends HttpServlet
 		else
 		{
 			String sEmpType = request.getParameter( "emp_type" ).toString();
-			
-			if(sEmpType.equals( "Student" ))
+
+			if ( sEmpType.equals( "Student" ) )
 				empType = 1;
-			else if(sEmpType.equals( "Senior Citizen" ))
+			else if ( sEmpType.equals( "Senior Citizen" ) )
 				empType = 2;
-			else if(sEmpType.equals( "Army" ))
+			else if ( sEmpType.equals( "Army" ) )
 				empType = 3;
 			else
 				empType = 0;
@@ -123,10 +148,35 @@ public class EmployeeProcessing extends HttpServlet
 				Investment investment = new Investment( invId, invName, invAmount, invPer );
 				investmentsList.add( investment );
 
-				System.out.println( "Investment Name: " + invName + ", Investment Amount: " + invAmount + ", Investment Percentage: " + invPer );
 
 			}
 		}
+		
+		ArrayList<Stock> stocksList = new ArrayList<Stock>();
+
+		if ( stocksCount > 0 )
+		{
+
+			for ( int index = 0; index < stocksCount; index++ )
+			{
+				int i = index + 1;
+				String stockSymbol = request.getParameter( "stocksymbol" + i );
+				int stockQuantity = Integer.parseInt( request.getParameter( "stockquantity" + i ) );
+				Date stockDate= null;
+				try
+				{
+					stockDate = simpleDateFormat.parse( request.getParameter( "stockdate" + i ) );
+				}
+				catch(Exception e)
+				{
+					
+				}
+				
+				Stock stock = new Stock( stockSymbol, stockQuantity, stockDate );
+				stocksList.add( stock );
+			}
+		}
+		
 
 		Employee employee;
 
@@ -158,6 +208,29 @@ public class EmployeeProcessing extends HttpServlet
 			employee.setNationality( Nationality.USA );
 		else
 			employee.setNationality( Nationality.NON_USA );
+		
+		employee.setDateOfBirth( dateOfBirth );
+		employee.setNoOfDependants( noDependants );
+		employee.setExMilatary( String.valueOf( isExMilitary ) );
+		employee.setDependantIncome( dependantsIncome);
+
+		Gender gender[] = Employee.Gender.values();
+		for ( int i = 0; i < gender.length; i++ )
+		{
+			if ( iGender == gender[i].ordinal() )
+			{
+				employee.setGender( gender[i] );
+			}
+		}
+
+		ResidencyStatus resStatus[] = Employee.ResidencyStatus.values();
+		for ( int i = 0; i < gender.length; i++ )
+		{
+			if ( iResStatus == resStatus[i].ordinal() )
+			{
+				employee.setResidencyStatus( resStatus[i] );
+			}
+		}
 
 		switch ( empMaritalStatus )
 		{
@@ -180,15 +253,24 @@ public class EmployeeProcessing extends HttpServlet
 			employee.setExemptions( exemptionsList );
 		if ( invCount > 0 )
 			employee.setInvestments( investmentsList );
+		if(stocksCount > 0)
+			employee.setStocks( stocksList );
 
 		System.out.println( "\nEmployee FirstName: " + employee.getFirstName() );
 		System.out.println( "\nEmployee LastName: " + employee.getLastName() );
 		System.out.println( "\nEmployee City: " + employee.getCity() );
 		System.out.println( "\nEmployee State: " + employee.getState() );
 		System.out.println( "\nEmployee Nationality: " + employee.getNationality().name() );
+		System.out.println( "\nEmployee Date of Birth: " + simpleDateFormat.format( employee.getDateOfBirth() ) );
+		System.out.println( "\nEmployee Number of Dependants: " + employee.getNoOfDependants() );
+		System.out.println( "\nEmployee Gender: " + employee.getGender().name() );
+		System.out.println( "\nEmployee Residency Status: " + employee.getResidencyStatus().name());
 		System.out.println( "\nEmployee Marital Status: " + employee.getMaritalStatus().name() );
 		if ( empMaritalStatus == 1 )
 			System.out.println( "\nEmployee Spouse UTIN: " + employee.getSpouseUtin() );
+		System.out.println( "\nEmployee isExMilitary: " + employee.getExMilatary());
+		System.out.println( "\nEmployee dependantIncome: " + employee.getDependantIncome());
+		
 		System.out.println( "\nEmployee Exemption Count: " + exmpCount );
 		if ( exmpCount > 0 )
 		{
@@ -201,7 +283,27 @@ public class EmployeeProcessing extends HttpServlet
 				System.out.println( "Exemption Percentage: " + e.getPercentage() );
 			}
 		}
-
+		if(invCount > 0)
+		{
+			List<Investment> investmentList = employee.getInvestments();
+			for(Investment investment:investmentList)
+			{
+				System.out.println("Investment Name: "+investment.getName());
+				System.out.println("Investment Amount: "+investment.getAmount());
+				System.out.println("Investment Applicable Per: "+investment.getApplicablePercent());
+			}
+		}
+		if(stocksCount > 0)
+		{
+			List<Stock> stockList = employee.getStocks();
+			for(Stock stock:stockList)
+			{
+				System.out.println("Stock Symbol: "+stock.getSymbol());
+				System.out.println("Stock Purchase Date: "+simpleDateFormat.format( stock.getPurchaseDate() ));
+				System.out.println("Stock Quantity: "+stock.getQuantity());
+			}
+		}
+		
 		httpSession.setAttribute( "employee", employee );
 		httpSession.setAttribute( "empType", empType );
 
@@ -217,17 +319,16 @@ public class EmployeeProcessing extends HttpServlet
 				requestDispatcher = request.getRequestDispatcher( "insert_senior_citizen.jsp" );
 			else
 				requestDispatcher = request.getRequestDispatcher( "update_senior_citizen.jsp" );
-			
+
 			requestDispatcher.forward( request, response );
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
 		{
-			
-			if( functionType == 4)
+			if ( functionType == 4 )
 				requestDispatcher = request.getRequestDispatcher( "insert_armed.jsp" );
 			else
 				requestDispatcher = request.getRequestDispatcher( "update_armed.jsp" );
-			
+
 			requestDispatcher.forward( request, response );
 		}
 		else

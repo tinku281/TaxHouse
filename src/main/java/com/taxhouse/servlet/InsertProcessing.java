@@ -71,11 +71,14 @@ public class InsertProcessing extends HttpServlet
 			
 			String[] exempNames = DBHandler.getInstance().getExemptionNames();
 			String[] invNames = DBHandler.getInstance().getInvestmentNames();
+			String[] stockSymobls = DBHandler.getInstance().getStockSymbols();
+			
 			
 			String  forwardPage = (functiontype == 4) ?"insert_employee.jsp":"update_employee.jsp";
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher(forwardPage );
 			request.setAttribute( "exemption_names", exempNames );
 			request.setAttribute( "investment_names", invNames );
+			request.setAttribute( "stock_symbols", stockSymobls );
 			requestDispatcher.forward( request, response );
 		}
 		else if(iCategory == TaxPayer.SubType.ORGANIZATION.ordinal())
