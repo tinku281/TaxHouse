@@ -9,7 +9,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -804,6 +806,32 @@ public class DBHandler {
 		return idMap;
 	}
 
+	public int getCombinationId(int scaleId, int typeId, int categoryId) {
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sql = "select combination_id from combination where scale_id = " + scaleId + " and type_id = " + typeId
+				+ " and category_id = " + categoryId;
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			if (rs.next()) {
+				return rs.getInt(COMBINATION_ID);
+			}
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return 1;
+	}
+
 	public List<Exemption> getEmployeeExemptions(int utin) {
 
 		Connection con = null;
@@ -942,6 +970,24 @@ public class DBHandler {
 		}
 
 		return null;
+	}
+
+	private String buildInClause(int batchSize) {
+
+		StringBuilder inClause = new StringBuilder();
+		boolean firstValue = true;
+
+		for (int i = 0; i < batchSize; i++) {
+			if (firstValue) {
+				firstValue = false;
+			} else {
+				inClause.append(',');
+			}
+
+			inClause.append('?');
+		}
+
+		return inClause.toString();
 	}
 
 	public String[] getExemptionNames(Integer... ids) {
@@ -1132,6 +1178,46 @@ public class DBHandler {
 		return null;
 	}
 
+	public String[] getStockSymbols() {
+
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sqlTotal = "Select COUNT(DISTINCT " + SYMBOL + ") AS namecount FROM stockcompanies";
+		String sql = "Select DISTINCT " + SYMBOL + " FROM stockcompanies";
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			rs = stmt.executeQuery(sqlTotal);
+			rs.next();
+			int count = rs.getInt("namecount");
+
+			System.out.println("Count of stock symbols: " + count);
+			if (count <= 0)
+				return null;
+
+			String[] stockSymbols = new String[count];
+
+			rs = stmt.executeQuery(sql);
+
+			int index = 0;
+			while (rs.next()) {
+				stockSymbols[index++] = rs.getString(SYMBOL);
+			}
+
+			return stockSymbols;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return null;
+	}
+
 	public int getExemptionId(String exempetionName) {
 
 		Connection con = null;
@@ -1155,6 +1241,33 @@ public class DBHandler {
 
 		return -1;
 
+	}
+
+	public int getInvestmentId(String name) {
+
+		Connection con = null;
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		String sql = "Select " + INV_ID + " FROM investment WHERE " + INV_NAME + " = '" + name + "'";
+
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+
+			rs = stmt.executeQuery(sql);
+
+			rs.next();
+			int id = rs.getInt(INV_ID);
+			return id;
+
+		} catch (Exception e) {
+
+		} finally {
+			closeConnectionObjects(rs, stmt, con);
+		}
+
+		return -1;
 	}
 
 	public int getSlabId(double income) {
@@ -1181,6 +1294,7 @@ public class DBHandler {
 	}
 
 	public double getSharePercents(int utin) {
+
 		Connection con = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -1212,11 +1326,13 @@ public class DBHandler {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 
-		String sql = "insert into tax_payer(tp_password, firstname, lastname, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
+		String sql = "insert into tax_payer(tp_password, first_name, last_name, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
 
 		try {
 			con = getConnection();
-			stmt = con.prepareStatement(sql);
+			con.setAutoCommit(false);
+
+			stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
 			stmt.setString(1, taxPayer.getPassword());
 			stmt.setString(2, taxPayer.getFirstName());
@@ -1228,6 +1344,13 @@ public class DBHandler {
 					: TaxPayer.SubType.ORGANIZATION.ordinal());
 
 			stmt.executeUpdate();
+
+			rs = stmt.getGeneratedKeys();
+			if (rs.next()) {
+				taxPayer.setUtin(rs.getInt(1));
+			}
+
+			rs.close();
 			stmt.close();
 			stmt = null;
 
@@ -1254,7 +1377,224 @@ public class DBHandler {
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
+
+				if (taxPayer instanceof Student) {
+					sql = "insert into student values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setDouble(2, ((Student) taxPayer).getFeeWaiverAmt());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+
+				} else if (taxPayer instanceof SeniorCitizen) {
+
+					sql = "insert into sc_income values(?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					for (Income income : ((SeniorCitizen) taxPayer).getIncomes()) {
+						stmt.setString(2, income.getSource());
+						stmt.setDouble(3, income.getAmount());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+
+				} else if (taxPayer instanceof ArmedForcePersonnel) {
+
+					sql = "insert into af_specl values(?,?,?,?);";
+					String sql1 = "insert into combat_zones values(?,?);";
+
+					stmt = con.prepareStatement(sql);
+					PreparedStatement stmt1 = con.prepareStatement(sql1);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt1.setInt(1, taxPayer.getUtin());
+
+					for (SpecialTask task : ((ArmedForcePersonnel) taxPayer).getSpecialTasks()) {
+						stmt.setInt(2, task.getId());
+						stmt.setString(3, dateFormat.format(task.getStartDate()));
+						stmt.setString(4, dateFormat.format(task.getEndDate()));
+
+						stmt.executeUpdate();
+
+						if (!task.getCombatZone().equalsIgnoreCase("None")) {
+							stmt1.setString(2, task.getCombatZone());
+							stmt1.executeUpdate();
+						}
+					}
+
+					stmt1.close();
+					stmt.close();
+					stmt = null;
+				}
+
+				// works_at
+				if (!(taxPayer instanceof SeniorCitizen)) {
+
+					sql = "insert into works_at values(?,?,?,?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setInt(2, ((Employee) taxPayer).getOrganization().getUtin());
+					stmt.setString(3, dateFormat.format(((Employee) taxPayer).getJobStartDate()));
+					stmt.setString(4, "");
+					stmt.setString(5, ((Employee) taxPayer).getDesignation());
+					stmt.setDouble(6, taxPayer.getIncome());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// marriedto
+				if (((Employee) taxPayer).getMaritalStatus() == MaritalStatus.MARRIED) {
+					sql = "insert into marriedto values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					if (((Employee) taxPayer).getGender() == Gender.MALE) {
+						stmt.setInt(1, taxPayer.getUtin());
+						stmt.setInt(2, ((Employee) taxPayer).getSpouseUtin());
+					} else {
+						stmt.setInt(2, taxPayer.getUtin());
+						stmt.setInt(1, ((Employee) taxPayer).getSpouseUtin());
+					}
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// ex-military
+				if (((Employee) taxPayer).getExMilatary().equals(String.valueOf(true))) {
+					sql = "insert into exmilitary values(?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// dependant income
+				if (((Employee) taxPayer).getDependantIncome() > 0) {
+					sql = "insert into dependant_income values(?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+					stmt.setDouble(2, ((Employee) taxPayer).getDependantIncome());
+
+					stmt.executeUpdate();
+					stmt.close();
+					stmt = null;
+				}
+
+				// stocks
+				if (((Employee) taxPayer).hasStocks()) {
+					sql = "insert into stockholders values(?,?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					for (Stock stock : ((Employee) taxPayer).getStocks()) {
+
+						stmt.setString(2, stock.getSymbol());
+						stmt.setString(3, dateFormat.format(stock.getPurchaseDate()));
+						stmt.setDouble(4, stock.getQuantity());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+				}
+
+			} else if (taxPayer instanceof Organization) {
+				sql = "insert into organization values(?,?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				stmt.setInt(1, taxPayer.getUtin());
+				stmt.setString(2, dateFormat.format(((Organization) taxPayer).getEstblDate()));
+				stmt.setInt(3, ((Organization) taxPayer).getCombinationId());
+				stmt.setDouble(4, ((Organization) taxPayer).getTurnover());
+				stmt.setDouble(5, taxPayer.getIncome());
+
+				stmt.executeUpdate();
+				stmt.close();
+				stmt = null;
+
+				HashMap<Integer, Double> shares = ((Organization) taxPayer).getShares();
+
+				if (shares != null && shares.size() > 0) {
+
+					sql = "insert into has_partnership values(?,?,?);";
+					stmt = con.prepareStatement(sql);
+
+					stmt.setInt(1, taxPayer.getUtin());
+
+					Iterator<Entry<Integer, Double>> it = shares.entrySet().iterator();
+					Entry<Integer, Double> share = null;
+
+					while (it.hasNext()) {
+						share = it.next();
+
+						stmt.setInt(2, share.getKey());
+						stmt.setDouble(3, share.getValue());
+
+						stmt.executeUpdate();
+					}
+
+					stmt.close();
+					stmt = null;
+				}
+
 			}
+
+			if (taxPayer.hasExemptions()) {
+				sql = "insert into has_exmp values(?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				for (Exemption exmp : taxPayer.getExemptions()) {
+
+					stmt.setInt(1, exmp.getId());
+					stmt.setInt(2, taxPayer.getUtin());
+					stmt.setDouble(3, exmp.getAmount());
+					stmt.setDouble(4, exmp.getPercentage());
+
+					stmt.executeUpdate();
+				}
+
+				stmt.close();
+				stmt = null;
+			}
+
+			if (taxPayer.hasInvestments()) {
+				sql = "insert into has_inv values(?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				for (Investment investment : taxPayer.getInvestments()) {
+
+					stmt.setInt(1, investment.getId());
+					stmt.setInt(2, taxPayer.getUtin());
+					stmt.setDouble(3, investment.getAmount());
+					stmt.setDouble(4, investment.getApplicablePercent());
+
+					stmt.executeUpdate();
+				}
+
+				stmt.close();
+				stmt = null;
+			}
+
+			con.commit();
+			con.setAutoCommit(true);
 
 		} catch (Exception e) {
 			return false;
@@ -1266,22 +1606,30 @@ public class DBHandler {
 		return true;
 	}
 
-	private String buildInClause(int batchSize) {
+	public boolean updateTaxPayer(Employee employee) {
+		return false;
+	}
 
-		StringBuilder inClause = new StringBuilder();
-		boolean firstValue = true;
+	public boolean deleteTaxPayer(int utin) {
+		Connection con = null;
+		Statement stmt = null;
 
-		for (int i = 0; i < batchSize; i++) {
-			if (firstValue) {
-				firstValue = false;
-			} else {
-				inClause.append(',');
-			}
+		String sql = "Delete from tax_payer where utin = " + utin;
 
-			inClause.append('?');
+		try {
+			con = getConnection();
+			stmt = con.createStatement();
+			stmt.executeUpdate(sql);
+
+			return true;
+
+		} catch (SQLException e) {
+
+		} finally {
+			closeConnectionObjects(null, stmt, con);
 		}
 
-		return inClause.toString();
+		return false;
 	}
 
 	private void closeConnectionObjects(ResultSet rs, Statement stmt, Connection con) {

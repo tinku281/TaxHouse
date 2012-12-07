@@ -23,6 +23,20 @@ String.prototype.isValidDate = function() {
 	return ((composedDate.getMonth() == (matches[2] -1) )  &&  (composedDate.getDate() == matches[3]) && (composedDate.getFullYear() == matches[1]));
 };
 
+function isNumeric(val)
+{
+        var validChars = '0123456789';
+
+
+        for(var i = 0; i < val.length; i++) 
+        {
+            if(validChars.indexOf(val.charAt(i)) == -1)
+                return false;
+        }
+
+        return true;
+}
+
 
 function compareDate(start,end)
 {
@@ -142,6 +156,41 @@ function addSpecialTask()
 
 function validate() 
 {
+	var orgUtin = document.insertApForm.emp_org_utin.value;
+	var empDesg = document.insertApForm.emp_designation.value;
+	var empJoinDate = document.insertApForm.emp_org_join_date.value;
+	
+	if (orgUtin == "") 
+	{
+		alert("Please enter Organtization UTIN");
+		document.insertApForm.emp_org_utin.focus();
+		return false;
+	}
+	
+	if(empDesg == "")
+	{
+		alert("Please enter Designation");
+		document.insertApForm.emp_designation.focus();
+		return false;
+	}
+	if(empJoinDate == "")
+	{
+		alert("Please enter Joining Date");
+		document.insertApForm.emp_org_join_date.focus();
+		return false;
+	}	
+	if(!isNumeric(orgUtin))
+	{
+		alert("Please enter Organtization UTIN as digits");
+		document.insertApForm.emp_org_utin.focus();
+		return false;
+	}	
+	if(!empJoinDate.isValidDate())
+	{
+		alert("Please enter a valid Joining Date");
+		document.insertApForm.emp_org_join_date.focus();
+		return false;
+	}	
 	document.insertApForm.submit();
 	return true;
 }
@@ -149,13 +198,18 @@ function validate()
 </head>
 <body>
 <%@ include file = "header.jsp"%>
+<%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
 
-<div class="subheader width500" >
-	<div class="header">
-		<h2>Enter Armed Personnel Details</h2>
-	</div>
+<div class="subheader width700" >
+	
 	<form name="insertApForm" method="POST" action="EmployeeSubtypeProcessing.do" >
+		<%@ include file = "insert_works_at.jsp"%>
+		
+		<div class="header">
+			<h2>Enter Armed Personnel Details</h2>
+		</div>
+	
 			<div class="formrow">
 				<label class="label1 ">Special Task</label>
 				<select name="sc_name" class="drop rightfloat">

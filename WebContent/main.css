@@ -11,6 +11,7 @@ body
 	
 }
 
+
 #header
 {
 	padding:5px 0 5px 0;
@@ -41,6 +42,22 @@ body
 {
 	margin-top:20px;
 	margin-right:10px;
+}
+
+#logout
+{
+	margin:0px auto;
+	display:block;
+	clear:both;
+}
+
+#logout a
+{
+	margin:20px;
+	text-decoration: none;
+	float:right;
+	color:#3E93C0;
+	font-weight: bold;
 }
 
 .labels p
@@ -190,6 +207,42 @@ body
 	height:50px;
 }
 
+.checkbox1
+{
+	-webkit-appearance: none;
+    background-color: #FFF;
+ 	border:1px solid #8fdeff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05);
+    padding: 5px;
+    display: inline-block;
+    width:25px;
+    height:25px;
+}
+
+.checkbox1:checked
+{
+	background-color: #FFF;
+   	border:1px solid #8fdeff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0px -15px 10px -12px rgba(0,0,0,0.05), inset 15px 10px -12px rgba(255,255,255,0.1);
+    color: #8fdeff;
+}
+
+.checkbox1:checked:after 
+{
+    content: '\2714';
+    font-size: 14px;
+    position: absolute;
+    top: 0px;
+    left: 3px;
+    color: #8fdeff;
+}
+
+.checkbox2
+{
+	width:30px;
+	height: 30px;
+	margin-top:10px;
+}
 .label1
 {
 	float:left;
@@ -222,6 +275,11 @@ body
 .margintTop100
 {
 	margin-top:100px;
+}
+
+.marginRight200
+{
+	margin-right: 200px;
 }
 
 .error_msg

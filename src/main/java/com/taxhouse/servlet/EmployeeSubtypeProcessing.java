@@ -1,9 +1,12 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -16,6 +19,7 @@ import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.ArmedForcePersonnel;
 import com.taxhouse.model.ArmedForcePersonnel.SpecialTask;
 import com.taxhouse.model.Employee;
+import com.taxhouse.model.Organization;
 import com.taxhouse.model.SeniorCitizen;
 import com.taxhouse.model.SeniorCitizen.Income;
 import com.taxhouse.model.Student;
@@ -45,116 +49,160 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			return;
 		}
 
+		int functionType = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
+
 		int empType = Integer.parseInt( httpSession.getAttribute( "empType" ).toString() );
-		Employee employee = (Employee)httpSession.getAttribute( "employee" );
+		Employee employee = (Employee) httpSession.getAttribute( "employee" );
+		
+		int empOrgUTIN;
+		String empDesignation;
+		Date empJoinDate;
+		try
+		{
+			empOrgUTIN = Integer.parseInt( request.getParameter( "emp_org_utin" ) );
+			empDesignation = request.getParameter( "emp_designation" );
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			empJoinDate = simpleDateFormat.parse( request.getParameter( "emp_org_join_date" ) );
+		}
+		catch(Exception e)
+		{
+			empOrgUTIN = -1;
+			empDesignation = "";
+			empJoinDate = null;
+		}
+		
+		if(employee != null && (empType == Employee.SubType.STUDENT.ordinal() || empType == Employee.SubType.ARMY.ordinal()))
+		{
+			try
+			{
+				Organization organization =  DBHandler.getInstance().getOrganization( empOrgUTIN );
+				
+				if(organization != null)
+					employee.setOrganization( organization);
+//				else
+					// If the organization UTIN doesn't exist then take the default value	
+			}
+			catch ( SQLException e )
+			{
+				e.printStackTrace();
+			}
+			catch ( ParseException e )
+			{
+				e.printStackTrace();
+			}
+			
+			employee.setDesignation( empDesignation );
+			employee.setJobStartDate( empJoinDate );
+		}
+		
+		if(employee.getOrganization() != null)
+			System.out.println("Employee Organization UTIN: "+employee.getOrganization().getUtin());
+		
+		System.out.println("Employee Designation: "+employee.getDesignation());
+		System.out.println("Employee Joining Date: "+employee.getJobStartDate());
 		
 		if ( empType == Employee.SubType.STUDENT.ordinal() )
 		{
-			Student student  = (Student)employee;
-			double waiverAmount = Double.parseDouble( request.getParameter( "waiver_amount" ));
-			student.setFeeWaiverAmt(waiverAmount );
-			if(DBHandler.getInstance().insertTaxPayer( student ))
-			{
-				//forward to insertion successful page
-				System.out.println("Employee Subtype Processing: Inserted Student");
-			}
-			else
-			{
-				// error inserting record
-			}
+			Student student = (Student) employee;
+			double waiverAmount = Double.parseDouble( request.getParameter( "waiver_amount" ) );
+			student.setFeeWaiverAmt( waiverAmount );
+			sendToDB( functionType, student );
 			
 		}
 		else if ( empType == Employee.SubType.SENIOR_CITIZEN.ordinal() )
 		{
-			SeniorCitizen seniorCitizen = (SeniorCitizen)employee;
-			
-			//retrieving income list from insert_senior_citizen form
+			SeniorCitizen seniorCitizen = (SeniorCitizen) employee;
+
+			// retrieving income list from insert_senior_citizen form
 			ArrayList<Income> incomeList = new ArrayList<Income>();
-			
-			int incomeCount = Integer.parseInt( request.getParameter( "count" ));
-			
-			if(incomeCount > 0)
+
+			int incomeCount = Integer.parseInt( request.getParameter( "count" ) );
+
+			if ( incomeCount > 0 )
 			{
-				
-				for(int index = 0; index < incomeCount; index++)
+
+				for ( int index = 0; index < incomeCount; index++ )
 				{
-					int i = index+1;
-					
-					String incomeName = request.getParameter( "incomename"+i );
-					Double incomeAmount = Double.parseDouble( request.getParameter( "incomeamount"+i ));
-					
+					int i = index + 1;
+
+					String incomeName = request.getParameter( "incomename" + i );
+					Double incomeAmount = Double.parseDouble( request.getParameter( "incomeamount" + i ) );
+
 					Income income = new Income( incomeName, incomeAmount );
 					incomeList.add( income );
-					System.out.println("Added Income- Source: "+incomeName+" Amount: "+incomeAmount);
+					System.out.println( "Added Income- Source: " + incomeName + " Amount: " + incomeAmount );
 				}
 			}
-			
-			
-			
-			//set Income list for senior citizen
+
+			// set Income list for senior citizen
 			seniorCitizen.setIncomes( incomeList );
-			
-			if(DBHandler.getInstance().insertTaxPayer( seniorCitizen ))
-			{
-				//forward to insertion successful page
-				System.out.println("Employee Subtype Processing: Inserted Senior Citizen");
-			}
-			else
-			{
-				// error inserting record
-			}
-			
-			
+
+			sendToDB( functionType, seniorCitizen );
+
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
 		{
-			ArmedForcePersonnel armedForcePersonnel = (ArmedForcePersonnel)employee;
-			
-			//retrieving special tasks list from insert_armed form
+			ArmedForcePersonnel armedForcePersonnel = (ArmedForcePersonnel) employee;
+
+			// retrieving special tasks list from insert_armed form
 			ArrayList<SpecialTask> specialTaskList = new ArrayList<SpecialTask>();
-			
-			int spCount = Integer.parseInt( request.getParameter( "count" ));
-			
-			if(spCount > 0)
-			{
+
+			int spCount = Integer.parseInt( request.getParameter( "count" ) );
+
+
+			if (spCount > 0) {
 				
-				for(int index = 0; index < spCount; index++)
+				HashMap<String, Integer> taskIds = new HashMap<String, Integer>();
+				taskIds.put("Red Cross", 1);
+				taskIds.put("US Marine", 2);
+				taskIds.put("Combat", 3);
+
+				for ( int index = 0; index < spCount; index++ )
 				{
-					int i = index+1;
-					
-					String scName = request.getParameter( "scname"+i );
-					String scCombatZone =  request.getParameter( "sccombat"+i );
-					String scStartDate = request.getParameter( "scstartdate"+i );
-					String scEndDate = request.getParameter( "scenddate"+i );
-					
+					int i = index + 1;
+
+					String scName = request.getParameter( "scname" + i );
+					String scCombatZone = request.getParameter( "sccombat" + i );
+					String scStartDate = request.getParameter( "scstartdate" + i );
+					String scEndDate = request.getParameter( "scenddate" + i );
+
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat( "yyyy-MM-dd" );
-					Date startDate = null,endDate = null;
-					
+					Date startDate = null, endDate = null;
+
 					try
 					{
 						startDate = simpleDateFormat.parse( scStartDate );
 						endDate = simpleDateFormat.parse( scEndDate );
-						System.out.println("Start Date is: "+startDate.toString()+" , End Date is: "+endDate.toString());
+						System.out.println( "Start Date is: " + startDate.toString() + " , End Date is: " + endDate.toString() );
 					}
-					catch(Exception e)
+					catch ( Exception e )
 					{
-						System.out.println("EmployeeSubtypeProcessing, Date Parse Exception");
+						System.out.println( "EmployeeSubtypeProcessing, Date Parse Exception" );
 					}
+
 					
-					SpecialTask specialTask = new SpecialTask( 0, scName, startDate, endDate, scCombatZone );
-					specialTaskList.add( specialTask );
-					System.out.println("Added Special Task: "+scName+" Cobat zone: "+scCombatZone);
+					SpecialTask specialTask = new SpecialTask(taskIds.get(scName), scName, startDate, endDate, scCombatZone);
+					specialTaskList.add(specialTask);
+					System.out.println("Added Special Task: " + scName + " Cobat zone: " + scCombatZone);
 				}
+				
+				armedForcePersonnel.setSpecialTasks(specialTaskList);
 			}
-			
-			
-			
-			//set Income list for senior citizen
-			
-			if(DBHandler.getInstance().insertTaxPayer( armedForcePersonnel ))
+
+			sendToDB( functionType, armedForcePersonnel );
+		}
+
+	}
+
+	private void sendToDB( int functionType, Employee employee )
+	{
+
+		if ( functionType == 4 )
+		{
+			if ( DBHandler.getInstance().insertTaxPayer( employee ) )
 			{
-				//forward to insertion successful page
-				System.out.println("Employee Subtype Processing: Inserted Armed Force Personnel");
+				// forward to insertion successful page
+				System.out.println( "Employee Subtype Processing: Inserted" );
 			}
 			else
 			{
@@ -162,6 +210,19 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			}
 		}
 
+		else
+		{
+
+			if ( DBHandler.getInstance().updateTaxPayer( employee ) )
+			{
+				// forward to insertion successful page
+				System.out.println( "Employee Subtype Processing: Updated" );
+			}
+			else
+			{
+				// error inserting record
+			}
+		}
 	}
 
 }
