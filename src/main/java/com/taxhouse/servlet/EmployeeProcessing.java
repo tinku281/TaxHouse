@@ -49,12 +49,12 @@ public class EmployeeProcessing extends HttpServlet
 			return;
 		}
 
-		int functiontype = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
+		int functionType = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
 		int exmpCount = Integer.parseInt( request.getParameter( "count" ).toString() );
 		int invCount = Integer.parseInt( request.getParameter( "inv_count" ).toString() );
 
 		int empType;
-		if ( functiontype == 4 )
+		if ( functionType == 4 )
 			empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
 		else
 		{
@@ -207,13 +207,13 @@ public class EmployeeProcessing extends HttpServlet
 
 		if ( empType == Employee.SubType.STUDENT.ordinal() )
 		{
-			request.setAttribute( "type", functiontype );
+			request.setAttribute( "type", functionType );
 			requestDispatcher = request.getRequestDispatcher( "insert_student.jsp" );
 			requestDispatcher.forward( request, response );
 		}
 		else if ( empType == Employee.SubType.SENIOR_CITIZEN.ordinal() )
 		{
-			if( functiontype == 4)
+			if( functionType == 4)
 				requestDispatcher = request.getRequestDispatcher( "insert_senior_citizen.jsp" );
 			else
 				requestDispatcher = request.getRequestDispatcher( "update_senior_citizen.jsp" );
@@ -223,7 +223,7 @@ public class EmployeeProcessing extends HttpServlet
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
 		{
 			
-			if( functiontype == 4)
+			if( functionType == 4)
 				requestDispatcher = request.getRequestDispatcher( "insert_armed.jsp" );
 			else
 				requestDispatcher = request.getRequestDispatcher( "update_armed.jsp" );
@@ -232,8 +232,24 @@ public class EmployeeProcessing extends HttpServlet
 		}
 		else
 		{
-			// insert code for employee goes here with type none
-			DBHandler.getInstance().insertTaxPayer( employee );
+			if (functionType == 4) {
+				if (DBHandler.getInstance().insertTaxPayer(employee)) {
+					// forward to insertion successful page
+					System.out.println("Employee Processing: Inserted");
+				} else {
+					// error inserting record
+				}
+			}
+
+			else {
+
+				if (DBHandler.getInstance().updateTaxPayer(employee)) {
+					// forward to insertion successful page
+					System.out.println("Employee Processing: Updated");
+				} else {
+					// error inserting record
+				}
+			}
 		}
 	}
 

@@ -16,7 +16,7 @@ import com.taxhouse.model.TaxRecord.Entry;
 rule "Base Federal tax rule" #Base Tax
 salience 15 
     when
-    item:SeniorCitizen(item.getTaxableIncome()>9350)
+    item:SeniorCitizen()
     taxRecord:TaxRecord()
 then
   	double amount = item.getTaxableIncome();
@@ -49,7 +49,7 @@ end
 rule "Base State tax rule"  #Base Tax
 salience 14
     when
-        item:SeniorCitizen(item.getTaxableIncome()>8000)
+        item:SeniorCitizen()
         
     taxRecord:TaxRecord()
 	then
@@ -128,10 +128,7 @@ salience 13
 when item:SeniorCitizen(residencyStatus != Employee.ResidencyStatus.FULL_TIME)
 taxRecord:TaxRecord()
 then
-double extra,taxCal;
-double per;
-
-double amount= taxRecord.getTotalTax();
+	double amount= taxRecord.getTotalTax();
 	int taxPer = 5;
 	
 	double reduction = Utils.calculatePercentage(amount , taxPer);
