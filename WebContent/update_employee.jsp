@@ -605,7 +605,7 @@
 			Double investmentAmount = investmentList.get( i ).getAmount(  );
 			Double investmentPer = investmentList.get( i ).getApplicablePercent(  );
 	%>
-			<div class="formrow"><label class="label1 ">Exemption Name</label>
+			<div class="formrow"><label class="label1 ">Investment Name</label>
 			<select name="<%="investmentname"+(i+1)%>" class="drop rightfloat">
 			<%
 				String[] investmentNames = (String[])request.getAttribute( "investment_names" );
