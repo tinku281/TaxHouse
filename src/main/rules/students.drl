@@ -19,7 +19,7 @@ then
 	double amount = item.getTaxableIncome();
 	double percent = 12;
     double fraction = Utils.calculatePercentage(amount, percent);
-	taxRecord.addEntry(new Entry("Base Federal tax (Graduate Assistants @)", percent,fraction));
+	taxRecord.addEntry(new Entry("Base Federal tax (Graduate Assistants)", percent,fraction));
 end
 
 
@@ -43,7 +43,7 @@ then
 		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax (Graduate Assistants) @ ", percent,fraction));
+		taxRecord.addEntry(new Entry("Base State tax (Graduate Assistants) ", percent,fraction));
        
 end
 
@@ -57,7 +57,7 @@ then
 	double amount = item.getTaxableIncome();
 	double percent = 6;
     double fraction = Utils.calculatePercentage(amount, percent);
-	taxRecord.addEntry(new Entry("Base Federal tax (Teaching Assistants @)", percent,fraction));
+	taxRecord.addEntry(new Entry("Base Federal tax (Teaching Assistants)", percent,fraction));
 end
 
 //tested
@@ -81,7 +81,7 @@ then
 		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax (Teaching Assistants) @ ", percent,fraction));
+		taxRecord.addEntry(new Entry("Base State tax (Teaching Assistants) ", percent,fraction));
 end
 
 
@@ -95,7 +95,7 @@ then
 	double amount = item.getTaxableIncome();
 	double percent = 8;
     double fraction = Utils.calculatePercentage(amount, percent);
-	taxRecord.addEntry(new Entry("Base Federal tax (Research Assistants @)", percent,fraction));
+	taxRecord.addEntry(new Entry("Base Federal tax (Research Assistants)", percent,fraction));
 end
 
 
@@ -119,7 +119,7 @@ then
 		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax (Research Assistants) @ ", percent,fraction));
+		taxRecord.addEntry(new Entry("Base State tax (Research Assistants) ", percent,fraction));
 end
 
 
@@ -133,7 +133,7 @@ then
 	double amount = item.getTaxableIncome();
 	double percent = 8;
     double fraction = Utils.calculatePercentage(amount, percent);
-	taxRecord.addEntry(new Entry("Base Federal tax (On-Campus work @)", percent,fraction));
+	taxRecord.addEntry(new Entry("Base Federal tax (On-Campus work)", percent,fraction));
 end
 
 
@@ -157,7 +157,7 @@ then
 		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax (On-campus work) @ ", percent,fraction));
+		taxRecord.addEntry(new Entry("Base State tax (On-campus work) ", percent,fraction));
 end
 
 
@@ -169,7 +169,7 @@ then
 double amount=item.getFeeWaiverAmt();
 double percent=5;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Tax on Feewaiver @ ", percent,fraction));
+taxRecord.addEntry(new Entry("Tax on Feewaiver ", percent,fraction));
 end
 
 
@@ -182,7 +182,7 @@ then
 double amount=taxRecord.getTotalTax();
 double percent=5;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Private University Tax @ ", percent,fraction));
+taxRecord.addEntry(new Entry("Private University Tax ", percent,fraction));
 end
 
 rule"Alien stat" #Increment on Tax
@@ -194,7 +194,7 @@ then
 double amount=taxRecord.getTotalTax();
 double percent=7;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Private University Tax @ ", percent,fraction));
+taxRecord.addEntry(new Entry("Private University Tax ", percent,fraction));
 end	
 
 //tested
@@ -208,7 +208,7 @@ then
 double amount=taxRecord.getTotalTax();
 double percent=2;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for Residency Status @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for Residency Status ", percent, -fraction));
 end	
 
 rule "Having Dependants" #Rebate on Tax
@@ -220,7 +220,7 @@ then
 double amount=taxRecord.getTotalTax();
 double percent=4;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for having Dependants @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for having Dependants ", percent, -fraction));
 end
 
 
@@ -233,7 +233,7 @@ then
 double amount=investment.getAmount();
 double percent=8;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for investing in Student Organiazations @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for investing in Student Organiazations ", percent, -fraction));
 end	
 
 rule "for Student_investment in Charity" #Rebate on investment
@@ -245,7 +245,7 @@ then
 double amount=investment.getAmount();
 double percent=4;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for investing in Charity @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for investing in Charity ", percent, -fraction));
 end
 
 
@@ -260,7 +260,7 @@ if(amount == 0) amount = 200;
 double percent=9;
 if(percent == 0) percent = 10;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for Student Minority Exemption @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for Student Minority Exemption ", percent, -fraction));
 end
 
 rule "For Student Exemption physical disability"
@@ -274,7 +274,7 @@ if(amount == 0) amount = 900;
 double percent=9;
 if(percent == 0) percent = 13;
 double fraction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for Student physical disability exemption @ ", percent, -fraction));
+taxRecord.addEntry(new Entry("Rebate for Student physical disability exemption ", percent, -fraction));
 end
 
 
