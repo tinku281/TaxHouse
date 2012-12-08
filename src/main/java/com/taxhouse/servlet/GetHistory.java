@@ -1,6 +1,7 @@
 package com.taxhouse.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -9,28 +10,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import com.taxhouse.app.TaxRulesLogic;
+import com.taxhouse.db.HistoryProvider;
+import com.taxhouse.model.TaxHistory;
 import com.taxhouse.model.TaxPayer;
-import com.taxhouse.model.TaxRecord;
 
 /**
- * Servlet implementation class TaxCalculator
+ * Servlet implementation class GetHistory
  */
-public class TaxCalculator extends HttpServlet {
+public class GetHistory extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
-	public TaxCalculator() {
+	public GetHistory() {
 		super();
+		// TODO Auto-generated constructor stub
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
-			IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession httpSession = request.getSession();
 
 		if (httpSession.isNew()) {
@@ -41,23 +42,16 @@ public class TaxCalculator extends HttpServlet {
 		}
 
 		TaxPayer taxPayer = (TaxPayer) httpSession.getAttribute("taxpay");
+		RequestDispatcher requestDispatcher;
 
 		if (taxPayer != null) {
-			request.setAttribute("taxpayer", taxPayer);
-
-			try {
-				TaxRecord taxRecord = TaxRulesLogic.triggerRules(taxPayer);
-				request.setAttribute("taxrecord", taxRecord);
-
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-			}
-
-			RequestDispatcher requestDispatcher = request.getRequestDispatcher("taxdetails.jsp");
+			
+			ArrayList<TaxHistory> histories = HistoryProvider.getTaxHistory(taxPayer.getUtin());
+			httpSession.setAttribute("tax_history", histories);
+			
+			requestDispatcher = request.getRequestDispatcher("tax_history.jsp");
 			requestDispatcher.forward(request, response);
 		}
 	}
-
-	
 
 }
