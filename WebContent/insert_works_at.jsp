@@ -1,3 +1,4 @@
+<%@page import="com.taxhouse.model.SeniorCitizen"%>
 <%@page import="java.text.SimpleDateFormat"%>
 <%@page import="com.taxhouse.model.Employee"%>
 <%@page import="com.taxhouse.model.ArmedForcePersonnel"%>
@@ -11,7 +12,7 @@
  		String orgUTIN ="", designation = "", startDate = "";
  		
  		Employee employee = (Employee)session.getAttribute( "taxpayee" );
- 		if(employee != null && (employee instanceof Student || employee instanceof ArmedForcePersonnel))
+ 		if(employee != null && !(employee instanceof SeniorCitizen))
  		{
  			
  			orgUTIN = String.valueOf( employee.getOrganization(  ).getUtin(  ));

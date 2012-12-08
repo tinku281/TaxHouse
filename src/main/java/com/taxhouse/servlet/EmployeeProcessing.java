@@ -248,6 +248,7 @@ public class EmployeeProcessing extends HttpServlet
 				break;
 		}
 
+		
 		if ( exmpCount > 0 )
 			employee.setExemptions( exemptionsList );
 		if ( invCount > 0 )
@@ -332,24 +333,8 @@ public class EmployeeProcessing extends HttpServlet
 		}
 		else
 		{
-			if (functionType == 4) {
-				if (DBHandler.getInstance().insertTaxPayer(employee)) {
-					// forward to insertion successful page
-					System.out.println("Employee Processing: Inserted");
-				} else {
-					// error inserting record
-				}
-			}
-
-			else {
-
-				if (DBHandler.getInstance().updateTaxPayer(employee)) {
-					// forward to insertion successful page
-					System.out.println("Employee Processing: Updated");
-				} else {
-					// error inserting record
-				}
-			}
+			requestDispatcher = request.getRequestDispatcher( "insert_employee_none.jsp" );
+			requestDispatcher.forward( request, response );
 		}
 	}
 
