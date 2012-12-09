@@ -40,9 +40,9 @@ public class DBHandler {
 	private DataSource dataSource;
 
 	// connection parameters
-	public static final String MySQL_HOST = "localhost:3306";
-	public static final String MySQL_USERNAME = "root";
-	public static final String MySQL_PASSWORD = "root";
+//	public static final String MySQL_HOST = "localhost:3306";
+//	public static final String MySQL_USERNAME = "root";
+//	public static final String MySQL_PASSWORD = "root";
 
 	// table Admin
 	public static final String ADMIN_ID = "Admin_Id";
