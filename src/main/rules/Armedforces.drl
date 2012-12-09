@@ -27,7 +27,7 @@ then
 	
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -10); //subtract 10 years from current date
+	cal1.add(Calendar.YEAR, -10); //subtract 10 years from current date
 	
 	if (cal.after(cal1)) {
 		taxRecord.addEntry(new Entry("Tax after Full Rebate(Active A1 Combat Zone Personnel)", 0));
@@ -52,7 +52,7 @@ then
 	
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -10); // subtract 10 years from current date
+	cal1.add(Calendar.YEAR, -10); // subtract 10 years from current date
 	
 	if (cal.after(cal1)) {
 		double taxPer = 1;
@@ -79,7 +79,7 @@ then
 	
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -10); // subtract 10 years from current date
+	cal1.add(Calendar.YEAR, -10); // subtract 10 years from current date
 	
 	if (cal.after(cal1)) {
 		double taxPer = 2;
@@ -106,7 +106,7 @@ then
 	
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -10); // subtract 10 years from current date
+	cal1.add(Calendar.YEAR, -10); // subtract 10 years from current date
 	
 	if (cal.after(cal1)) {
 		double taxPer = 5;
@@ -238,7 +238,7 @@ then
 	
 	double reduction = Utils.calculatePercentage(amount, percent);
 	taxRecord.addEntry(new Entry("Tax Rebate (A1 Combat Zone) on $" + Utils.formatDouble(amount),
-			amount, -reduction));
+			percent, -reduction));
 end
 
 //tested
@@ -254,7 +254,7 @@ then
 	
 	double reduction = Utils.calculatePercentage(amount, percent);
 	taxRecord.addEntry(new Entry("Tax Rebate (A2 Combat Zone) on $" + Utils.formatDouble(amount),
-			amount, -reduction));
+			percent, -reduction));
 end
 
 //tested
@@ -270,7 +270,7 @@ then
 	
 	double reduction = Utils.calculatePercentage(amount, percent);
 	taxRecord.addEntry(new Entry("Tax Rebate (A3 Combat Zone) on $" + Utils.formatDouble(amount),
-			amount, -reduction));
+			percent, -reduction));
 end
 
 //tested

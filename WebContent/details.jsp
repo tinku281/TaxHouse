@@ -344,7 +344,10 @@ function calculateTax()
 
 		</div>
 		<form method="POST" action="calculateTax.do"/>
-			<input class=" center_div button_blue display_block" type="submit" value="Calculate Tax"  />
+			<input class=" center_div button_blue display_block margin10" type="submit" value="Calculate Tax"  />
+		</form>	
+		<form method="GET" action="history.do"/>
+			<input class=" center_div button_blue display_block margin10" type="submit" value="View History"  />
 		</form>	
 	</div>
 </body>

@@ -386,6 +386,7 @@
 <%@ include file="header.jsp" %>
 <%@ include file = "subheader.jsp"%>
 <%@ include file="admin_panel.html" %>
+<div id="logout" class="width800"><input class="rightfloat button_blue display_block"  type = "button" value="Back" onClick="history.back()"/></div>
 
 <form name="insertEmployee" method="POST" action="insert_employee.do">
 <div class="subheader width600">

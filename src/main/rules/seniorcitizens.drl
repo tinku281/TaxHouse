@@ -30,7 +30,7 @@ then
 
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -70); // subtract 70 years from current date
+	cal1.add(Calendar.YEAR, -70); // subtract 70 years from current date
 
 	if (cal.after(cal1)) {
 
@@ -64,7 +64,7 @@ salience 14
 
 		Calendar cal1 = Calendar.getInstance();
 		cal1.setTime(now);
-		cal.add(Calendar.YEAR, -70); // subtract 70 years from current date
+		cal1.add(Calendar.YEAR, -70); // subtract 70 years from current date
 
 		if (item.getState().substring(0, 1) == "A"
 				|| item.getState().substring(0, 1) == "B") {
@@ -91,7 +91,7 @@ salience 14
 		}
 
 		double fraction = Utils.calculatePercentage(amount, percent);
-		taxRecord.addEntry(new Entry("Base State tax (senior citizens) @  %",percent,fraction));
+		taxRecord.addEntry(new Entry("Base State tax (senior citizens) ",percent,fraction));
       end
 
       
@@ -147,7 +147,7 @@ double amount = taxRecord.getTotalTax();
 double percent = 10;
 
 double reduction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Income from PF Rebate (senior citizens) @  %",percent,-reduction));
+taxRecord.addEntry(new Entry("Income from PF Rebate (senior citizens) ",percent,-reduction));
 end
 
 
@@ -162,7 +162,7 @@ double amount = taxRecord.getTotalTax();
 double percent = 12;
 
 double reduction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Income from annuity (senior citizens) @  %",percent,-reduction));
+taxRecord.addEntry(new Entry("Income from annuity (senior citizens) ",percent,-reduction));
 end
  
  
@@ -177,7 +177,7 @@ double amount = taxRecord.getTotalTax();
 double percent = 15;
 
 double reduction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Income from OtherState (senior citizens) @  %",percent,-reduction));
+taxRecord.addEntry(new Entry("Income from OtherState (senior citizens) ",percent,-reduction));
 end
  
  
@@ -190,7 +190,7 @@ double amount  = taxRecord.getTotalTax();
 double percent = item.getNoOfDependants()/2;
 	
 double reduction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for more than three dependants(senior citizens) @  %",percent,-reduction));
+taxRecord.addEntry(new Entry("Rebate for more than three dependants(senior citizens) ",percent,-reduction));
 end
 
 
@@ -204,7 +204,7 @@ double amount  = taxRecord.getTotalTax();
 double percent = 4.7;
 	
 double reduction = Utils.calculatePercentage(amount, percent);
-taxRecord.addEntry(new Entry("Rebate for Widows(senior citizens) @  %",percent,-reduction));
+taxRecord.addEntry(new Entry("Rebate for Widows(senior citizens) ",percent,-reduction));
 end
 
 rule "Senior Citizens invested in Health Insurance"	#Rebate on Investment

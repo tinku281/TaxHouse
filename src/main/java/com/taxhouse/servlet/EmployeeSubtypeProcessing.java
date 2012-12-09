@@ -49,6 +49,7 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			return;
 		}
 
+		String customMessage;
 		int functionType = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
 
 		int empType = Integer.parseInt( httpSession.getAttribute( "empType" ).toString() );
@@ -71,7 +72,7 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			empJoinDate = null;
 		}
 		
-		if(employee != null && (empType == Employee.SubType.STUDENT.ordinal() || empType == Employee.SubType.ARMY.ordinal()))
+		if(employee != null && !(empType == Employee.SubType.SENIOR_CITIZEN.ordinal()))
 		{
 			try
 			{
@@ -106,7 +107,7 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			Student student = (Student) employee;
 			double waiverAmount = Double.parseDouble( request.getParameter( "waiver_amount" ) );
 			student.setFeeWaiverAmt( waiverAmount );
-			sendToDB( functionType, student );
+			customMessage = sendToDB( functionType, student );
 			
 		}
 		else if ( empType == Employee.SubType.SENIOR_CITIZEN.ordinal() )
@@ -137,7 +138,7 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			// set Income list for senior citizen
 			seniorCitizen.setIncomes( incomeList );
 
-			sendToDB( functionType, seniorCitizen );
+			customMessage = sendToDB( functionType, seniorCitizen );
 
 		}
 		else if ( empType == Employee.SubType.ARMY.ordinal() )
@@ -189,12 +190,19 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 				armedForcePersonnel.setSpecialTasks(specialTaskList);
 			}
 
-			sendToDB( functionType, armedForcePersonnel );
+			customMessage =sendToDB( functionType, armedForcePersonnel );
 		}
+		else 
+		{
+			customMessage =sendToDB( functionType, employee );
+		}
+		
+		request.setAttribute( "custom_message", customMessage );
+		request.getRequestDispatcher( "display_message.jsp" ).forward( request, response );
 
 	}
 
-	private void sendToDB( int functionType, Employee employee )
+	private String sendToDB( int functionType, Employee employee )
 	{
 
 		if ( functionType == 4 )
@@ -203,10 +211,12 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 			{
 				// forward to insertion successful page
 				System.out.println( "Employee Subtype Processing: Inserted" );
+				return "Record Insertion Successful";
 			}
 			else
 			{
 				// error inserting record
+				return "Record Insertion Unsuccessful";
 			}
 		}
 
@@ -215,14 +225,17 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 
 			if ( DBHandler.getInstance().updateTaxPayer( employee ) )
 			{
-				// forward to insertion successful page
+				// forward to updation successful page
 				System.out.println( "Employee Subtype Processing: Updated" );
+				return "Record Updation Successful";
 			}
 			else
 			{
-				// error inserting record
+				// error updating record
+				return "Record Updation Unsuccessful";
 			}
 		}
+		
 	}
 
 }

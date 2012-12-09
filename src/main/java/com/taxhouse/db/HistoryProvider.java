@@ -106,4 +106,43 @@ public class HistoryProvider {
 
 		return taxHistory;
 	}
+	
+	
+	public static ArrayList<TaxHistory> getTaxHistory(int utin) {
+
+		ArrayList<TaxHistory> histories = new ArrayList<TaxHistory>();
+		TaxHistory taxHistory = null;
+
+		connectMongo();
+		DBCollection coll = db.getCollection(COLLECTION_NAME);
+
+		BasicDBObject query = new BasicDBObject();
+		query.put(UTIN, utin);
+		DBCursor cursorDoc = coll.find(query);
+
+		while (cursorDoc.hasNext()) {
+			DBObject dbObj = cursorDoc.next();
+
+			taxHistory = new TaxHistory();
+			taxHistory.setUtin(Integer.parseInt(dbObj.get(UTIN).toString()));
+			taxHistory.setTaxYear(Integer.parseInt(dbObj.get(TAX_YEAR).toString()));
+			taxHistory.setInvestments(Double.parseDouble(dbObj.get(INVESTMENTS).toString()));
+			taxHistory.setExemptions(Double.parseDouble(dbObj.get(EXEMPTIONS).toString()));
+			taxHistory.setTaxPaid(Double.parseDouble(dbObj.get(TAX_PAID).toString()));
+			taxHistory.setPenaltyPaid(Double.parseDouble(dbObj.get(PENALTY_PAID).toString()));
+
+			try {
+				taxHistory.setTaxDueDate(DBHandler.dateFormat.parse((String) dbObj.get(TAX_DUE_DATE)));
+				taxHistory.setTaxPaidDate(DBHandler.dateFormat.parse((String) dbObj.get(TAX_PAID_DATE)));
+
+			} catch (ParseException e) {
+
+			}
+			
+			histories.add(taxHistory);
+		}
+
+		return histories;
+	}
+	
 }

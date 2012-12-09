@@ -427,6 +427,7 @@
 <%@ include file="header.jsp" %>
 <%@ include file = "subheader.jsp"%>
 <%@ include file="admin_panel.html" %>
+<div id="logout" class="width800"><input class="rightfloat button_blue display_block"  type = "button" value="Back" onClick="history.back()"/></div>
 
 <form name="insertEmployee" method="POST" action="insert_employee.do">
 <div class="subheader width600">
@@ -605,7 +606,7 @@
 			Double investmentAmount = investmentList.get( i ).getAmount(  );
 			Double investmentPer = investmentList.get( i ).getApplicablePercent(  );
 	%>
-			<div class="formrow"><label class="label1 ">Exemption Name</label>
+			<div class="formrow"><label class="label1 ">Investment Name</label>
 			<select name="<%="investmentname"+(i+1)%>" class="drop rightfloat">
 			<%
 				String[] investmentNames = (String[])request.getAttribute( "investment_names" );

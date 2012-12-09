@@ -94,4 +94,14 @@
     <servlet-name>Logout</servlet-name>
     <url-pattern>/Logout.do</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>GetHistory</display-name>
+    <servlet-name>GetHistory</servlet-name>
+    <servlet-class>com.taxhouse.servlet.GetHistory</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>GetHistory</servlet-name>
+    <url-pattern>/history.do</url-pattern>
+  </servlet-mapping>
 </web-app>

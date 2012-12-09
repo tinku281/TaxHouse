@@ -9,6 +9,8 @@
 <script>
 
 var count = 0;
+var invCount = 0;
+var shareCount = 0;
 
 String.prototype.isValidDate = function() {
 	var IsoDateRe = new RegExp("^([0-9]{4})-([0-9]{2})-([0-9]{2})$");
@@ -37,6 +39,148 @@ function isNumeric(val)
         return true;
 }
 
+function addExmpDetails()
+{
+	var exempAmount = document.insertOrgForm.exemptionamt.value;
+	if(exempAmount == "" || !isNumeric(exempAmount))
+	{
+		alert("Please enter Exemption Amount as digits.");
+		return false;
+	}	
+	document.insertOrgForm.count.value = ++count;
+	
+	
+	var labelExmpAmount =document.createElement("label");
+	labelExmpAmount.setAttribute("class","label1");
+	labelExmpAmount.innerHTML="Exemption Name";
+	
+	var labelExmpNameValue = document.createElement("input");
+	labelExmpNameValue.type="text";
+	labelExmpNameValue.name="exemptionname"+count;
+	labelExmpNameValue.setAttribute("class", "textbox2 rightfloat");
+	labelExmpNameValue.setAttribute("value", document.insertOrgForm.emp_exemp_name.value);
+	labelExmpNameValue.readOnly = "readonly";
+
+	
+	var divExmpAmount = document.createElement("div");
+	divExmpAmount.setAttribute("class", "formrow");
+	divExmpAmount.appendChild(labelExmpAmount);
+	divExmpAmount.appendChild(labelExmpNameValue);
+	
+	var labelExmpPer =document.createElement("label");
+	labelExmpPer.setAttribute("class","label1");
+	
+	
+	var labelExmpPerValue = document.createElement("input");
+	labelExmpPerValue.type="text";
+	labelExmpPerValue.name="exemptionamount"+count;
+	labelExmpPerValue.setAttribute("class", "textbox2 rightfloat");
+	labelExmpPerValue.setAttribute("value", exempAmount);
+	labelExmpPerValue.readOnly = "readonly";
+
+	
+	var divExmpPer = document.createElement("div");
+	divExmpPer.setAttribute("class", "formrow");
+	divExmpPer.appendChild(labelExmpPer);
+	divExmpPer.appendChild(labelExmpPerValue);
+	
+	var divExmpType = document.createElement("input");
+	divExmpType.type="hidden";
+	divExmpType.name="exemptiontype"+count;
+	divExmpType.value=document.insertOrgForm.exmp_type.value;
+	
+	document.getElementById('exemp_details').appendChild(divExmpAmount).appendChild(divExmpPer).appendChild(divExmpType);
+	if(document.insertOrgForm.exmp_type.value == "1")
+		labelExmpPer.innerHTML="Exemption Amount";
+	else
+		labelExmpPer.innerHTML="Exemption Percentage";
+	
+	return true;
+	
+}
+
+function addInvestmentDetails()
+{
+	var invAmount,invPer;
+	invAmount = document.insertOrgForm.investmentamount.value;
+	invPer = document.insertOrgForm.investmentper.value;
+	
+	if(invAmount == "" || invPer == "" )
+	{
+		alert("Please fill in the investment details");	
+		return false;
+	}
+	if(!isNumeric(invAmount))
+	{
+		alert("Investement amount should be in digits");	
+		return false;
+	}
+	if(!isNumeric(invPer))
+	{
+		alert("Applicable percentage should be in digits");	
+		return false;
+	}
+	
+	document.insertOrgForm.inv_count.value = 	++invCount;
+	
+	/*--------------INVESTMENT NAME--------*/
+	
+	var labelInvName =document.createElement("label");
+	labelInvName.setAttribute("class","label1");
+	labelInvName.innerHTML="Investment Name";
+	
+	var textBoxInvName = document.createElement("input");
+	textBoxInvName.setAttribute("type", "text");
+	textBoxInvName.setAttribute("class", "textbox2 rightfloat");
+	textBoxInvName.setAttribute("name", "investmentname"+invCount);
+	textBoxInvName.setAttribute("value", document.insertOrgForm.emp_inv_name.value);
+	textBoxInvName.readOnly = "readonly";
+
+	var divInvName = document.createElement("div");
+	divInvName.setAttribute("class", "formrow");
+	divInvName.appendChild(labelInvName);
+	divInvName.appendChild(textBoxInvName);
+	
+	/*--------------INVESTMENT AMOUNT--------*/
+	
+	var labelInvAmount =document.createElement("label");
+	labelInvAmount.setAttribute("class","label1");
+	labelInvAmount.innerHTML="Investment Amount";
+	
+	var textBoxInvAmount = document.createElement("input");
+	textBoxInvAmount.setAttribute("type", "text");
+	textBoxInvAmount.setAttribute("class", "textbox2 rightfloat");
+	textBoxInvAmount.setAttribute("name", "investmentamount"+invCount);
+	textBoxInvAmount.setAttribute("value", invAmount);
+	textBoxInvAmount.readOnly = "readonly";
+
+	var divInvAmount = document.createElement("div");
+	divInvAmount.setAttribute("class", "formrow");
+	divInvAmount.appendChild(labelInvAmount);
+	divInvAmount.appendChild(textBoxInvAmount);
+	
+	/*--------------APPLICABLE PERCENTAGE--------*/
+	
+	var labelInvPer =document.createElement("label");
+	labelInvPer.setAttribute("class","label1");
+	labelInvPer.innerHTML="Applicable Percentage";
+	
+	var textBoxInvPer = document.createElement("input");
+	textBoxInvPer.setAttribute("type", "text");
+	textBoxInvPer.setAttribute("class", "textbox2 rightfloat");
+	textBoxInvPer.setAttribute("name", "investmentper"+invCount);
+	textBoxInvPer.setAttribute("value", invPer);
+	textBoxInvPer.readOnly = "readonly";
+	
+	var divInvPer = document.createElement("div");
+	divInvPer.setAttribute("class", "formrow");
+	divInvPer.appendChild(labelInvPer);
+	divInvPer.appendChild(textBoxInvPer);
+	
+	document.getElementById('inv_details').appendChild(divInvName).appendChild(divInvAmount).appendChild(divInvPer);
+	return true;
+}
+
 function addShareDetails()
 {
 	var holderUTIN = document.insertOrgForm.org_shr_hldr_utin.value;
@@ -58,7 +202,7 @@ function addShareDetails()
 		return false;
 	}
 	
-	document.insertOrgForm.count.value = 	++count;
+	document.insertOrgForm.share_count.value = 	++shareCount;
 	
 	/*--------------SHAREHOLDER'S UTIN--------*/
 	
@@ -69,7 +213,7 @@ function addShareDetails()
 	var textBoxholderUTIN = document.createElement("input");
 	textBoxholderUTIN.setAttribute("type", "text");
 	textBoxholderUTIN.setAttribute("class", "textbox2 rightfloat");
-	textBoxholderUTIN.setAttribute("name", "holderutin"+count);
+	textBoxholderUTIN.setAttribute("name", "holderutin"+shareCount);
 	textBoxholderUTIN.setAttribute("value", holderUTIN);
 	textBoxholderUTIN.readOnly = "readonly";
 
@@ -87,7 +231,7 @@ function addShareDetails()
 	var textBoxsharePer = document.createElement("input");
 	textBoxsharePer.setAttribute("type", "text");
 	textBoxsharePer.setAttribute("class", "textbox2 rightfloat");
-	textBoxsharePer.setAttribute("name", "shareper"+count);
+	textBoxsharePer.setAttribute("name", "shareper"+shareCount);
 	textBoxsharePer.setAttribute("value", sharePer);
 	textBoxsharePer.readOnly = "readonly";
 	
@@ -131,6 +275,7 @@ function validate()
 <%@ include file = "header.jsp"%>
 <%@ include file = "subheader.jsp"%>
 <%@ include file = "admin_panel.html" %>
+<div id="logout" class="width800"><input class="rightfloat button_blue display_block"  type = "button" value="Back" onClick="history.back()"/></div>
 
 <div class="subheader width700" >
 	<div class="header">
@@ -196,8 +341,73 @@ function validate()
 					<div class="formrow"><label class="label1 ">Share's Percentage</label><input class="textbox2 rightfloat" type="text" name="org_shr_hldr_per" /></div>
 					<div id="share_details"></div>	
 					<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Shareholder" onClick="addShareDetails()"/></div>
+					
+	<div class="header">
+		<h2>Exemption Details</h2>
+	</div>
+	
+			<div class="formrow"><label class="label1 ">Exemption Name</label>
+			<select name="emp_exemp_name" class="drop rightfloat">
+			<%
+				String[] exempNames = (String[])request.getAttribute( "exemption_names" );
+			
+				if(exempNames!= null && exempNames.length >= 0)
+				{
+						for(int index=0; index < exempNames.length; index++)
+						{
+							String exempName = exempNames[index];							
+							
+			%>				<option value="<%=exempName%>"><%=exempName %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
+			<div class="formrow"><label class="label1 ">Exemption Amount/Percentage</label><input class="textbox2 rightfloat" type="text" name="exemptionamt" /></div>
+			<div class="formrow rightfloat">
+				<select name="exmp_type" class="drop rightfloat">
+					<option value="1">Amount</option>
+					<option value="2">Percentage</option>
+				</select>
+			</div>
+			<div id="exemp_details"></div>	
+			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
+		
+			
+	
+	<div class="header">
+		<h2>Investment Details</h2>
+	</div>
+		<div id="inv_details">
+			<div class="formrow"><label class="label1 ">Investment Name</label>
+			<select name="emp_inv_name" class="drop rightfloat">
+			<%
+				String[] invNames = (String[])request.getAttribute( "investment_names" );
+			
+				if(invNames!= null && invNames.length >= 0)
+				{
+						for(int index=0; index < invNames.length; index++)
+						{
+							String invName = invNames[index];							
+							
+			%>				<option value="<%=invName%>"><%=invName %></option>			
+			<%				
+						}
+				}
+			%>
+			</select>
+			</div>
+			<div class="formrow"><label class="label1 ">Investment Amount</label><input class="textbox2 rightfloat" type="text" name="investmentamount"  /></div>
+			<div class="formrow"><label class="label1 ">Applicable Percentage</label><input class="textbox2 rightfloat" type="text" name="investmentper"/></div>
+		</div>	
+			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add More" onClick="addInvestmentDetails()"/></div>
+		
 						
 			<input type="hidden" name="count" value="0" />
+			<input type="hidden" name="inv_count" value="0" />
+			<input type="hidden" name="share_count" value="0" />
+			
 			<input class=" center_div button_blue display_block margin10"  type = "button" value="Submit" onClick="validate()"/>
 			
 	</form>

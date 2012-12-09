@@ -24,6 +24,7 @@ import com.taxhouse.model.Investment;
 import com.taxhouse.model.SeniorCitizen;
 import com.taxhouse.model.Stock;
 import com.taxhouse.model.Student;
+import com.taxhouse.model.TaxPayer;
 import com.taxhouse.model.TaxPayer.Nationality;
 
 /**
@@ -81,6 +82,7 @@ public class EmployeeProcessing extends HttpServlet
 		int empType;
 		if ( functionType == 4 )
 			empType = Integer.parseInt( request.getParameter( "emp_type" ).toString() );
+			
 		else
 		{
 			String sEmpType = request.getParameter( "emp_type" ).toString();
@@ -201,6 +203,12 @@ public class EmployeeProcessing extends HttpServlet
 		employee.setPassword( httpSession.getAttribute( "password" ).toString() );
 		employee.setCity( httpSession.getAttribute( "city" ).toString() );
 		employee.setState( httpSession.getAttribute( "state" ).toString() );
+		
+		if(functionType == 3)
+		{
+			TaxPayer taxPayer = (TaxPayer)httpSession.getAttribute("taxpayee");
+			employee.setUtin(taxPayer.getUtin());
+		}	
 
 		int nationality = Integer.parseInt( httpSession.getAttribute( "nationality" ).toString() );
 		if ( nationality == 1 )
@@ -248,6 +256,7 @@ public class EmployeeProcessing extends HttpServlet
 				break;
 		}
 
+		
 		if ( exmpCount > 0 )
 			employee.setExemptions( exemptionsList );
 		if ( invCount > 0 )
@@ -332,24 +341,8 @@ public class EmployeeProcessing extends HttpServlet
 		}
 		else
 		{
-			if (functionType == 4) {
-				if (DBHandler.getInstance().insertTaxPayer(employee)) {
-					// forward to insertion successful page
-					System.out.println("Employee Processing: Inserted");
-				} else {
-					// error inserting record
-				}
-			}
-
-			else {
-
-				if (DBHandler.getInstance().updateTaxPayer(employee)) {
-					// forward to insertion successful page
-					System.out.println("Employee Processing: Updated");
-				} else {
-					// error inserting record
-				}
-			}
+			requestDispatcher = request.getRequestDispatcher( "insert_employee_none.jsp" );
+			requestDispatcher.forward( request, response );
 		}
 	}
 

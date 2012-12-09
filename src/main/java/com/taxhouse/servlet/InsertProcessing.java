@@ -65,19 +65,20 @@ public class InsertProcessing extends HttpServlet
 		httpSession.setAttribute( "state", request.getParameter( "state" ));
 		httpSession.setAttribute( "nationality",request.getParameter( "nationality" ));
 		
+		String[] exempNames = DBHandler.getInstance().getExemptionNames();
+		String[] invNames = DBHandler.getInstance().getInvestmentNames();
+		request.setAttribute( "exemption_names", exempNames );
+		request.setAttribute( "investment_names", invNames );
+		
 		if(iCategory == TaxPayer.SubType.EMPLOYEE.ordinal())
 		{
 			System.out.println("Employee Ordinal: "+TaxPayer.SubType.EMPLOYEE.ordinal());
-			
-			String[] exempNames = DBHandler.getInstance().getExemptionNames();
-			String[] invNames = DBHandler.getInstance().getInvestmentNames();
+		
 			String[] stockSymobls = DBHandler.getInstance().getStockSymbols();
 			
-			
+				
 			String  forwardPage = (functiontype == 4) ?"insert_employee.jsp":"update_employee.jsp";
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher(forwardPage );
-			request.setAttribute( "exemption_names", exempNames );
-			request.setAttribute( "investment_names", invNames );
 			request.setAttribute( "stock_symbols", stockSymobls );
 			requestDispatcher.forward( request, response );
 		}
