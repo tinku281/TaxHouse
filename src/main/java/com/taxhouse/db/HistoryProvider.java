@@ -46,30 +46,31 @@ public class HistoryProvider {
 		}
 	}
 
-	public static double GetHistoricRate(String symbol, String date) {
+	public static double GetHistoricRate(ArrayList<String> symbol,
+			ArrayList<String> dates) {
 		double rate = 0;
-
-		connectMongo();
-
-		DBCollection coll = db.getCollection("stock_history");
-		BasicDBObject query = new BasicDBObject();
-		query.put(SYMBOL, symbol);
-		query.put(HDATE, date);
-		DBCursor cursorDoc = coll.find(query);
-
-		if (cursorDoc.hasNext()) {
-			DBObject dbObj = cursorDoc.next();
-
-			try {
-				rate = Double.parseDouble(dbObj.get(HSTOCKRATE).toString());
-
-			} catch (NumberFormatException e) {
-
+		try {
+			connectMongo();
+			DBCollection coll = db.getCollection("stock_history");
+			for (int i = 0; i < symbol.size(); i++) {
+				for (int j = 0; j < dates.size(); j++) {
+					BasicDBObject query = new BasicDBObject();
+					query.put(SYMBOL, symbol.get(i));
+					query.put(HDATE, dates.get(j));
+					DBCursor cursorDoc = coll.find(query);
+					if (cursorDoc.hasNext()) {
+						DBObject dbObj = cursorDoc.next();
+						rate += (double) dbObj.get(HSTOCKRATE);
+					}
+				}
 			}
-		}
+		} catch (NumberFormatException e) {
 
+			
+		}
 		return rate;
 	}
+
 
 	public static TaxHistory getTaxHistory(int utin, int year) {
 
