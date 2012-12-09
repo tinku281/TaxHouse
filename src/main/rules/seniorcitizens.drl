@@ -30,7 +30,7 @@ then
 
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -70); // subtract 70 years from current date
+	cal1.add(Calendar.YEAR, -70); // subtract 70 years from current date
 
 	if (cal.after(cal1)) {
 
@@ -64,7 +64,7 @@ salience 14
 
 		Calendar cal1 = Calendar.getInstance();
 		cal1.setTime(now);
-		cal.add(Calendar.YEAR, -70); // subtract 70 years from current date
+		cal1.add(Calendar.YEAR, -70); // subtract 70 years from current date
 
 		if (item.getState().substring(0, 1) == "A"
 				|| item.getState().substring(0, 1) == "B") {

@@ -18,6 +18,7 @@ import com.taxhouse.db.DBHandler;
 import com.taxhouse.model.Exemption;
 import com.taxhouse.model.Investment;
 import com.taxhouse.model.Organization;
+import com.taxhouse.model.TaxPayer;
 import com.taxhouse.model.TaxPayer.Nationality;
 
 public class OrganizationProcessing extends HttpServlet
@@ -65,6 +66,8 @@ public class OrganizationProcessing extends HttpServlet
 		{
 
 		}
+		
+		int functionType = Integer.parseInt( httpSession.getAttribute( "functionType" ).toString() );
 
 		// Setting general taxpayer details
 		Organization organization = new Organization();
@@ -73,6 +76,12 @@ public class OrganizationProcessing extends HttpServlet
 		organization.setPassword( httpSession.getAttribute( "password" ).toString() );
 		organization.setCity( httpSession.getAttribute( "city" ).toString() );
 		organization.setState( httpSession.getAttribute( "state" ).toString() );
+		
+		if(functionType == 3)
+		{
+			TaxPayer taxPayer = (TaxPayer)httpSession.getAttribute("taxpayee");
+			organization.setUtin(taxPayer.getUtin());
+		}	
 
 		int nationality = Integer.parseInt( httpSession.getAttribute( "nationality" ).toString() );
 		if ( nationality == 1 )
@@ -168,11 +177,48 @@ public class OrganizationProcessing extends HttpServlet
 		System.out.println( "\nOrganization CategoryId: " + organization.getCategoryId() );
 		System.out.println( "\nOrganization TypeId: " + organization.getTypeId() );
 
-		if ( DBHandler.getInstance().insertTaxPayer( organization ) )
-		{
-			System.out.println( "\nOrganization inserted" );
-		}
+		String customMessage = sendToDB(functionType, organization);
+		
+		request.setAttribute( "custom_message", customMessage );
+		request.getRequestDispatcher( "display_message.jsp" ).forward( request, response );
 
 	}
+	
+	private String sendToDB( int functionType, Organization org )
+	{
+
+		if ( functionType == 4 )
+		{
+			if ( DBHandler.getInstance().insertTaxPayer( org ) )
+			{
+				// forward to insertion successful page
+				System.out.println( "Organization Processing: Inserted" );
+				return "Record Insertion Successful";
+			}
+			else
+			{
+				// error inserting record
+				return "Record Insertion Unsuccessful";
+			}
+		}
+
+		else
+		{
+
+			if ( DBHandler.getInstance().updateTaxPayer( org ) )
+			{
+				// forward to updation successful page
+				System.out.println( "Organization Processing: Updated" );
+				return "Record Updation Successful";
+			}
+			else
+			{
+				// error updating record
+				return "Record Updation Unsuccessful";
+			}
+		}
+		
+	}
+
 
 }

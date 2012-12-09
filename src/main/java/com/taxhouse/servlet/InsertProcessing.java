@@ -76,6 +76,7 @@ public class InsertProcessing extends HttpServlet
 		
 			String[] stockSymobls = DBHandler.getInstance().getStockSymbols();
 			
+				
 			String  forwardPage = (functiontype == 4) ?"insert_employee.jsp":"update_employee.jsp";
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher(forwardPage );
 			request.setAttribute( "stock_symbols", stockSymobls );

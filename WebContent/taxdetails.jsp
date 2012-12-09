@@ -14,6 +14,7 @@
 <body>
 	<%@include file="header.jsp"%>
 	<%@ include file = "subheader.jsp"%>
+	<div id="logout" class="width800"><input class="rightfloat button_blue display_block"  type = "button" value="Back" onClick="history.back()"/></div>
 
 	<%
 		TaxPayer taxPayer = (TaxPayer) request.getAttribute("taxpayer");
@@ -71,7 +72,7 @@
 				}
 			%>
 			<div class="display_block fullwidth">
-				<p class="leftfloat">Payable Tax Amount</p>
+				<p class="leftfloat">Total Payable Tax Amount</p>
 				<p class="leftfloat values2"><%="$ " +Utils.formatDouble(taxRecord.getTotalTax())%></p>
 			</div>
 			<%

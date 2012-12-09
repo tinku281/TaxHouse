@@ -348,6 +348,7 @@ public class DBHandler {
 			ParseException {
 
 		emp.setUtin(rs.getInt(UTIN));
+		emp.setPassword(rs.getString(TP_PASSWORD));
 		emp.setFirstName(rs.getString(FIRST_NAME));
 		emp.setLastName(rs.getString(LAST_NAME));
 		emp.setCity(rs.getString(CITY));
@@ -465,6 +466,7 @@ public class DBHandler {
 			rs = stmt.executeQuery(sql);
 			rs1 = stmt1.executeQuery(query1);
 			List<SpecialTask> tasks = new ArrayList<SpecialTask>();
+			
 			while (rs.next()) {
 				if (rs1.next()) {
 					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs.getString(TASK_NAME), dateFormat.parse(rs
@@ -473,7 +475,7 @@ public class DBHandler {
 
 				} else {
 					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs.getString(TASK_NAME), dateFormat.parse(rs
-							.getString(START_DATE)), dateFormat.parse(rs.getString(END_DATE)), " "));
+							.getString(START_DATE)), dateFormat.parse(rs.getString(END_DATE)), ""));
 				}
 			}
 
@@ -633,6 +635,7 @@ public class DBHandler {
 
 				org = new Organization();
 				org.setUtin(utin);
+				org.setPassword(rs.getString(TP_PASSWORD));
 				org.setFirstName(rs.getString(FIRST_NAME));
 				org.setLastName(rs.getString(LAST_NAME));
 				org.setCity(rs.getString(CITY));
@@ -1320,37 +1323,69 @@ public class DBHandler {
 		return 0;
 	}
 
+	public boolean updateTaxPayer(TaxPayer taxPayer) {
+
+		return (deleteTaxPayer(taxPayer.getUtin()) && insertTaxPayer(taxPayer, taxPayer.getUtin()));
+	}
+
 	public boolean insertTaxPayer(TaxPayer taxPayer) {
+		return insertTaxPayer(taxPayer, 0);
+	}
+
+	public boolean insertTaxPayer(TaxPayer taxPayer, int utin) {
 
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-
-		String sql = "insert into tax_payer(tp_password, first_name, last_name, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
+		String sql = null;
 
 		try {
 			con = getConnection();
 			con.setAutoCommit(false);
 
-			stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			if (utin == 0) {
+				sql = "insert into tax_payer(tp_password, first_name, last_name, city, state, nationality, tp_category) values(?,?,?,?,?,?,?);";
 
-			stmt.setString(1, taxPayer.getPassword());
-			stmt.setString(2, taxPayer.getFirstName());
-			stmt.setString(3, taxPayer.getLastName());
-			stmt.setString(4, taxPayer.getCity());
-			stmt.setString(5, taxPayer.getState());
-			stmt.setString(6, taxPayer.getNationality().toString());
-			stmt.setInt(7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
-					: TaxPayer.SubType.ORGANIZATION.ordinal());
+				stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-			stmt.executeUpdate();
+				stmt.setString(1, taxPayer.getPassword());
+				stmt.setString(2, taxPayer.getFirstName());
+				stmt.setString(3, taxPayer.getLastName());
+				stmt.setString(4, taxPayer.getCity());
+				stmt.setString(5, taxPayer.getState());
+				stmt.setString(6, taxPayer.getNationality().toString());
+				stmt.setInt(7, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
+						: TaxPayer.SubType.ORGANIZATION.ordinal());
 
-			rs = stmt.getGeneratedKeys();
-			if (rs.next()) {
-				taxPayer.setUtin(rs.getInt(1));
+				stmt.executeUpdate();
+
+				rs = stmt.getGeneratedKeys();
+				if (rs.next()) {
+					taxPayer.setUtin(rs.getInt(1));
+				}
+				
+				rs.close();
+
+			} else {
+
+				taxPayer.setUtin(utin);
+
+				sql = "insert into tax_payer values(?,?,?,?,?,?,?,?);";
+				stmt = con.prepareStatement(sql);
+
+				stmt.setInt(1, taxPayer.getUtin());
+				stmt.setString(2, taxPayer.getPassword());
+				stmt.setString(3, taxPayer.getFirstName());
+				stmt.setString(4, taxPayer.getLastName());
+				stmt.setString(5, taxPayer.getCity());
+				stmt.setString(6, taxPayer.getState());
+				stmt.setString(7, taxPayer.getNationality().toString());
+				stmt.setInt(8, taxPayer instanceof Employee ? TaxPayer.SubType.EMPLOYEE.ordinal()
+						: TaxPayer.SubType.ORGANIZATION.ordinal());
+
+				stmt.executeUpdate();
 			}
-
-			rs.close();
+			
 			stmt.close();
 			stmt = null;
 
@@ -1606,10 +1641,6 @@ public class DBHandler {
 		return true;
 	}
 
-	public boolean updateTaxPayer(Employee employee) {
-		return false;
-	}
-
 	public boolean deleteTaxPayer(int utin) {
 		Connection con = null;
 		Statement stmt = null;
@@ -1650,7 +1681,5 @@ public class DBHandler {
 			} catch (SQLException ignore) {
 			}
 	}
-	
-	
 
 }

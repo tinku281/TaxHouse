@@ -314,8 +314,8 @@ end
 rule "WIDOW ALLOWANCE FEMALE PROFIT" #Rebate on Tax
 salience 34
 when 
-	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PRIVATE) 
-	 || organization.typeId == Organization.Type.getId(Organization.Type.NON_PROFIT_PUBLIC), 
+	 item:Employee(organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PRIVATE) 
+	 || organization.typeId == Organization.Type.getId(Organization.Type.PROFIT_PUBLIC), 
 	 maritalStatus==Employee.MaritalStatus.WIDOW,gender == Employee.Gender.FEMALE)
 	taxRecord:TaxRecord()
 then
@@ -420,7 +420,7 @@ then
 
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -15); // subtract 15 years from current date
+	cal1.add(Calendar.YEAR, -15); // subtract 15 years from current date
 
 	if (cal.after(cal1)) {
 		percent = 18;
@@ -447,7 +447,7 @@ then
 
 	Calendar cal1 = Calendar.getInstance();
 	cal1.setTime(now);
-	cal.add(Calendar.YEAR, -15); // subtract 15 years from current date
+	cal1.add(Calendar.YEAR, -15); // subtract 15 years from current date
 
 	if (cal.after(cal1)) {
 		percent = 20;
