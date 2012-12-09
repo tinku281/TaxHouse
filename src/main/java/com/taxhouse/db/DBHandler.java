@@ -1,6 +1,7 @@
 package com.taxhouse.db;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -157,12 +158,17 @@ public class DBHandler {
 
 	private Connection getConnection() throws SQLException {
 
-		// Class.forName("com.mysql.jdbc.Driver");
-		// return DriverManager.getConnection("jdbc:mysql://" + MySQL_HOST +
-		// "/tax_house", MySQL_USERNAME,
-		// MySQL_PASSWORD);
+		 try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 return DriverManager.getConnection("jdbc:mysql://" + MySQL_HOST +
+		 "/tax_house_test", MySQL_USERNAME,
+		 MySQL_PASSWORD);
 
-		return dataSource.getConnection();
+//		return dataSource.getConnection();
 	}
 
 	public boolean validateAdmin(String adminId, String password) {
@@ -1597,6 +1603,7 @@ public class DBHandler {
 			con.setAutoCommit(true);
 
 		} catch (Exception e) {
+			System.out.println(e);
 			return false;
 
 		} finally {
@@ -1650,5 +1657,5 @@ public class DBHandler {
 			} catch (SQLException ignore) {
 			}
 	}
-
+	
 }
