@@ -1,7 +1,6 @@
 package com.taxhouse.db;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,9 +40,9 @@ public class DBHandler {
 	private DataSource dataSource;
 
 	// connection parameters
-//	public static final String MySQL_HOST = "localhost:3306";
-//	public static final String MySQL_USERNAME = "root";
-//	public static final String MySQL_PASSWORD = "root";
+	// public static final String MySQL_HOST = "localhost:3306";
+	// public static final String MySQL_USERNAME = "root";
+	// public static final String MySQL_PASSWORD = "root";
 
 	// table Admin
 	public static final String ADMIN_ID = "Admin_Id";
@@ -136,7 +135,12 @@ public class DBHandler {
 	public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
 	public DBHandler() {
-
+		dataSource = getDataSource();
+	}
+	
+	public DataSource getDataSource() {
+		DataSource dataSource = null;
+		
 		try {
 			// Get DataSource
 			Context initContext = new InitialContext();
@@ -144,8 +148,11 @@ public class DBHandler {
 			dataSource = (DataSource) envContext.lookup("jdbc/tax_house");
 
 		} catch (NamingException e) {
-
+			e.printStackTrace();
+			System.out.println("Error");
 		}
+		
+		return dataSource;
 	}
 
 	public static DBHandler getInstance() {
@@ -158,17 +165,19 @@ public class DBHandler {
 
 	private Connection getConnection() throws SQLException {
 
-		 try {
-			Class.forName("com.mysql.jdbc.Driver");
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		 return DriverManager.getConnection("jdbc:mysql://" + MySQL_HOST +
-		 "/tax_house_test", MySQL_USERNAME,
-		 MySQL_PASSWORD);
+		if(dataSource == null)
+			dataSource = getDataSource();
+		
+		// try {
+		// Class.forName("com.mysql.jdbc.Driver");
+		// } catch (ClassNotFoundException e) {
+		// e.printStackTrace();
+		// }
+		// return DriverManager.getConnection("jdbc:mysql://" + MySQL_HOST +
+		// "/tax_house_test", MySQL_USERNAME,
+		// MySQL_PASSWORD);
 
-//		return dataSource.getConnection();
+		return dataSource.getConnection();
 	}
 
 	public boolean validateAdmin(String adminId, String password) {
@@ -472,7 +481,7 @@ public class DBHandler {
 			rs = stmt.executeQuery(sql);
 			rs1 = stmt1.executeQuery(query1);
 			List<SpecialTask> tasks = new ArrayList<SpecialTask>();
-			
+
 			while (rs.next()) {
 				if (rs1.next()) {
 					tasks.add(new SpecialTask(rs.getInt(TASK_ID), rs.getString(TASK_NAME), dateFormat.parse(rs
@@ -1369,7 +1378,7 @@ public class DBHandler {
 				if (rs.next()) {
 					taxPayer.setUtin(rs.getInt(1));
 				}
-				
+
 				rs.close();
 
 			} else {
@@ -1391,7 +1400,7 @@ public class DBHandler {
 
 				stmt.executeUpdate();
 			}
-			
+
 			stmt.close();
 			stmt = null;
 
@@ -1689,5 +1698,5 @@ public class DBHandler {
 			} catch (SQLException ignore) {
 			}
 	}
-	
+
 }

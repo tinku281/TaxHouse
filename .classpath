@@ -37,5 +37,6 @@
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/xmlpull.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/xpp3_min.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/xstream.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/tomcat-juli.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

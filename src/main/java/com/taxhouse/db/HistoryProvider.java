@@ -46,8 +46,7 @@ public class HistoryProvider {
 		}
 	}
 
-	public static double GetHistoricRate(ArrayList<String> symbol,
-			ArrayList<String> dates) {
+	public static double GetHistoricRate(ArrayList<String> symbol, ArrayList<String> dates) {
 		double rate = 0;
 		try {
 			connectMongo();
@@ -60,17 +59,15 @@ public class HistoryProvider {
 					DBCursor cursorDoc = coll.find(query);
 					if (cursorDoc.hasNext()) {
 						DBObject dbObj = cursorDoc.next();
-						rate += (double) dbObj.get(HSTOCKRATE);
+						rate += Double.parseDouble(dbObj.get(HSTOCKRATE).toString());
 					}
 				}
 			}
 		} catch (NumberFormatException e) {
 
-			
 		}
 		return rate;
 	}
-
 
 	public static TaxHistory getTaxHistory(int utin, int year) {
 
@@ -106,8 +103,7 @@ public class HistoryProvider {
 
 		return taxHistory;
 	}
-	
-	
+
 	public static ArrayList<TaxHistory> getTaxHistory(int utin) {
 
 		ArrayList<TaxHistory> histories = new ArrayList<TaxHistory>();
@@ -138,11 +134,11 @@ public class HistoryProvider {
 			} catch (ParseException e) {
 
 			}
-			
+
 			histories.add(taxHistory);
 		}
 
 		return histories;
 	}
-	
+
 }
