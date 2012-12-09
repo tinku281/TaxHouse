@@ -495,4 +495,22 @@ public class DBHandlerTest {
 		assertEquals(expected,actual);
 	}
 
+	@Test
+	//Test 25
+	public void testdeleteTaxPayer(){
+		boolean expected = true;
+		boolean actual = DBHandler.getInstance().deleteTaxPayer(299999);
+		assertEquals(expected,actual);
+	}
+
+	@Test
+	public void testupdateTaxPayer(){
+		boolean expected = true;
+		TaxPayer actualPayer = DBHandler.getInstance().getTaxPayer(200001);
+		actualPayer.setPassword("oooo");
+		boolean actual = DBHandler.getInstance().updateTaxPayer(actualPayer);
+		assertEquals(expected,actual);
+	}
+	
+	
 }

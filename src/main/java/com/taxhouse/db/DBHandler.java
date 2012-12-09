@@ -1662,6 +1662,7 @@ public class DBHandler {
 			return true;
 
 		} catch (SQLException e) {
+			System.out.println(e);
 
 		} finally {
 			closeConnectionObjects(null, stmt, con);
