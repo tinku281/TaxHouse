@@ -1340,14 +1340,14 @@ public class DBHandler {
 
 	public boolean updateTaxPayer(TaxPayer taxPayer) {
 
-		return (deleteTaxPayer(taxPayer.getUtin()) && insertTaxPayer(taxPayer, taxPayer.getUtin()));
+		return (deleteTaxPayer(taxPayer.getUtin()) && (insertTaxPayer(taxPayer, taxPayer.getUtin()) == taxPayer.getUtin()));
 	}
 
-	public boolean insertTaxPayer(TaxPayer taxPayer) {
+	public int insertTaxPayer(TaxPayer taxPayer) {
 		return insertTaxPayer(taxPayer, 0);
 	}
 
-	public boolean insertTaxPayer(TaxPayer taxPayer, int utin) {
+	public int insertTaxPayer(TaxPayer taxPayer, int utin) {
 
 		Connection con = null;
 		PreparedStatement stmt = null;
@@ -1441,48 +1441,52 @@ public class DBHandler {
 
 				} else if (taxPayer instanceof SeniorCitizen) {
 
-					sql = "insert into sc_income values(?,?,?);";
-					stmt = con.prepareStatement(sql);
+					if(((SeniorCitizen) taxPayer).getIncomes() != null) {
+						sql = "insert into sc_income values(?,?,?);";
+						stmt = con.prepareStatement(sql);
 
-					stmt.setInt(1, taxPayer.getUtin());
+						stmt.setInt(1, taxPayer.getUtin());
 
-					for (Income income : ((SeniorCitizen) taxPayer).getIncomes()) {
-						stmt.setString(2, income.getSource());
-						stmt.setDouble(3, income.getAmount());
+						for (Income income : ((SeniorCitizen) taxPayer).getIncomes()) {
+							stmt.setString(2, income.getSource());
+							stmt.setDouble(3, income.getAmount());
 
-						stmt.executeUpdate();
+							stmt.executeUpdate();
+						}
+
+						stmt.close();
+						stmt = null;
 					}
-
-					stmt.close();
-					stmt = null;
 
 				} else if (taxPayer instanceof ArmedForcePersonnel) {
 
-					sql = "insert into af_specl values(?,?,?,?);";
-					String sql1 = "insert into combat_zones values(?,?);";
+					if(((ArmedForcePersonnel) taxPayer).getSpecialTasks() != null) {
+						sql = "insert into af_specl values(?,?,?,?);";
+						String sql1 = "insert into combat_zones values(?,?);";
 
-					stmt = con.prepareStatement(sql);
-					PreparedStatement stmt1 = con.prepareStatement(sql1);
+						stmt = con.prepareStatement(sql);
+						PreparedStatement stmt1 = con.prepareStatement(sql1);
 
-					stmt.setInt(1, taxPayer.getUtin());
-					stmt1.setInt(1, taxPayer.getUtin());
+						stmt.setInt(1, taxPayer.getUtin());
+						stmt1.setInt(1, taxPayer.getUtin());
 
-					for (SpecialTask task : ((ArmedForcePersonnel) taxPayer).getSpecialTasks()) {
-						stmt.setInt(2, task.getId());
-						stmt.setString(3, dateFormat.format(task.getStartDate()));
-						stmt.setString(4, dateFormat.format(task.getEndDate()));
+						for (SpecialTask task : ((ArmedForcePersonnel) taxPayer).getSpecialTasks()) {
+							stmt.setInt(2, task.getId());
+							stmt.setString(3, dateFormat.format(task.getStartDate()));
+							stmt.setString(4, dateFormat.format(task.getEndDate()));
 
-						stmt.executeUpdate();
+							stmt.executeUpdate();
 
-						if (!task.getCombatZone().equalsIgnoreCase("None")) {
-							stmt1.setString(2, task.getCombatZone());
-							stmt1.executeUpdate();
+							if (!task.getCombatZone().equalsIgnoreCase("None")) {
+								stmt1.setString(2, task.getCombatZone());
+								stmt1.executeUpdate();
+							}
 						}
-					}
 
-					stmt1.close();
-					stmt.close();
-					stmt = null;
+						stmt1.close();
+						stmt.close();
+						stmt = null;
+					}
 				}
 
 				// works_at
@@ -1648,13 +1652,13 @@ public class DBHandler {
 
 		} catch (Exception e) {
 			System.out.println(e);
-			return false;
+			return -1;
 
 		} finally {
 			closeConnectionObjects(rs, stmt, con);
 		}
 
-		return true;
+		return taxPayer.getUtin();
 	}
 
 	public boolean deleteTaxPayer(int utin) {

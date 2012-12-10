@@ -496,28 +496,28 @@ public class DBHandlerTest {
 		// UTIN in insertion is auto increment. Therefore it the utin which we got in the above step doesn't matter.
 		// Using the above function is only just the tax payer records with out manually loading them
 
-		boolean actual = DBHandler.getInstance().insertTaxPayer(actualPayer);
+		boolean actual = DBHandler.getInstance().insertTaxPayer(actualPayer) > 0;
 		boolean expected = true; // Manually verified in database if the values are inserted.
 		assertEquals(expected, actual);
 
 		actualPayer = DBHandler.getInstance().getTaxPayer(1);
 		actualPayer.setPassword("ssss");
-		actual = DBHandler.getInstance().insertTaxPayer(actualPayer); // To insert students
+		actual = DBHandler.getInstance().insertTaxPayer(actualPayer) > 0; // To insert students
 		assertEquals(expected, actual);
 
 		actualPayer = DBHandler.getInstance().getTaxPayer(20001); // To insert Senior Citizens
 		actualPayer.setPassword("scsc");
-		actual = DBHandler.getInstance().insertTaxPayer(actualPayer);
+		actual = DBHandler.getInstance().insertTaxPayer(actualPayer) > 0;
 		assertEquals(expected, actual);
 
 		actualPayer = DBHandler.getInstance().getTaxPayer(80001); // To insert Employees
 		actualPayer.setPassword("eeee");
-		actual = DBHandler.getInstance().insertTaxPayer(actualPayer);
+		actual = DBHandler.getInstance().insertTaxPayer(actualPayer) > 0;
 		assertEquals(expected, actual);
 
 		actualPayer = DBHandler.getInstance().getTaxPayer(40001); // To insert Armed Force Personnel
 		actualPayer.setPassword("afaf");
-		actual = DBHandler.getInstance().insertTaxPayer(actualPayer);
+		actual = DBHandler.getInstance().insertTaxPayer(actualPayer) > 0;
 		assertEquals(expected, actual);
 	}
 

@@ -189,11 +189,12 @@ public class OrganizationProcessing extends HttpServlet
 
 		if ( functionType == 4 )
 		{
-			if ( DBHandler.getInstance().insertTaxPayer( org ) )
+			int utin =  DBHandler.getInstance().insertTaxPayer( org );
+			if ( utin > 0 )
 			{
 				// forward to insertion successful page
 				System.out.println( "Organization Processing: Inserted" );
-				return "Record Insertion Successful";
+				return "Record Insertion Successful. UTIN: " + utin;
 			}
 			else
 			{

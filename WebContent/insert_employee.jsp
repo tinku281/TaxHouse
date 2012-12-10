@@ -486,7 +486,7 @@
 				</select>
 			</div>
 			<div id="exemp_details"></div>	
-			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add Exemption" onClick="addExmpDetails()"/></div>	
+			<div class="formrow "><input class=" rightfloat button_blue display_block margin10 margin_b" type="button" value="Add This Exemption" onClick="addExmpDetails()"/></div>	
 		
 			
 	
@@ -515,7 +515,7 @@
 			<div class="formrow"><label class="label1 ">Investment Amount</label><input class="textbox2 rightfloat" type="text" name="investmentamount"  /></div>
 			<div class="formrow"><label class="label1 ">Applicable Percentage</label><input class="textbox2 rightfloat" type="text" name="investmentper"/></div>
 		</div>	
-			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add More" onClick="addInvestmentDetails()"/></div>
+			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add This Investment" onClick="addInvestmentDetails()"/></div>
 	
 	
 	<div class="header">
@@ -545,7 +545,7 @@
 		</div>	
 		
 		<div id="stock_details"></div>	
-			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add Stock" onClick="addStockDetails()"/></div>
+			<div class="formrow"><input class=" rightfloat button_blue display_block margin_b"  type = "button" value="Add This Stock" onClick="addStockDetails()"/></div>
 					
 	
 	<input type="hidden" name="count" value="0" />

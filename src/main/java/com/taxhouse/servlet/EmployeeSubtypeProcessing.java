@@ -207,11 +207,12 @@ public class EmployeeSubtypeProcessing extends HttpServlet
 
 		if ( functionType == 4 )
 		{
-			if ( DBHandler.getInstance().insertTaxPayer( employee ) )
+			int utin = DBHandler.getInstance().insertTaxPayer( employee );
+			if ( utin > 0 )
 			{
 				// forward to insertion successful page
 				System.out.println( "Employee Subtype Processing: Inserted" );
-				return "Record Insertion Successful";
+				return "Record Insertion Successful. UTIN: " + utin;
 			}
 			else
 			{
